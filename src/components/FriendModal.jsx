@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, Quote, Heart, Sparkles, Award } from 'lucide-react';
+import { X, Quote, Heart, Sparkles, ArrowUpRight } from 'lucide-react';
 import InstagramIcon from './InstagramIcon';
 import './FriendModal.css';
 
@@ -20,75 +20,93 @@ export default function FriendModal({ friend, onClose }) {
   if (!friend) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="spatial-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div 
-        className="glass-card modal-sheet-card glass-shine" 
+        className="glass-card spatial-sheet-card liquid-shimmer" 
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top iOS Grab Bar */}
-        <div className="ios-grab-bar-wrapper">
-          <div className="ios-grab-bar"></div>
+        {/* iOS Grab Handle */}
+        <div className="sheet-grab-bar-area">
+          <div className="sheet-grab-pill"></div>
         </div>
 
-        {/* Close Button */}
-        <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
-          <X size={18} />
+        {/* Close Button Pill */}
+        <button 
+          className="sheet-close-btn" 
+          onClick={onClose} 
+          aria-label="Close modal"
+        >
+          <X size={16} />
         </button>
 
         {/* Header Photo & Identity */}
-        <div className="modal-header-section">
-          <div className="modal-photo-frame">
-            <img src={friend.photo} alt={friend.name} className="modal-photo" />
-            <div className="modal-badge-tag">{friend.badge || "Squad MVP"}</div>
+        <div className="modal-profile-header">
+          <div className="modal-portrait-frame">
+            <img src={friend.photo} alt={friend.name} className="modal-portrait-img" />
+            <div className="modal-badge-chip">{friend.badge || "Core Legend"}</div>
           </div>
 
-          <h2 className="modal-name">{friend.name}</h2>
-          <span className="modal-role">{friend.role} • "{friend.nickname}"</span>
+          <h2 className="modal-friend-name">{friend.name}</h2>
+          <span className="modal-friend-sub">{friend.role} • "{friend.nickname}"</span>
         </div>
 
-        {/* Body Bio & Quote */}
-        <div className="modal-body-section">
-          <div className="modal-info-block glass-card-subtle">
-            <div className="block-title">
-              <Sparkles size={16} className="pink-icon" />
-              <span>Squad Bio</span>
+        {/* Dynamic Stats Chips (if stats exist) */}
+        {friend.stats && (
+          <div className="modal-stats-chips-row">
+            {Object.entries(friend.stats).map(([key, val]) => (
+              <div key={key} className="modal-stat-chip">
+                <span className="chip-key">{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
+                <span className="chip-val">{val}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Body Bio & Memory Blocks */}
+        <div className="modal-content-blocks">
+          {/* Bio Capsule */}
+          <div className="modal-glass-block">
+            <div className="block-header-label">
+              <Sparkles size={14} className="glyph-rose" />
+              <span>SQUAD BIO</span>
             </div>
-            <p className="block-text">{friend.bio}</p>
+            <p className="block-body-text">{friend.bio}</p>
           </div>
 
+          {/* Quote Capsule */}
           {friend.quote && (
-            <div className="modal-info-block glass-card-subtle">
-              <div className="block-title">
-                <Quote size={16} className="blue-icon" />
-                <span>Favorite Quote</span>
+            <div className="modal-glass-block">
+              <div className="block-header-label">
+                <Quote size={14} className="glyph-blue" />
+                <span>SIGNATURE QUOTE</span>
               </div>
-              <p className="quote-text">"{friend.quote}"</p>
+              <p className="quote-body-text">"{friend.quote}"</p>
             </div>
           )}
 
+          {/* Favorite Memory */}
           {friend.favoriteMemory && (
-            <div className="modal-info-block glass-card-subtle">
-              <div className="block-title">
-                <Heart size={16} className="amber-icon" />
-                <span>Unforgettable Memory</span>
+            <div className="modal-glass-block">
+              <div className="block-header-label">
+                <Heart size={14} className="glyph-amber" />
+                <span>UNFORGETTABLE MOMENT</span>
               </div>
-              <p className="block-text">{friend.favoriteMemory}</p>
+              <p className="block-body-text">{friend.favoriteMemory}</p>
             </div>
           )}
         </div>
 
-        {/* Footer CTA */}
-        <div className="modal-footer-section">
+        {/* Footer CTA Button */}
+        <div className="modal-action-footer">
           <a
             href={friend.instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="modal-ig-btn glass-shine"
+            className="modal-liquid-ig-btn liquid-shimmer"
           >
-            <div className="ig-btn-icon">
-              <InstagramIcon size={18} />
-            </div>
-            <span>Visit Instagram Profile</span>
+            <InstagramIcon size={16} />
+            <span>Connect on Instagram</span>
+            <ArrowUpRight size={15} />
           </a>
         </div>
       </div>

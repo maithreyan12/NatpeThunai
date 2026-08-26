@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { friends } from '../data/friends';
-import { ExternalLink, Sparkles, UserCheck, Heart } from 'lucide-react';
+import { UserCheck, Heart, ArrowUpRight } from 'lucide-react';
 import InstagramIcon from './InstagramIcon';
 import FriendModal from './FriendModal';
 import './FriendsGallery.css';
@@ -16,75 +16,84 @@ export default function FriendsGallery() {
   return (
     <section id="friends" className="gallery-section">
       <div className="section-header">
-        <div className="badge-pill glass-shine">
-          <UserCheck size={14} className="accent-icon" />
-          <span>The Squad Gallery</span>
+        <div className="badge-pill liquid-shimmer">
+          <UserCheck size={15} className="header-badge-icon" />
+          <span>SQUAD ARCHIVE</span>
         </div>
         <h2 className="section-title">
-          Meet The <span className="gradient-text">Legends</span>
+          Meet The <span className="gradient-text-brand">Legends</span>
         </h2>
         <p className="section-desc">
-          Click any card to discover their squad role, funny quotes, and favorite memories!
+          The core souls of நட்பே துணை. Tap any card for memory capsules, favorite quotes, and squad roles.
         </p>
       </div>
 
-      {/* Friends Cards Grid */}
-      <div className="friends-grid">
+      {/* Friends Cards Spatial Grid */}
+      <div className="friends-spatial-grid">
         {friends.map((friend) => (
           <div
             key={friend.id}
-            className="glass-card friend-card interactive-card glass-shine"
+            className="glass-card friend-spatial-card interactive-slab liquid-shimmer"
             onClick={() => setSelectedFriend(friend)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSelectedFriend(friend);
+              }
+            }}
           >
-            {/* Top Badge */}
-            <div className="friend-card-top">
-              <span className="friend-role-badge">{friend.role || friend.nickname}</span>
-              <div className="card-heart-icon">
-                <Heart size={14} />
+            {/* Card Header Tag & Heart Pill */}
+            <div className="friend-card-meta-row">
+              <span className="friend-role-chip">{friend.role || friend.nickname}</span>
+              <div className="card-heart-pill">
+                <Heart size={13} />
               </div>
             </div>
 
-            {/* Friend Photo with Rounded Glass Frame */}
-            <div className="friend-photo-wrapper">
-              <div className="glass-photo-frame">
+            {/* Circular Liquid Photo Bevel */}
+            <div className="friend-portrait-container">
+              <div className="liquid-photo-frame">
                 <img
                   src={friend.photo}
                   alt={friend.name}
-                  className="friend-photo"
+                  className="friend-portrait-img"
                   loading="lazy"
                   onError={(e) => {
-                    // Fallback to placeholder if image fails to load
                     e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80';
                   }}
                 />
               </div>
+              <div className="friend-badge-floating">{friend.badge || "Squad Member"}</div>
             </div>
 
-            {/* Friend Information */}
-            <div className="friend-info">
-              <h3 className="friend-name">{friend.name}</h3>
-              <p className="friend-nickname">"{friend.nickname}"</p>
+            {/* Identity & Stats */}
+            <div className="friend-card-identity">
+              <h3 className="friend-full-name">{friend.name}</h3>
+              <p className="friend-handle-nickname">"{friend.nickname}"</p>
 
-              {/* Instagram Handle Pill Button */}
+              {/* Instagram Handle Liquid Glass Pill Button */}
               <button
-                className="instagram-pill-btn glass-shine"
+                className="instagram-liquid-pill"
                 onClick={(e) => handleInstagramClick(e, friend.instagram)}
-                title={`Open ${friend.name}'s Instagram`}
+                title={`Open ${friend.name}'s Instagram profile`}
+                aria-label={`Open ${friend.name}'s Instagram profile`}
               >
-                <div className="ig-icon-gradient">
-                  <InstagramIcon size={14} />
+                <div className="ig-icon-bubble">
+                  <InstagramIcon size={13} />
                 </div>
-                <span className="ig-handle-text">
+                <span className="ig-username-text">
                   @{friend.instagram.split('instagram.com/')[1] || friend.name.toLowerCase().replace(/\s+/g, '')}
                 </span>
-                <ExternalLink size={12} className="ext-link-icon" />
+                <ArrowUpRight size={13} className="ig-arrow-icon" />
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* iOS Detail Modal */}
+      {/* VisionOS-Inspired Pro Sheet Modal */}
       {selectedFriend && (
         <FriendModal
           friend={selectedFriend}

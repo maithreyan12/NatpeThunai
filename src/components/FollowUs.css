@@ -1,3 +1,7 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  APPLE PRO LIQUID BANNER & SQUAD CHEER                              */
+/* ═══════════════════════════════════════════════════════════════════ */
+
 .follow-section {
   padding: 80px 0;
   display: flex;
@@ -5,53 +9,48 @@
   width: 100%;
 }
 
-.follow-hero-card {
+.follow-marquee-card {
   width: 100%;
-  max-width: 900px;
+  max-width: 960px;
   padding: 60px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: var(--radius-xl);
+  background: var(--glass-surface-card);
+  border-radius: var(--radius-2xl);
   border: var(--glass-border-highlight);
   box-shadow: var(--shadow-glass-lg);
   position: relative;
 }
 
-.follow-badge-container {
-  margin-bottom: 16px;
+.follow-badge-row {
+  margin-bottom: 20px;
 }
 
-.ig-accent-icon {
-  color: #f06292;
+.ig-badge-glyph {
+  color: var(--accent-rose);
 }
 
-.follow-title {
+.follow-headline {
+  font-family: var(--font-heading);
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   font-weight: 800;
-  letter-spacing: -1px;
+  letter-spacing: -0.04em;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  line-height: 1.15;
 }
 
-.gradient-text-ig {
-  background: linear-gradient(135deg, #9575f0, #f06292, #ffb74d);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.follow-desc {
-  font-size: 1.1rem;
+.follow-paragraph {
+  font-size: clamp(1rem, 2vw, 1.15rem);
   color: var(--text-secondary);
-  max-width: 580px;
+  max-width: 620px;
   margin-bottom: 40px;
   line-height: 1.6;
 }
 
-.follow-actions {
+.follow-buttons-group {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -60,93 +59,119 @@
   margin-bottom: 30px;
 }
 
-.follow-ig-btn {
+.liquid-ig-follow-btn {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 32px;
+  padding: 15px 32px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, #f06292, #ff8a65, #ffb74d);
+  background: var(--gradient-brand);
   color: white;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 0.96rem;
+  font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 12px 35px rgba(240, 98, 146, 0.28);
-  transition: var(--transition-bounce);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: var(--shadow-glow-rose);
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s var(--ease-spring);
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.follow-ig-btn:hover {
-  transform: translateY(-4px) scale(1.04);
-  box-shadow: 0 18px 45px rgba(240, 98, 146, 0.38);
+.liquid-ig-follow-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 16px 38px -6px rgba(244, 63, 94, 0.50);
 }
 
-.ig-btn-logo {
+.liquid-ig-follow-btn:active {
+  transform: translateY(2px) scale(0.96);
+  transition: transform 0.04s var(--ease-instant);
+}
+
+.ig-circle-icon {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* Cheer Button */
-.cheer-btn {
+.liquid-cheer-btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 28px;
+  padding: 15px 26px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: var(--glass-blur);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-md);
   border: var(--glass-border);
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.94rem;
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-glass-sm);
-  transition: var(--transition-bounce);
+  transition: transform 0.14s var(--ease-spring), 
+              background 0.14s var(--ease-spring), 
+              box-shadow 0.14s var(--ease-spring);
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.cheer-btn:hover {
-  background: white;
-  transform: translateY(-4px) scale(1.04);
+.liquid-cheer-btn:hover {
+  background: var(--glass-surface-hover);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-glass-md);
 }
 
-.cheer-btn.cheered {
-  background: rgba(240, 98, 146, 0.08);
-  border-color: rgba(240, 98, 146, 0.25);
-  color: var(--accent-pink);
+.liquid-cheer-btn:active {
+  transform: translateY(2px) scale(0.95);
+  transition: transform 0.04s var(--ease-instant);
 }
 
-.cheer-icon {
+.liquid-cheer-btn.cheered {
+  background: rgba(var(--accent-rose-rgb), 0.12);
+  border-color: rgba(var(--accent-rose-rgb), 0.35);
+  color: var(--accent-rose);
+}
+
+.cheer-popper-icon {
   color: var(--accent-amber);
+  transition: transform 0.14s var(--ease-spring);
 }
 
-.cheer-badge {
-  background: rgba(91, 141, 239, 0.10);
-  color: var(--accent-blue);
+.liquid-cheer-btn:hover .cheer-popper-icon {
+  transform: rotate(15deg) scale(1.15);
+}
+
+.cheer-count-pill {
+  background: rgba(var(--accent-apple-blue-rgb), 0.10);
+  color: var(--accent-apple-blue);
   padding: 2px 10px;
   border-radius: var(--radius-pill);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
-.follow-footer-note {
+.follow-meta-note {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.825rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-muted);
 }
 
-@media (max-width: 600px) {
-  .follow-hero-card {
-    padding: 40px 20px;
+.sparkle-gold {
+  color: var(--accent-amber);
+}
+
+@media (max-width: 680px) {
+  .follow-marquee-card {
+    padding: 44px 20px;
   }
-  .follow-actions {
+  .follow-buttons-group {
     flex-direction: column;
     width: 100%;
   }
-  .follow-ig-btn, .cheer-btn {
+  .liquid-ig-follow-btn, .liquid-cheer-btn {
     width: 100%;
     justify-content: center;
   }

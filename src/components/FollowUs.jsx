@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PartyPopper, Heart, ExternalLink, Sparkles } from 'lucide-react';
+import { PartyPopper, ArrowUpRight, Sparkles } from 'lucide-react';
 import InstagramIcon from './InstagramIcon';
 import confetti from 'canvas-confetti';
 import './FollowUs.css';
@@ -10,10 +10,10 @@ export default function FollowUs() {
 
   const triggerConfetti = () => {
     confetti({
-      particleCount: 80,
-      spread: 70,
+      particleCount: 90,
+      spread: 80,
       origin: { y: 0.7 },
-      colors: ['#f06292', '#5b8def', '#9575f0', '#ffb74d']
+      colors: ['#0071e3', '#6366f1', '#f43f5e', '#f59e0b', '#38bdf8']
     });
 
     if (!hasCheered) {
@@ -24,51 +24,51 @@ export default function FollowUs() {
 
   return (
     <section id="follow" className="follow-section">
-      <div className="glass-card follow-hero-card glass-shine">
-        <div className="follow-badge-container">
-          <div className="badge-pill glass-shine">
-            <InstagramIcon size={14} className="ig-accent-icon" />
-            <span>Join The Vibe</span>
+      <div className="glass-card follow-marquee-card liquid-shimmer">
+        <div className="follow-badge-row">
+          <div className="badge-pill liquid-shimmer">
+            <InstagramIcon size={14} className="ig-badge-glyph" />
+            <span>COMMUNITY VIBE</span>
           </div>
         </div>
 
-        <h2 className="follow-title">
-          Follow Our Group On <span className="gradient-text-ig">Instagram</span>
+        <h2 className="follow-headline">
+          Join Our Daily Journey On <span className="gradient-text-brand">Instagram</span>
         </h2>
 
-        <p className="follow-desc">
-          Get an exclusive peek into our daily banter, unreleased travel photos, and behind-the-scenes squad madness!
+        <p className="follow-paragraph">
+          Experience behind-the-scenes squad banter, unreleased road trip captures, and daily chaotic moments.
         </p>
 
-        <div className="follow-actions">
-          {/* Main Large Glassy Instagram Button */}
+        <div className="follow-buttons-group">
+          {/* Main Large Liquid Instagram Button */}
           <a
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="follow-ig-btn glass-shine"
+            className="liquid-ig-follow-btn liquid-shimmer"
           >
-            <div className="ig-btn-logo">
-              <InstagramIcon size={22} />
+            <div className="ig-circle-icon">
+              <InstagramIcon size={20} />
             </div>
             <span>Follow @NatpeThunaiSquad</span>
-            <ExternalLink size={16} />
+            <ArrowUpRight size={17} />
           </a>
 
-          {/* Interactive Send Love Button with Confetti */}
+          {/* Interactive Confetti Cheer Button */}
           <button
-            className={`cheer-btn ${hasCheered ? 'cheered' : ''}`}
+            className={`liquid-cheer-btn ${hasCheered ? 'cheered' : ''}`}
             onClick={triggerConfetti}
           >
-            <PartyPopper size={18} className="cheer-icon" />
-            <span>{hasCheered ? 'Loved!' : 'Send Squad Cheer 🎉'}</span>
-            <span className="cheer-badge">{cheerCount}</span>
+            <PartyPopper size={18} className="cheer-popper-icon" />
+            <span>{hasCheered ? 'Squad Loved! ❤️' : 'Send Squad Cheer 🎉'}</span>
+            <span className="cheer-count-pill">{cheerCount}</span>
           </button>
         </div>
 
-        <div className="follow-footer-note">
-          <Sparkles size={14} />
-          <span>Updated weekly with fresh memories</span>
+        <div className="follow-meta-note">
+          <Sparkles size={13} className="sparkle-gold" />
+          <span>Curated Weekly • Unfiltered Friendship Memories</span>
         </div>
       </div>
     </section>

@@ -1,53 +1,55 @@
 import React from 'react';
-import { Heart, Users, ArrowUp } from 'lucide-react';
+import { Heart, ArrowUp, Sparkles } from 'lucide-react';
 import InstagramIcon from './InstagramIcon';
 import './Footer.css';
 
 export default function Footer({ onScrollTop }) {
   return (
-    <footer className="footer-container">
-      <div className="glass-card footer-bar">
-        {/* Top Info */}
-        <div className="footer-left">
-          <div className="footer-brand">
-            <div className="footer-logo">
-              <Users size={16} />
+    <footer className="apple-footer-wrapper">
+      <div className="glass-card footer-dock-bar liquid-shimmer">
+        {/* Brand & Quote */}
+        <div className="footer-identity-col">
+          <div className="footer-brand-lockup">
+            <div className="footer-brand-icon">
+              <Sparkles size={15} />
             </div>
-            <span className="footer-title" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-            <span className="footer-tamil">• Friendship Forever</span>
+            <span className="footer-title-text" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
+            <span className="footer-subtitle-tag">• UNCONDITIONAL BOND</span>
           </div>
-          <p className="footer-quote">
+          <p className="footer-quote-copy">
             "True friendship isn't about being inseparable, it's being separated and knowing nothing will change."
           </p>
         </div>
 
-        {/* Right Social & Scroll Top */}
-        <div className="footer-right">
+        {/* Action Controls: Social & Back to Top */}
+        <div className="footer-controls-group">
           <a
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-social-icon glass-shine"
+            className="footer-round-btn liquid-shimmer"
             title="Instagram Page"
+            aria-label="Instagram Page"
           >
-            <InstagramIcon size={18} />
+            <InstagramIcon size={16} />
           </a>
 
           <button
-            className="footer-scroll-top-btn glass-shine"
+            className="footer-round-btn footer-scroll-btn liquid-shimmer"
             onClick={onScrollTop}
             title="Back to Top"
+            aria-label="Back to top"
           >
-            <ArrowUp size={18} />
+            <ArrowUp size={16} />
           </button>
         </div>
       </div>
 
-      {/* Copyright Note */}
-      <div className="footer-bottom">
-        <span>Handcrafted with</span>
-        <Heart size={14} className="heart-icon-pulse" />
-        <span>for our everlasting bond • {new Date().getFullYear()}</span>
+      {/* Copyright Line */}
+      <div className="footer-sub-metadata">
+        <span>Architected with precision &</span>
+        <Heart size={13} className="footer-heart-glow" />
+        <span>for our eternal squad • {new Date().getFullYear()}</span>
       </div>
     </footer>
   );

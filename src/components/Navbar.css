@@ -1,188 +1,359 @@
-.ios-navbar-wrapper {
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  APPLE PRO FLOATING GLASS NAVIGATION DOCK                            */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.apple-nav-wrapper {
   position: fixed;
-  top: 12px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
-  max-width: 1100px;
-  z-index: 100;
-  transition: var(--transition-normal);
+  max-width: 1120px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.4s var(--ease-spring), opacity 0.4s ease;
 }
 
-.ios-top-bar {
+/* ─── Dynamic Island Status Bar ─── */
+.dynamic-island-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 16px 6px 16px;
-  font-size: 0.75rem;
+  width: 100%;
+  max-width: 980px;
+  padding: 0 16px;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
-.ios-time-text {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.2px;
+.island-time {
+  font-family: var(--font-main);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
 
-.ios-dynamic-island {
+.dynamic-island-capsule {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  padding: 3px 12px;
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  padding: 4px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: var(--glass-border-highlight);
+  box-shadow: var(--shadow-glass-sm);
+  transition: var(--transition-fast);
 }
 
-.island-dot {
-  width: 6px;
-  height: 6px;
+.dynamic-island-capsule:hover {
+  transform: scale(1.02);
+}
+
+.live-dot-pulse {
+  width: 6.5px;
+  height: 6.5px;
   border-radius: 50%;
-  background: #4ade80;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  animation: liveDotGlow 2s infinite ease-in-out;
 }
 
-.island-dot.pulse {
-  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5);
-  animation: pulseDot 2s infinite;
+@keyframes liveDotGlow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
-@keyframes pulseDot {
-  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
-  70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-}
-
-.island-text {
+.island-status-text {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: 0.01em;
 }
 
-.ios-status-icons {
+.island-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-secondary);
+  opacity: 0.75;
 }
 
-/* Glass Main Container — Mirror finish */
-.glass-nav-container {
+.meta-icon {
+  stroke-width: 2.2;
+}
+
+/* ─── Main Glass Pill Dock ─── */
+.glass-pill-dock {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.92);
+  width: 100%;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: var(--glass-border);
   border-radius: var(--radius-pill);
-  padding: 8px 12px 8px 18px;
+  padding: 8px 10px 8px 18px;
   box-shadow: var(--shadow-glass-md);
-  transition: var(--transition-normal);
+  transition: background 0.35s var(--ease-spring), 
+              box-shadow 0.35s var(--ease-spring), 
+              transform 0.35s var(--ease-spring);
 }
 
-.scrolled .glass-nav-container {
-  background: rgba(255, 255, 255, 0.92);
+.apple-nav-wrapper.scrolled .glass-pill-dock {
+  background: var(--glass-surface-floating);
   box-shadow: var(--shadow-glass-lg);
+  border-color: var(--glass-border-highlight);
 }
 
-.nav-brand {
+/* ─── Dock Brand ─── */
+.dock-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   text-decoration: none;
+  cursor: pointer;
+  padding-right: 8px;
 }
 
-.brand-logo-icon {
+.dock-brand-icon {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-pink));
+  background: var(--gradient-brand);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 16px rgba(91, 141, 239, 0.25);
+  box-shadow: var(--shadow-glow-blue);
+  flex-shrink: 0;
+  transition: transform 0.35s var(--ease-spring-bounce);
 }
 
-.brand-text-group {
+.dock-brand:hover .dock-brand-icon {
+  transform: rotate(15deg) scale(1.08);
+}
+
+.dock-brand-meta {
   display: flex;
   flex-direction: column;
 }
 
-.brand-title {
+.dock-brand-title {
   font-weight: 800;
   font-size: 1.05rem;
   color: var(--text-primary);
   line-height: 1.1;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
 }
 
-.brand-subtitle {
-  font-size: 0.65rem;
-  font-weight: 600;
+.dock-brand-sub {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   color: var(--text-accent);
 }
 
-.nav-links {
+/* ─── Dock Segmented Navigation ─── */
+.dock-nav-items {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.55);
+  gap: 2px;
+  background: var(--glass-surface-subtle);
   padding: 4px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: var(--glass-border-subtle);
 }
 
-.nav-link-btn {
+.dock-link-btn {
   background: transparent;
   border: none;
-  padding: 6px 16px;
+  padding: 7px 18px;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.12s var(--ease-spring);
+  font-family: inherit;
+  position: relative;
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.nav-link-btn:hover {
+.dock-link-btn:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.4);
 }
 
-.nav-link-btn.active {
-  background: white;
-  color: var(--text-accent);
+[data-theme="dark"] .dock-link-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dock-link-btn:active {
+  transform: scale(0.95);
+  transition: transform 0.04s var(--ease-instant);
+}
+
+.dock-link-btn.active {
+  background: var(--glass-surface-floating);
+  color: var(--accent-apple-blue);
+  font-weight: 700;
   box-shadow: var(--shadow-glass-sm);
 }
 
-.nav-cta-btn {
+[data-theme="dark"] .dock-link-btn.active {
+  color: var(--text-primary);
+}
+
+/* ─── Actions: Theme Switcher & CTA ─── */
+.dock-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #f06292, #ff8a65);
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--glass-surface-subtle);
+  border: var(--glass-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-spring), background 0.14s ease, color 0.14s ease;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--glass-surface-hover);
+  color: var(--text-primary);
+  transform: scale(1.08);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.90);
+  transition: transform 0.04s var(--ease-instant);
+}
+
+.dock-cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gradient-brand);
   color: white;
   text-decoration: none;
   padding: 8px 18px;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 700;
-  box-shadow: 0 4px 18px rgba(240, 98, 146, 0.25);
-  transition: var(--transition-bounce);
+  letter-spacing: -0.01em;
+  box-shadow: var(--shadow-glow-blue);
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s var(--ease-spring);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.nav-cta-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 24px rgba(240, 98, 146, 0.35);
+.dock-cta-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 16px 36px -6px rgba(0, 113, 227, 0.45);
 }
 
-@media (max-width: 768px) {
-  .nav-links {
+.dock-cta-btn:active {
+  transform: translateY(1px) scale(0.96);
+  transition: transform 0.04s var(--ease-instant);
+}
+
+.arrow-shift {
+  transition: transform 0.14s var(--ease-spring);
+}
+
+.dock-cta-btn:hover .arrow-shift {
+  transform: translate(2px, -2px);
+}
+
+/* ─── Mobile Bottom Floating Dock ─── */
+.mobile-bottom-dock {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 380px;
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
+  border-radius: var(--radius-pill);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-glass-lg);
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mobile-dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  transition: transform 0.12s var(--ease-spring), color 0.12s ease, background 0.12s ease;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.mobile-dock-item span {
+  letter-spacing: -0.01em;
+}
+
+.mobile-dock-item:hover,
+.mobile-dock-item.active {
+  color: var(--accent-apple-blue);
+  background: rgba(var(--accent-apple-blue-rgb), 0.08);
+  transform: translateY(-2px);
+}
+
+.mobile-dock-item:active {
+  transform: scale(0.92);
+  transition: transform 0.04s var(--ease-instant);
+}
+
+/* ─── Responsive Breakpoints ─── */
+@media (max-width: 860px) {
+  .dock-nav-items {
     display: none;
   }
-  .ios-dynamic-island {
+  .dynamic-island-bar {
     display: none;
+  }
+  .mobile-bottom-dock {
+    display: flex;
+  }
+  .apple-nav-wrapper {
+    top: 10px;
+  }
+  .glass-pill-dock {
+    padding: 6px 8px 6px 14px;
   }
 }

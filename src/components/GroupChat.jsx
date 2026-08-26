@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, LogIn, LogOut, Shield, Smile, Users, Sparkles, ChevronDown } from 'lucide-react';
+import { MessageCircle, Send, LogOut, Shield, Smile, Users, Sparkles, CheckCheck, Lock } from 'lucide-react';
 import { signInWithGoogle, logOut, onAuthChange, sendMessage, subscribeToMessages } from '../firebase';
 import './GroupChat.css';
 
-// Quick emoji reactions
-const QUICK_EMOJIS = ['😂', '❤️', '🔥', '👏', '💯', '😍', '🎉', '👀'];
+const QUICK_EMOJIS = ['❤️', '🔥', '😂', '👏', '✨', '💯', '😍', '🎉'];
 
 export default function GroupChat() {
   const [user, setUser] = useState(null);
@@ -108,14 +107,12 @@ export default function GroupChat() {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  // Group messages to show date dividers
   const getDateKey = (msg) => {
     if (!msg.createdAt) return 'pending';
     const date = msg.createdAt.toDate ? msg.createdAt.toDate() : new Date(msg.createdAt);
     return date.toDateString();
   };
 
-  // Check if a message is from the same sender as the previous one (for grouping)
   const isSameSender = (msg, prevMsg) => {
     if (!prevMsg) return false;
     return msg.uid === prevMsg.uid && getDateKey(msg) === getDateKey(prevMsg);
@@ -124,9 +121,9 @@ export default function GroupChat() {
   if (loading) {
     return (
       <section id="chat" className="chat-section">
-        <div className="chat-loading">
-          <div className="chat-loading-spinner"></div>
-          <span>Loading chat...</span>
+        <div className="chat-loading-state">
+          <div className="apple-spinner"></div>
+          <span>Connecting to Squad Network...</span>
         </div>
       </section>
     );
@@ -135,40 +132,39 @@ export default function GroupChat() {
   return (
     <section id="chat" className="chat-section">
       <div className="section-header">
-        <div className="badge-pill glass-shine">
-          <MessageCircle size={14} className="accent-icon" />
-          <span>Squad Chat</span>
+        <div className="badge-pill liquid-shimmer">
+          <MessageCircle size={15} className="header-badge-icon" />
+          <span>SQUAD ENCLAVE</span>
         </div>
         <h2 className="section-title">
-          Group <span className="gradient-text">Chat Room</span>
+          Live <span className="gradient-text-brand">Chat Enclave</span>
         </h2>
         <p className="section-desc">
-          Sign in with Google to join the squad conversation. Real-time, private, and just for us!
+          A private, real-time message stream for our squad. Google-authenticated and encrypted.
         </p>
       </div>
 
-      <div className="glass-card chat-container-card glass-shine">
+      <div className="glass-card chat-spatial-container liquid-shimmer">
         {!user ? (
-          /* ─── Login Screen ─── */
-          <div className="chat-login-screen">
-            <div className="chat-login-visual">
-              <div className="login-icon-ring">
-                <div className="login-icon-inner">
-                  <MessageCircle size={36} />
+          /* ─── Apple Pro Login Screen ─── */
+          <div className="chat-login-experience">
+            <div className="login-beacon-graphic">
+              <div className="beacon-ring">
+                <div className="beacon-core">
+                  <Lock size={32} />
                 </div>
               </div>
-              <div className="login-floating-bubble bubble-1">Hey! 👋</div>
-              <div className="login-floating-bubble bubble-2">Join us! 🔥</div>
-              <div className="login-floating-bubble bubble-3">Squad only 💯</div>
+              <div className="floating-chat-bubble bubble-alpha">Squad Live ✨</div>
+              <div className="floating-chat-bubble bubble-beta">Private Room 🔒</div>
             </div>
 
-            <h3 className="chat-login-title">Join the Squad Chat</h3>
-            <p className="chat-login-desc">
-              Sign in with your Google account to access the private group conversation. Only squad members allowed!
+            <h3 className="chat-login-heading">Enter The Squad Chat</h3>
+            <p className="chat-login-caption">
+              Sign in with your Google account to access the private squad hub.
             </p>
 
-            <button className="google-signin-btn glass-shine" onClick={handleGoogleSignIn}>
-              <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
+            <button className="google-liquid-btn liquid-shimmer" onClick={handleGoogleSignIn}>
+              <svg className="google-vector-icon" viewBox="0 0 24 24" width="18" height="18">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -178,57 +174,63 @@ export default function GroupChat() {
             </button>
 
             {authError && (
-              <div className="chat-auth-error">
+              <div className="chat-auth-alert">
                 <Shield size={14} />
                 <span>{authError}</span>
               </div>
             )}
 
-            <div className="chat-login-footer">
+            <div className="chat-privacy-footnote">
               <Shield size={12} />
-              <span>Private & secure • Google authentication</span>
+              <span>End-to-end Firebase security • Verified members only</span>
             </div>
           </div>
         ) : (
-          /* ─── Chat Room ─── */
-          <div className="chat-room">
-            {/* Chat Header */}
-            <div className="chat-header">
-              <div className="chat-header-left">
-                <div className="chat-header-icon">
-                  <Users size={18} />
+          /* ─── Apple Messages-Style Chat Console ─── */
+          <div className="chat-console">
+            {/* Header */}
+            <div className="chat-top-console">
+              <div className="console-left">
+                <div className="console-channel-icon">
+                  <Users size={16} />
                 </div>
-                <div className="chat-header-info">
-                  <span className="chat-room-name" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-                  <span className="chat-room-status">
-                    <span className="status-dot live"></span>
-                    Live Chat • {messages.length} messages
+                <div className="console-channel-info">
+                  <span className="console-channel-name" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
+                  <span className="console-channel-status">
+                    <span className="live-dot-pulse"></span>
+                    Live Enclave • {messages.length} messages
                   </span>
                 </div>
               </div>
-              <div className="chat-header-right">
-                <div className="chat-user-badge">
+
+              <div className="console-right">
+                <div className="console-user-pill">
                   <img 
                     src={user.photoURL} 
                     alt={user.displayName} 
-                    className="chat-user-avatar-small"
+                    className="console-user-avatar"
                     referrerPolicy="no-referrer"
                   />
-                  <span className="chat-user-name-small">{user.displayName?.split(' ')[0]}</span>
+                  <span className="console-user-name">{user.displayName?.split(' ')[0]}</span>
                 </div>
-                <button className="chat-signout-btn" onClick={handleSignOut} title="Sign Out">
-                  <LogOut size={16} />
+                <button 
+                  className="console-signout-btn" 
+                  onClick={handleSignOut} 
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <LogOut size={15} />
                 </button>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div className="chat-messages-area" ref={chatContainerRef}>
+            <div className="chat-stream-viewport" ref={chatContainerRef}>
               {messages.length === 0 ? (
-                <div className="chat-empty-state">
-                  <Sparkles size={32} className="empty-icon" />
-                  <p className="empty-title">No messages yet!</p>
-                  <p className="empty-desc">Be the first to say something to the squad 🎉</p>
+                <div className="chat-empty-beacon">
+                  <Sparkles size={32} className="empty-sparkle-icon" />
+                  <p className="empty-beacon-title">No messages in room</p>
+                  <p className="empty-beacon-sub">Start the conversation with your squad members!</p>
                 </div>
               ) : (
                 messages.map((msg, index) => {
@@ -240,27 +242,31 @@ export default function GroupChat() {
                   return (
                     <React.Fragment key={msg.id}>
                       {showDateDivider && msg.createdAt && (
-                        <div className="chat-date-divider">
+                        <div className="chat-date-pill-divider">
                           <span>{formatDateDivider(msg.createdAt)}</span>
                         </div>
                       )}
-                      <div className={`chat-message-row ${isOwn ? 'own' : 'other'} ${grouped ? 'grouped' : ''}`}>
+                      <div className={`chat-bubble-row ${isOwn ? 'own-side' : 'other-side'} ${grouped ? 'grouped-msg' : ''}`}>
                         {!isOwn && !grouped && (
                           <img 
                             src={msg.photoURL} 
                             alt={msg.displayName} 
-                            className="chat-msg-avatar"
+                            className="chat-sender-avatar"
                             referrerPolicy="no-referrer"
                           />
                         )}
-                        {!isOwn && grouped && <div className="chat-msg-avatar-spacer"></div>}
-                        <div className="chat-msg-bubble-wrapper">
+                        {!isOwn && grouped && <div className="chat-avatar-placeholder"></div>}
+                        
+                        <div className="chat-bubble-column">
                           {!isOwn && !grouped && (
-                            <span className="chat-msg-sender">{msg.displayName}</span>
+                            <span className="chat-sender-name">{msg.displayName}</span>
                           )}
-                          <div className={`chat-msg-bubble ${isOwn ? 'own-bubble' : 'other-bubble'}`}>
-                            <span className="chat-msg-text">{msg.text}</span>
-                            <span className="chat-msg-time">{formatTime(msg.createdAt)}</span>
+                          <div className={`chat-imessage-bubble ${isOwn ? 'bubble-own' : 'bubble-other'}`}>
+                            <span className="bubble-text">{msg.text}</span>
+                            <div className="bubble-meta">
+                              <span className="bubble-timestamp">{formatTime(msg.createdAt)}</span>
+                              {isOwn && <CheckCheck size={12} className="check-icon" />}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -271,14 +277,15 @@ export default function GroupChat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Emoji Picker */}
+            {/* Quick Emoji Bar */}
             {showEmojis && (
-              <div className="chat-emoji-bar">
+              <div className="chat-emoji-dock">
                 {QUICK_EMOJIS.map(emoji => (
                   <button 
                     key={emoji} 
-                    className="emoji-btn" 
+                    className="emoji-dock-btn" 
                     onClick={() => addEmoji(emoji)}
+                    type="button"
                   >
                     {emoji}
                   </button>
@@ -286,31 +293,35 @@ export default function GroupChat() {
               </div>
             )}
 
-            {/* Input Area */}
-            <form className="chat-input-area" onSubmit={handleSendMessage}>
+            {/* Input Bar */}
+            <form className="chat-input-bar" onSubmit={handleSendMessage}>
               <button 
                 type="button" 
-                className={`emoji-toggle-btn ${showEmojis ? 'active' : ''}`}
+                className={`emoji-selector-btn ${showEmojis ? 'active' : ''}`}
                 onClick={() => setShowEmojis(!showEmojis)}
+                aria-label="Toggle emoji picker"
               >
-                <Smile size={20} />
+                <Smile size={19} />
               </button>
+              
               <input
                 ref={inputRef}
                 type="text"
-                className="chat-input"
-                placeholder="Type a message..."
+                className="chat-glass-input"
+                placeholder="iMessage to squad..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 maxLength={500}
                 autoComplete="off"
               />
+
               <button 
                 type="submit" 
-                className={`chat-send-btn ${newMessage.trim() ? 'active' : ''}`}
+                className={`chat-submit-btn ${newMessage.trim() ? 'active' : ''}`}
                 disabled={!newMessage.trim() || sending}
+                aria-label="Send message"
               >
-                <Send size={18} />
+                <Send size={16} />
               </button>
             </form>
           </div>

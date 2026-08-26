@@ -1,144 +1,151 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  APPLE PRO ABOUT & SQUAD ESSENCE SECTION                            */
+/* ═══════════════════════════════════════════════════════════════════ */
+
 .about-section {
-  padding: 80px 0;
+  padding: 90px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.header-badge-icon {
+  color: var(--accent-apple-blue);
 }
 
-.accent-icon {
-  color: var(--accent-blue);
-}
-
-.section-title {
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin: 14px 0;
-  color: var(--text-primary);
-}
-
-.section-desc {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  max-width: 580px;
-  line-height: 1.6;
-}
-
-/* Story Card */
-.story-card {
+/* ─── Editorial Liquid Glass Story Slab ─── */
+.story-slab {
   width: 100%;
-  max-width: 900px;
-  padding: 40px;
-  margin-bottom: 50px;
-  background: rgba(255, 255, 255, 0.65);
-  border-radius: var(--radius-xl);
+  max-width: 920px;
+  padding: 50px 45px;
+  margin-bottom: 45px;
+  background: var(--glass-surface-card);
+  border-radius: var(--radius-2xl);
+  border: var(--glass-border-highlight);
   box-shadow: var(--shadow-glass-lg);
 }
 
-.story-content {
-  position: relative;
+.story-slab-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  position: relative;
 }
 
-.quote-mark {
-  font-size: 5rem;
-  line-height: 0.6;
-  font-family: Georgia, serif;
-  color: rgba(2, 132, 199, 0.2);
-  margin-bottom: 10px;
+.quote-mark-icon {
+  color: rgba(var(--accent-apple-blue-rgb), 0.18);
+  margin-bottom: 16px;
+  stroke-width: 1.5;
 }
 
-.story-paragraph {
-  font-size: 1.15rem;
+.story-lead-paragraph {
+  font-size: clamp(1.1rem, 2.2vw, 1.3rem);
   line-height: 1.8;
   color: var(--text-primary);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  font-weight: 400;
+  max-width: 780px;
 }
 
-.story-paragraph strong {
-  color: var(--accent-blue);
+.story-lead-paragraph strong {
+  color: var(--accent-apple-blue);
+  font-weight: 700;
 }
 
-.story-footer-pill {
+.story-lead-paragraph em {
+  font-style: normal;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.story-meta-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
-  background: rgba(2, 132, 199, 0.08);
-  border: 1px solid rgba(2, 132, 199, 0.2);
+  padding: 7px 18px;
+  background: rgba(var(--accent-apple-blue-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-apple-blue-rgb), 0.20);
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--accent-blue);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent-apple-blue);
 }
 
-/* Stats Grid */
-.stats-grid {
+.sparkle-accent {
+  animation: sparkleRotate 3s infinite linear;
+}
+
+@keyframes sparkleRotate {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ─── 4 Apple-Inspired Glass Metric Slabs ─── */
+.stats-metric-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   width: 100%;
-  max-width: 900px;
+  max-width: 920px;
 }
 
-.stat-card {
-  padding: 24px 20px;
+.stat-metric-card {
+  padding: 28px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
+  background: var(--glass-surface-card);
+  border: var(--glass-border);
 }
 
-.stat-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+.stat-icon-wrapper {
+  margin-bottom: 12px;
 }
 
-.stat-icon.pink { color: var(--accent-pink); }
-.stat-icon.blue { color: var(--accent-blue); }
-.stat-icon.amber { color: var(--accent-amber); }
-.stat-icon.purple { color: var(--accent-purple); }
+.stat-glyph.rose { color: var(--accent-rose); }
+.stat-glyph.blue { color: var(--accent-apple-blue); }
+.stat-glyph.amber { color: var(--accent-amber); }
+.stat-glyph.purple { color: var(--accent-purple); }
 
-.stat-value {
-  font-size: 2rem;
+.stat-numeric-value {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 3.5vw, 2.5rem);
   font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -1px;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 6px;
 }
 
-.stat-label {
-  font-size: 0.85rem;
+.stat-metric-label {
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
 }
 
-@media (max-width: 840px) {
-  .stats-grid {
+/* ─── Responsive Layout ─── */
+@media (max-width: 860px) {
+  .stats-metric-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .story-slab {
+    padding: 36px 24px;
+  }
 }
 
-@media (max-width: 500px) {
-  .stats-grid {
+@media (max-width: 520px) {
+  .stats-metric-grid {
     grid-template-columns: 1fr;
   }
-  .story-card {
-    padding: 24px;
+  .story-slab {
+    padding: 28px 18px;
   }
 }
