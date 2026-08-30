@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
-  Clock, 
   Film, 
   Users, 
   MessageCircle, 
-  Calendar, 
   Sun, 
   Moon, 
   LogOut, 
@@ -20,7 +18,8 @@ export default function Navbar({
   onNavigate, 
   theme, 
   onToggleTheme, 
-  currentUser 
+  currentUser,
+  onOpenSignIn
 }) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -32,9 +31,12 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleAuthAction = async () => {
+  const handleAuthAction = async (e) => {
+    if (e) e.stopPropagation();
     if (currentUser) {
       await logOut();
+    } else if (onOpenSignIn) {
+      onOpenSignIn();
     } else {
       try {
         await signInWithGoogle();
@@ -43,6 +45,11 @@ export default function Navbar({
       }
     }
   };
+
+  // Determine active states for the 5 core tabs
+  const isSquadActive = activeSection === 'members' || activeSection === 'journey';
+  const isMemoriesActive = activeSection === 'timeline' || activeSection === 'reel';
+  const isChatActive = activeSection === 'chat' || activeSection === 'community';
 
   return (
     <>
@@ -63,7 +70,7 @@ export default function Navbar({
             </div>
           </a>
 
-          {/* Nav Links */}
+          {/* 5 Core Navigation Buttons */}
           <div className="nav-links-dock">
             <button 
               className={`nav-item-btn ${activeSection === 'hero' ? 'active' : ''}`}
@@ -78,40 +85,22 @@ export default function Navbar({
               Story ❤️
             </button>
             <button 
-              className={`nav-item-btn ${activeSection === 'journey' ? 'active' : ''}`}
-              onClick={() => onNavigate('journey')}
-            >
-              Journey
-            </button>
-            <button 
-              className={`nav-item-btn ${activeSection === 'timeline' ? 'active' : ''}`}
-              onClick={() => onNavigate('timeline')}
-            >
-              Timeline
-            </button>
-            <button 
-              className={`nav-item-btn ${activeSection === 'reel' ? 'active' : ''}`}
-              onClick={() => onNavigate('reel')}
-            >
-              Memory Reel
-            </button>
-            <button 
-              className={`nav-item-btn ${activeSection === 'members' ? 'active' : ''}`}
+              className={`nav-item-btn ${isSquadActive ? 'active' : ''}`}
               onClick={() => onNavigate('members')}
             >
               Squad
             </button>
             <button 
-              className={`nav-item-btn ${activeSection === 'community' ? 'active' : ''}`}
-              onClick={() => onNavigate('community')}
+              className={`nav-item-btn ${isMemoriesActive ? 'active' : ''}`}
+              onClick={() => onNavigate('timeline')}
             >
-              Community
+              Memories
             </button>
             <button 
-              className={`nav-item-btn ${activeSection === 'chat' ? 'active' : ''}`}
+              className={`nav-item-btn ${isChatActive ? 'active' : ''}`}
               onClick={() => onNavigate('chat')}
             >
-              Live Chat
+              AI Chat 💬
             </button>
           </div>
 
@@ -129,12 +118,19 @@ export default function Navbar({
             {/* Profile / Auth Button */}
             {currentUser ? (
               <div className="user-profile-menu">
-                <img 
-                  src={currentUser.photoURL || '/photos/friend1.jpg'} 
-                  alt={currentUser.displayName || 'Member'} 
-                  className="user-nav-avatar"
-                  referrerPolicy="no-referrer"
-                />
+                <button 
+                  className="user-profile-avatar-btn"
+                  onClick={onOpenSignIn}
+                  title="My Sanctuary Profile"
+                >
+                  <img 
+                    src={currentUser.photoURL || '/photos/friend1.jpg'} 
+                    alt={currentUser.displayName || 'Member'} 
+                    className="user-nav-avatar"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="nav-status-indicator" />
+                </button>
                 <button 
                   className="auth-signout-btn" 
                   onClick={handleAuthAction}
@@ -145,8 +141,8 @@ export default function Navbar({
               </div>
             ) : (
               <button 
-                className="btn-secondary btn-sm"
-                onClick={handleAuthAction}
+                className="btn-secondary btn-sm nav-signin-btn"
+                onClick={onOpenSignIn || handleAuthAction}
                 title="Sign in with Google"
               >
                 <LogIn size={14} />
@@ -157,62 +153,41 @@ export default function Navbar({
         </nav>
       </header>
 
-      {/* Mobile Floating Bottom Bar */}
+      {/* Mobile Floating Bottom Bar — Exactly 5 Balanced Tabs */}
       <nav className="mobile-bottom-bar" aria-label="Mobile navigation">
         <button 
           className={`mobile-tab ${activeSection === 'hero' ? 'active' : ''}`}
           onClick={() => onNavigate('hero')}
         >
-          <Sparkles size={18} />
+          <Sparkles size={19} />
           <span>Home</span>
         </button>
         <button 
           className={`mobile-tab ${activeSection === 'story' ? 'active' : ''}`}
           onClick={() => onNavigate('story')}
         >
-          <Heart size={18} />
+          <Heart size={19} />
           <span>Story</span>
         </button>
         <button 
-          className={`mobile-tab ${activeSection === 'journey' ? 'active' : ''}`}
-          onClick={() => onNavigate('journey')}
-        >
-          <Clock size={18} />
-          <span>Journey</span>
-        </button>
-        <button 
-          className={`mobile-tab ${activeSection === 'timeline' ? 'active' : ''}`}
-          onClick={() => onNavigate('timeline')}
-        >
-          <Calendar size={18} />
-          <span>Memories</span>
-        </button>
-        <button 
-          className={`mobile-tab ${activeSection === 'reel' ? 'active' : ''}`}
-          onClick={() => onNavigate('reel')}
-        >
-          <Film size={18} />
-          <span>Reel</span>
-        </button>
-        <button 
-          className={`mobile-tab ${activeSection === 'members' ? 'active' : ''}`}
+          className={`mobile-tab ${isSquadActive ? 'active' : ''}`}
           onClick={() => onNavigate('members')}
         >
-          <Users size={18} />
+          <Users size={19} />
           <span>Squad</span>
         </button>
         <button 
-          className={`mobile-tab ${activeSection === 'community' ? 'active' : ''}`}
-          onClick={() => onNavigate('community')}
+          className={`mobile-tab ${isMemoriesActive ? 'active' : ''}`}
+          onClick={() => onNavigate('timeline')}
         >
-          <MessageCircle size={18} />
-          <span>Group</span>
+          <Film size={19} />
+          <span>Memories</span>
         </button>
         <button 
-          className={`mobile-tab ${activeSection === 'chat' ? 'active' : ''}`}
+          className={`mobile-tab ${isChatActive ? 'active' : ''}`}
           onClick={() => onNavigate('chat')}
         >
-          <MessageCircle size={18} />
+          <MessageCircle size={19} />
           <span>Chat</span>
         </button>
       </nav>

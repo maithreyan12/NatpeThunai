@@ -13,7 +13,8 @@ import {
   FriendModal,
   CreatePostModal, 
   AddEventModal, 
-  LightboxModal 
+  LightboxModal,
+  SignInModal 
 } from './components';
 import { 
   subscribeToMemories, 
@@ -26,7 +27,7 @@ import {
   saveEvent,
   toggleEventRsvp 
 } from './services';
-import { onAuthChange } from './firebase';
+import { onAuthChange, signInWithGoogle, logOut } from './firebase';
 import './App.css';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
   // Modal States
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [lightboxMemory, setLightboxMemory] = useState(null);
 
@@ -173,6 +175,7 @@ export default function App() {
         theme={theme}
         onToggleTheme={toggleTheme}
         currentUser={currentUser}
+        onOpenSignIn={() => setIsSignInOpen(true)}
       />
 
       {/* Main Container */}
@@ -225,7 +228,7 @@ export default function App() {
         />
 
         {/* 8. Live Group Chat & AI Story Enclave */}
-        <GroupChat />
+        <GroupChat onOpenSignIn={() => setIsSignInOpen(true)} />
 
         {/* 9. Footer */}
         <Footer onScrollTop={() => scrollToSection('hero')} />
@@ -254,6 +257,14 @@ export default function App() {
       <FriendModal 
         friend={selectedFriend}
         onClose={() => setSelectedFriend(null)}
+      />
+
+      <SignInModal 
+        isOpen={isSignInOpen}
+        onClose={() => setIsSignInOpen(false)}
+        currentUser={currentUser}
+        onSignIn={signInWithGoogle}
+        onSignOut={logOut}
       />
 
       {/* Non-intrusive Toast Notification */}

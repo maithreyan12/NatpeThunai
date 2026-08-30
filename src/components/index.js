@@ -31,5 +31,6 @@ export { default as InstagramIcon } from './ui/InstagramIcon';
 export { 
   CreatePostModal, 
   AddEventModal, 
-  LightboxModal 
+  LightboxModal,
+  SignInModal 
 } from './ui/Modals';
