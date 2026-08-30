@@ -69,109 +69,138 @@ p, h1, h2, h3, h4, h5, h6, span, a, button {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.55;
+  filter: blur(90px);
+  opacity: 0.65;
   pointer-events: none;
   will-change: transform;
 }
 
 [data-theme="dark"] .orb {
-  opacity: 0.40;
-  filter: blur(120px);
+  opacity: 0.45;
+  filter: blur(110px);
 }
 
 .orb-1 {
-  top: -10%;
-  left: 15%;
+  top: -8%;
+  left: 12%;
   width: 650px;
   height: 650px;
   background: radial-gradient(circle, var(--mesh-orb-1) 0%, transparent 70%);
-  animation: orbFloat1 28s ease-in-out infinite alternate;
+  animation: orbFloat1 24s ease-in-out infinite alternate;
 }
 
 .orb-2 {
-  top: 35%;
-  right: -5%;
-  width: 600px;
-  height: 600px;
+  top: 30%;
+  right: -8%;
+  width: 620px;
+  height: 620px;
   background: radial-gradient(circle, var(--mesh-orb-2) 0%, transparent 70%);
-  animation: orbFloat2 32s ease-in-out infinite alternate;
-  animation-delay: -6s;
+  animation: orbFloat2 28s ease-in-out infinite alternate;
+  animation-delay: -5s;
 }
 
 .orb-3 {
-  bottom: -15%;
-  left: 8%;
-  width: 700px;
-  height: 700px;
+  bottom: -12%;
+  left: 5%;
+  width: 720px;
+  height: 720px;
   background: radial-gradient(circle, var(--mesh-orb-3) 0%, transparent 70%);
-  animation: orbFloat3 36s ease-in-out infinite alternate;
-  animation-delay: -12s;
+  animation: orbFloat3 30s ease-in-out infinite alternate;
+  animation-delay: -10s;
 }
 
 .orb-4 {
-  top: 60%;
-  left: 45%;
-  width: 500px;
-  height: 500px;
+  top: 55%;
+  left: 40%;
+  width: 520px;
+  height: 520px;
   background: radial-gradient(circle, var(--mesh-orb-4) 0%, transparent 70%);
-  animation: orbFloat1 24s ease-in-out infinite alternate-reverse;
-  animation-delay: -4s;
+  animation: orbFloat1 22s ease-in-out infinite alternate-reverse;
+  animation-delay: -3s;
+}
+
+.orb-5 {
+  top: 15%;
+  right: 35%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.22) 0%, transparent 70%);
+  animation: orbFloat2 26s ease-in-out infinite alternate;
+  animation-delay: -8s;
 }
 
 @keyframes orbFloat1 {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(50px, 60px, 0) scale(1.06); }
-  100% { transform: translate3d(-35px, 25px, 0) scale(0.96); }
+  50% { transform: translate3d(45px, 55px, 0) scale(1.08); }
+  100% { transform: translate3d(-30px, 20px, 0) scale(0.95); }
 }
 
 @keyframes orbFloat2 {
-  0% { transform: translate3d(0, 0, 0) scale(0.96); }
-  50% { transform: translate3d(-60px, -50px, 0) scale(1.08); }
-  100% { transform: translate3d(35px, 40px, 0) scale(1); }
+  0% { transform: translate3d(0, 0, 0) scale(0.95); }
+  50% { transform: translate3d(-55px, -45px, 0) scale(1.10); }
+  100% { transform: translate3d(30px, 35px, 0) scale(1); }
 }
 
 @keyframes orbFloat3 {
-  0% { transform: translate3d(0, 0, 0) scale(1.04); }
-  50% { transform: translate3d(40px, -60px, 0) scale(0.94); }
-  100% { transform: translate3d(-50px, 35px, 0) scale(1.05); }
+  0% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(35px, -55px, 0) scale(0.92); }
+  100% { transform: translate3d(-45px, 30px, 0) scale(1.06); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════ */
-/*  CLEAN PREMIUM CARDS & SURFACES                                     */
+/*  LIQUID GLASS SPATIAL CARDS & SURFACES                             */
 /* ═══════════════════════════════════════════════════════════════════ */
 
 .card-base {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.22s var(--ease-spring), 
-              box-shadow 0.22s var(--ease-spring), 
-              border-color 0.22s ease;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass-md);
+  position: relative;
+  transition: transform 0.26s var(--ease-spring), 
+              box-shadow 0.26s var(--ease-spring), 
+              border-color 0.26s ease;
 }
 
 .card-base:hover {
+  transform: translateY(-4px);
   border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-hover);
 }
 
-/* Backward-compatible glass card styled cleanly */
 .glass-card {
   background: var(--glass-surface-card);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.24s var(--ease-spring), 
-              box-shadow 0.24s var(--ease-spring), 
-              border-color 0.24s ease;
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-glass-lg);
+  position: relative;
+  transition: transform 0.28s var(--ease-spring), 
+              box-shadow 0.28s var(--ease-spring), 
+              border-color 0.28s ease;
 }
 
 .glass-card:hover {
+  transform: translateY(-5px);
   border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Specular light refraction sheen */
+.glass-card::before,
+.card-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 /* Subtle interactive card lift */
@@ -179,19 +208,19 @@ p, h1, h2, h3, h4, h5, h6, span, a, button {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  transition: transform 0.2s var(--ease-spring), 
-              box-shadow 0.2s var(--ease-spring), 
-              border-color 0.2s ease;
+  transition: transform 0.22s var(--ease-spring), 
+              box-shadow 0.22s var(--ease-spring), 
+              border-color 0.22s ease;
 }
 
 .interactive-slab:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-hover);
   border-color: var(--border-hover);
 }
 
 .interactive-slab:active {
-  transform: translateY(1px) scale(0.99);
+  transform: translateY(1px) scale(0.985);
 }
 
 /* ═══════════════════════════════════════════════════════════════════ */

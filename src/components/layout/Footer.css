@@ -19,12 +19,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-card);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
   border-radius: var(--radius-2xl);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
+  border: var(--glass-border-highlight);
+  box-shadow: var(--shadow-glass-lg);
   position: relative;
   overflow: hidden;
+}
+
+.footer-dock-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  pointer-events: none;
 }
 
 .footer-identity-col {

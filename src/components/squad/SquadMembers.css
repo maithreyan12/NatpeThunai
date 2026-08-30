@@ -22,10 +22,12 @@
 
 /* ── Member Editorial Card ── */
 .squad-member-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-glass-md);
   display: flex;
   flex-direction: column;
   transition: transform 0.28s var(--ease-spring), 
@@ -36,9 +38,21 @@
   cursor: pointer;
 }
 
+.squad-member-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
 .squad-member-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-hover);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--shadow-hover), 0 24px 50px rgba(91, 76, 219, 0.16);
   border-color: var(--border-hover);
 }
 
@@ -66,7 +80,7 @@
 .portrait-glass-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, transparent 40%, rgba(0, 0, 0, 0.42) 100%);
   pointer-events: none;
 }
 
@@ -87,36 +101,37 @@
   font-family: var(--font-main);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.90);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: var(--accent-lavender);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 [data-theme="dark"] .member-glass-role {
   background: rgba(26, 34, 48, 0.85);
   color: var(--accent-lavender-light);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
 }
 
 .member-glass-tag {
   font-family: var(--font-main);
   font-size: 0.70rem;
   font-weight: 700;
-  padding: 4px 9px;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.50);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   color: #ffffff;
   display: flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.20);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 /* ── Card Content Body ── */
@@ -126,6 +141,7 @@
   flex-direction: column;
   flex: 1;
   gap: 12px;
+  background: var(--glass-surface-card);
 }
 
 .member-name-row {
@@ -149,9 +165,10 @@
   font-weight: 600;
   color: var(--accent-lavender);
   background: var(--tint-lavender);
-  padding: 2px 9px;
+  padding: 3px 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(91, 76, 219, 0.14);
+  border: 1px solid rgba(91, 76, 219, 0.18);
+  box-shadow: var(--shadow-glass-sm);
 }
 
 .member-bio-text {
@@ -164,9 +181,14 @@
 /* Signature Quote */
 .member-quote-capsule {
   position: relative;
-  background: var(--bg-surface);
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border-left: 3px solid var(--accent-lavender);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-top: var(--glass-border-subtle);
+  border-right: var(--glass-border-subtle);
+  border-bottom: var(--glass-border-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   padding: 8px 12px 8px 18px;
   margin: 2px 0;
 }
@@ -203,10 +225,13 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-secondary);
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-subtle);
-  padding: 3px 8px;
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border-subtle);
+  padding: 4px 9px;
   border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-glass-sm);
 }
 
 /* ── Actions Row (Never Overflows) ── */
@@ -240,17 +265,20 @@
   justify-content: center;
   border-radius: 50%;
   background: var(--tint-pink);
-  border: 1px solid rgba(214, 51, 132, 0.22);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid rgba(214, 51, 132, 0.28);
   color: var(--accent-pink);
   text-decoration: none;
-  transition: var(--transition-fast);
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
   position: relative;
+  box-shadow: var(--shadow-glass-sm);
 }
 
 .member-insta-action-btn:hover {
-  background: rgba(214, 51, 132, 0.16);
-  transform: translateY(-2px) scale(1.06);
-  box-shadow: 0 4px 12px rgba(214, 51, 132, 0.25);
+  background: rgba(214, 51, 132, 0.20);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(214, 51, 132, 0.30);
 }
 
 .member-insta-action-btn .arrow-glyph {

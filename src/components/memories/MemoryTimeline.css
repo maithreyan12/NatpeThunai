@@ -50,21 +50,24 @@
   gap: 8px;
   padding: 5px 14px 5px 6px;
   border-radius: var(--radius-pill);
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border);
   color: var(--text-secondary);
   font-family: var(--font-main);
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-xs);
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-glass-sm);
+  transition: transform 0.2s var(--ease-spring), border-color 0.2s ease, background 0.2s ease;
 }
 
 .member-filter-pill:hover {
   border-color: var(--border-hover);
-  background: var(--bg-surface);
+  background: var(--glass-surface-hover);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-md);
 }
 
 .member-filter-pill.active {
@@ -72,7 +75,7 @@
   border-color: var(--accent-lavender);
   color: var(--accent-lavender);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(109, 88, 217, 0.18);
+  box-shadow: 0 4px 14px rgba(109, 88, 217, 0.22);
 }
 
 .member-pill-avatar {
@@ -96,11 +99,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-pill);
   padding: 5px;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-glass-sm);
 }
 
 .year-tab-btn {
@@ -113,7 +118,7 @@
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: transform 0.18s var(--ease-spring), background 0.18s ease, color 0.18s ease;
   white-space: nowrap;
 }
 

@@ -33,21 +33,21 @@
   max-width: 530px;
   max-height: min(90dvh, 800px);
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
   border: var(--glass-border-highlight);
   border-radius: var(--radius-2xl);
   padding: 34px 30px;
-  box-shadow: var(--shadow-glass-lg), 0 0 50px rgba(124, 58, 237, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16), 0 0 50px rgba(124, 58, 237, 0.16), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
   position: relative;
   animation: sheetPop 0.26s var(--ease-spring);
   overflow: hidden;
 }
 
 [data-theme="dark"] .spatial-sheet-card {
-  background: var(--glass-surface-floating);
-  box-shadow: var(--shadow-glass-lg), 0 0 60px rgba(139, 92, 246, 0.20);
+  background: rgba(22, 28, 44, 0.82);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 60px rgba(139, 92, 246, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
 }
 
 /* Decorative pastel corner orbs */

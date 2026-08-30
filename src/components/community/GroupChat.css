@@ -726,16 +726,33 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/*  NATPE AI STORYTELLER COMPANION STYLES                              */
-/* ═══════════════════════════════════════════════════════════════════ */
+.chat-spatial-container {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: var(--radius-2xl) !important;
+  min-height: 540px;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
+  box-shadow: var(--shadow-glass-lg), 0 20px 60px rgba(91, 76, 219, 0.10);
+  position: relative;
+}
+
+[data-theme="dark"] .chat-spatial-container {
+  box-shadow: var(--shadow-glass-lg), 0 0 60px rgba(139, 92, 246, 0.16);
+}
 
 .chat-channel-switcher-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  background: var(--bg-surface);
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border-bottom: 1px solid var(--border-light);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   flex-wrap: wrap;
@@ -745,30 +762,35 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: var(--radius-pill);
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border);
   color: var(--text-secondary);
   font-family: var(--font-main);
   font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-xs);
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-glass-sm);
+  transition: transform 0.18s var(--ease-spring), color 0.18s ease, background 0.18s ease;
 }
 
 .chat-channel-tab:hover {
   border-color: var(--border-hover);
   color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-md);
 }
 
 .chat-channel-tab.active {
-  background: var(--accent-lavender);
-  border-color: var(--accent-lavender);
+  background: var(--gradient-brand);
+  border-color: transparent;
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 3px 12px rgba(91, 76, 219, 0.28);
+  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.35);
+  transform: scale(1.02);
 }
 
 .channel-badge-pulse {

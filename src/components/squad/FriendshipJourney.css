@@ -13,13 +13,26 @@
 .journey-stage-card {
   width: 100%;
   max-width: 980px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-glass-lg);
   padding: 36px 40px;
   overflow: hidden;
   position: relative;
+}
+
+.journey-stage-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.9) 50%, transparent 100%);
+  pointer-events: none;
 }
 
 /* ── Stepper Navigation ── */
@@ -42,20 +55,23 @@
   padding: 8px 12px;
   cursor: pointer;
   position: relative;
-  transition: var(--transition-fast);
+  transition: transform 0.2s var(--ease-spring);
 }
 
 .step-indicator {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--bg-surface);
-  border: 2px solid var(--border-light);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-glass-sm);
+  transition: transform 0.2s var(--ease-spring), border-color 0.2s ease, background 0.2s ease;
 }
 
 .step-dot {

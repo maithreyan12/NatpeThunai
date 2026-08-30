@@ -28,15 +28,28 @@
 .modal-card {
   width: 100%;
   max-width: 640px;
-  max-height: 90vh;
+  max-height: min(92dvh, 820px);
   overflow-y: auto;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-2xl);
   padding: 32px 30px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), inset 0 1px 0 0 rgba(255, 255, 255, 0.90);
   position: relative;
   animation: modalScaleUp 0.24s var(--ease-spring);
+}
+
+.modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  pointer-events: none;
 }
 
 .modal-card-sm {

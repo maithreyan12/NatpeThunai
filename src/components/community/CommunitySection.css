@@ -13,11 +13,25 @@
 .community-main-container {
   width: 100%;
   max-width: 980px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-glass-lg);
   overflow: hidden;
+  position: relative;
+}
+
+.community-main-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.9) 50%, transparent 100%);
+  pointer-events: none;
 }
 
 /* ── Tabs Navigation ── */
@@ -26,7 +40,9 @@
   align-items: center;
   gap: 8px;
   padding: 14px 20px;
-  background: var(--bg-surface);
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border-bottom: 1px solid var(--border-light);
   overflow-x: auto;
 }
@@ -44,25 +60,26 @@
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: transform 0.18s var(--ease-spring), color 0.18s ease, background 0.18s ease;
   white-space: nowrap;
 }
 
 .community-tab-btn:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 [data-theme="dark"] .community-tab-btn:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .community-tab-btn.active {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   color: var(--accent-lavender);
-  border-color: var(--border-light);
-  box-shadow: var(--shadow-xs);
+  border-color: var(--glass-border-highlight);
+  box-shadow: var(--shadow-glass-sm);
   font-weight: 700;
+  transform: scale(1.02);
 }
 
 .tab-count-pill {
@@ -104,19 +121,23 @@
 }
 
 .community-post-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: var(--glass-surface-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-glass-sm);
+  transition: transform 0.22s var(--ease-spring), border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .community-post-card:hover {
-  border-color: var(--border-light);
-  box-shadow: var(--shadow-xs);
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-glass-md);
 }
 
 .post-author-row {

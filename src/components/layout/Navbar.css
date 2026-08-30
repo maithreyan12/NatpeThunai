@@ -22,18 +22,32 @@
   justify-content: space-between;
   max-width: 1220px;
   margin: 0 auto;
-  padding: 8px 16px;
+  padding: 8px 18px;
   background: var(--glass-surface-floating);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--border-light);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.24s ease, background-color 0.24s ease;
+  box-shadow: var(--shadow-glass-lg);
+  transition: box-shadow 0.28s var(--ease-spring), 
+              background-color 0.28s ease, 
+              border-color 0.28s ease;
+  position: relative;
+}
+
+.community-nav-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 50%, transparent);
+  pointer-events: none;
 }
 
 .community-navbar-wrapper.scrolled .community-nav-bar {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 20px 50px rgba(31, 38, 135, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
 }
 
 /* ── Brand Lockup ── */
@@ -43,23 +57,25 @@
   gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
-  transition: opacity 0.16s ease;
+  transition: transform 0.2s var(--ease-spring), opacity 0.16s ease;
 }
 
 .nav-brand-lockup:hover {
-  opacity: 0.85;
+  opacity: 0.92;
+  transform: scale(1.02);
 }
 
 .brand-badge-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
   background: var(--tint-lavender);
   color: var(--accent-lavender);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-glass-sm);
+  border: var(--glass-border);
   flex-shrink: 0;
 }
 
@@ -69,7 +85,7 @@
 }
 
 .brand-tamil-title {
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1.15;
@@ -78,7 +94,7 @@
 
 .brand-meta-year {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--accent-lavender);
 }
@@ -88,40 +104,58 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.035);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: var(--radius-pill);
   padding: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .nav-links-dock {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .nav-item-btn {
   background: none;
   border: none;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: var(--radius-pill);
   font-family: var(--font-main);
   font-size: 0.86rem;
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: transform 0.18s var(--ease-spring), 
+              color 0.18s ease, 
+              background-color 0.18s ease;
   white-space: nowrap;
 }
 
 .nav-item-btn:hover {
   color: var(--text-primary);
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.45);
 }
 
 [data-theme="dark"] .nav-item-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-item-btn.active {
   background: var(--bg-elevated);
   color: var(--accent-lavender);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.18), inset 0 1px 0 0 rgba(255, 255, 255, 1);
   font-weight: 700;
+  transform: scale(1.02);
+}
+
+[data-theme="dark"] .nav-item-btn.active {
+  background: rgba(36, 46, 68, 0.95);
+  color: #a395f8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
 }
 
 /* ── Actions Dock ── */
