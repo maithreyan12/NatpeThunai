@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { 
   Calendar, 
-  Plus, 
   Search, 
   Camera,
   Users
 } from 'lucide-react';
 import MemoryCard from './MemoryCard';
-import { SQUAD_MEMBERS } from '../services';
+import { SQUAD_MEMBERS } from '../../services';
 import './MemoryTimeline.css';
 
 const CATEGORY_TABS = ['All Moments', 'Adventures', 'Milestones', 'Reunions', 'Daily Laughs'];
@@ -16,7 +15,6 @@ export default function MemoryTimeline({
   memories, 
   onReact, 
   onAddComment, 
-  onOpenAddMemory, 
   onOpenLightbox,
   currentUser 
 }) {
@@ -112,7 +110,7 @@ export default function MemoryTimeline({
             ))}
           </div>
 
-          {/* Search & Add Memory Button */}
+          {/* Search Bar */}
           <div className="timeline-actions-group">
             <div className="timeline-search-box">
               <Search size={15} className="search-icon" />
@@ -124,14 +122,6 @@ export default function MemoryTimeline({
                 className="timeline-search-input"
               />
             </div>
-
-            <button 
-              className="btn-primary btn-sm"
-              onClick={onOpenAddMemory}
-            >
-              <Plus size={15} />
-              <span>Add Memory</span>
-            </button>
           </div>
         </div>
       </div>
@@ -144,12 +134,8 @@ export default function MemoryTimeline({
           </div>
           <h3 className="empty-state-title">No memories found.</h3>
           <p className="empty-state-text">
-            “Every great story starts with one moment.” Add your first photo or video memory for {selectedMember !== 'All' ? selectedMember : 'the squad'}.
+            No memories match the selected filter. Try choosing another category or friend tab!
           </p>
-          <button className="btn-primary" onClick={onOpenAddMemory}>
-            <Plus size={16} />
-            <span>Add a Memory</span>
-          </button>
         </div>
       ) : (
         <div className="memory-cards-grid">

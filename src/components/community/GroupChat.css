@@ -649,14 +649,80 @@
 }
 
 @media (max-width: 600px) {
+  .chat-section {
+    padding: 60px 0 30px;
+  }
+  .chat-spatial-container {
+    min-height: 480px;
+    border-radius: var(--radius-xl) !important;
+  }
   .chat-console {
-    height: 500px;
+    height: 480px;
+  }
+  .floating-chat-bubble {
+    display: none;
   }
   .console-user-pill {
     display: none;
   }
   .chat-bubble-column {
-    max-width: 84%;
+    max-width: 88%;
+  }
+  .chat-stream-viewport {
+    padding: 14px 12px;
+  }
+  .chat-channel-switcher-bar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .chat-channel-tab {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+  .ai-top-banner {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .ai-avatar-badge {
+    width: 30px;
+    height: 30px;
+  }
+  .ai-bot-name {
+    font-size: 0.90rem;
+  }
+  .ai-bot-sub {
+    font-size: 0.70rem;
+  }
+  .ai-prompt-chips-scroll {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .ai-suggestion-chip {
+    padding: 5px 10px;
+    font-size: 0.74rem;
+  }
+  .chat-input-bar {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .chat-glass-input {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+  }
+  .chat-login-experience {
+    padding: 40px 16px 36px;
+  }
+  .chat-login-heading {
+    font-size: 1.25rem;
+  }
+  .chat-login-caption {
+    font-size: 0.85rem;
+  }
+  .google-liquid-btn {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
   }
 }
 

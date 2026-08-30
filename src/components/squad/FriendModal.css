@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: clamp(10px, 3vw, 24px);
   animation: modalFadeIn 0.28s var(--ease-spring);
 }
 
@@ -31,7 +31,7 @@
 .spatial-sheet-card {
   width: 100%;
   max-width: 530px;
-  max-height: 88vh;
+  max-height: min(90dvh, 800px);
   overflow-y: auto;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: var(--glass-blur-heavy);
@@ -373,12 +373,15 @@
 }
 
 @media (max-width: 580px) {
-  .spatial-sheet-card { padding: 24px 18px; border-radius: var(--radius-xl); }
+  .spatial-sheet-card { 
+    padding: 20px 16px; 
+    border-radius: var(--radius-xl); 
+  }
   .modal-action-footer {
     flex-direction: column;
   }
-  .modal-add-mem-btn,
   .modal-ig-btn {
     width: 100%;
+    justify-content: center;
   }
 }

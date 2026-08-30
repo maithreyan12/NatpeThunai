@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, ArrowUp, Sparkles } from 'lucide-react';
-import InstagramIcon from './InstagramIcon';
+import InstagramIcon from '../ui/InstagramIcon';
 import './Footer.css';
 
 export default function Footer({ onScrollTop }) {

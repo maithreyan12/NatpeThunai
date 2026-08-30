@@ -7,13 +7,12 @@ import {
   Maximize2, 
   Minimize2, 
   Film, 
-  Plus, 
   Volume2, 
   VolumeX 
 } from 'lucide-react';
 import './MemoryReel.css';
 
-export default function MemoryReel({ memories, onOpenAddMemory }) {
+export default function MemoryReel({ memories }) {
   // Extract all memories that have media
   const reelItems = memories.filter(m => m.mediaUrl);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -74,14 +73,10 @@ export default function MemoryReel({ memories, onOpenAddMemory }) {
           <div className="empty-state-icon">
             <Film size={26} />
           </div>
-          <h3 className="empty-state-title">Our story is waiting for its next memory.</h3>
+          <h3 className="empty-state-title">Our memory reel is loading.</h3>
           <p className="empty-state-text">
-            Add photos and video moments to the archive to generate our continuous squad memory reel.
+            Moments and photographs will appear in this continuous squad memory reel.
           </p>
-          <button className="btn-primary" onClick={onOpenAddMemory}>
-            <Plus size={16} />
-            <span>Add First Memory</span>
-          </button>
         </div>
       ) : (
         <div 

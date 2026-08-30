@@ -498,17 +498,48 @@
 }
 
 @media (max-width: 640px) {
+  .timeline-section {
+    padding: 60px 0 40px 0;
+  }
   .memory-cards-grid {
     grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
   }
   .timeline-filter-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+  .member-avatar-pills-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    width: 100%;
+    padding-bottom: 4px;
+  }
+  .member-avatar-pills-row::-webkit-scrollbar {
+    display: none;
+  }
+  .member-filter-pill {
+    flex-shrink: 0;
   }
   .year-tabs-group {
     overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
     width: 100%;
     justify-content: flex-start;
+  }
+  .year-tabs-group::-webkit-scrollbar {
+    display: none;
+  }
+  .year-tab-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 0.80rem;
   }
   .timeline-actions-group {
     flex-direction: column;
@@ -516,5 +547,32 @@
   }
   .timeline-search-box {
     max-width: 100%;
+  }
+  .card-reactions-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .reaction-pills-group {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .card-top-meta {
+    padding: 12px 14px 10px;
+  }
+  .card-body-content {
+    padding: 14px;
+  }
+  .card-title {
+    font-size: 1.05rem;
+  }
+  .card-reactions-bar {
+    padding-top: 10px;
+  }
+  .emoji-reaction-pill {
+    padding: 3px 6px;
+    font-size: 0.78rem;
   }
 }

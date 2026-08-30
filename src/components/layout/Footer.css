@@ -134,15 +134,37 @@
   50% { transform: scale(1.25); opacity: 1; }
 }
 
+@media (max-width: 900px) {
+  .community-footer-wrapper {
+    padding-bottom: 80px;
+  }
+}
+
 @media (max-width: 760px) {
   .footer-dock-bar {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 20px;
-    padding: 28px 20px;
+    padding: 24px 18px;
+    border-radius: var(--radius-xl);
   }
   .footer-identity-col {
     align-items: center;
+  }
+  .footer-quote-copy {
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .footer-dock-bar {
+    padding: 20px 14px;
+  }
+  .footer-title-text {
+    font-size: 1.05rem;
+  }
+  .footer-sub-metadata {
+    font-size: 0.74rem;
   }
 }

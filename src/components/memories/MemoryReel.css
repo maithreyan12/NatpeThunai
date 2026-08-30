@@ -274,10 +274,35 @@
 }
 
 @media (max-width: 640px) {
+  .memory-reel-section {
+    padding: 60px 0 40px 0;
+  }
+  .reel-theater-card {
+    border-radius: var(--radius-xl);
+  }
   .reel-media-stage {
-    height: 380px;
+    height: clamp(240px, 58vw, 360px);
   }
   .reel-tap-area {
     opacity: 1;
+  }
+  .reel-controls-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .reel-control-btn {
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    gap: 5px;
+  }
+  .reel-item-title {
+    font-size: 1.05rem;
+  }
+  .reel-item-desc {
+    font-size: 0.80rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

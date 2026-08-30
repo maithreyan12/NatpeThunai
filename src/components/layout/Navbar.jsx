@@ -6,14 +6,13 @@ import {
   Users, 
   MessageCircle, 
   Calendar, 
-  Plus, 
   Sun, 
   Moon, 
   LogOut, 
   LogIn,
   Heart 
 } from 'lucide-react';
-import { signInWithGoogle, logOut } from '../firebase';
+import { signInWithGoogle, logOut } from '../../firebase';
 import './Navbar.css';
 
 export default function Navbar({ 
@@ -21,7 +20,6 @@ export default function Navbar({
   onNavigate, 
   theme, 
   onToggleTheme, 
-  onOpenAddMemory,
   currentUser 
 }) {
   const [scrolled, setScrolled] = useState(false);
@@ -117,16 +115,8 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* Actions: Add Memory, Theme Toggle, Auth */}
+          {/* Actions: Theme Toggle, Auth */}
           <div className="nav-actions-dock">
-            <button 
-              className="btn-primary btn-sm add-memory-nav-btn"
-              onClick={onOpenAddMemory}
-            >
-              <Plus size={15} />
-              <span>Add Memory</span>
-            </button>
-
             <button 
               className="theme-switcher-btn"
               onClick={onToggleTheme}

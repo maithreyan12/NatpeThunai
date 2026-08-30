@@ -396,11 +396,52 @@
 }
 
 @media (max-width: 768px) {
+  .community-hub-section {
+    padding: 60px 0 40px 0;
+  }
   .community-events-grid,
   .squad-members-grid {
     grid-template-columns: 1fr;
   }
   .community-tab-pane {
     padding: 20px 16px;
+  }
+}
+
+@media (max-width: 580px) {
+  .community-tabs-nav {
+    padding: 10px 12px;
+    gap: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .community-tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .community-tab-btn {
+    padding: 6px 12px;
+    font-size: 0.80rem;
+    flex-shrink: 0;
+  }
+  .tab-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .tab-action-bar .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+  .community-post-card,
+  .event-item-card {
+    padding: 16px 14px;
+  }
+  .event-rsvp-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .event-rsvp-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

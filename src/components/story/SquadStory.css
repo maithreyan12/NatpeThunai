@@ -338,8 +338,12 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  .squad-story-section {
+    padding: 70px 0 50px 0;
+  }
   .story-parchment-card {
-    padding: 30px 22px;
+    padding: 32px 24px;
+    border-radius: var(--radius-xl);
   }
   .prose-lead {
     font-size: 1.10rem;
@@ -353,5 +357,88 @@
   .story-signoff-bar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 580px) {
+  .story-controls-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+  .story-lang-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 4px;
+  }
+  .story-tab-pill {
+    padding: 7px 6px;
+    font-size: 0.76rem;
+    justify-content: center;
+    gap: 4px;
+  }
+  .story-header-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .story-action-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 0.80rem;
+  }
+  .story-moments-grid {
+    grid-template-columns: 1fr;
+  }
+  .moment-card-pill {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .story-parchment-card {
+    padding: 22px 16px;
+    gap: 22px;
+  }
+  .story-prose-stream {
+    gap: 24px;
+  }
+  .prose-lead {
+    font-size: 1.02rem;
+  }
+  .prose-body {
+    font-size: 0.90rem;
+    line-height: 1.68;
+  }
+  .story-callout-quote {
+    padding: 14px 14px 14px 22px;
+    margin: 8px 0;
+  }
+  .callout-statement {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .callout-mark {
+    font-size: 1.8rem;
+    left: 4px;
+  }
+  .story-climax-card {
+    padding: 18px 14px;
+  }
+  .climax-title {
+    font-size: 1.15rem;
+  }
+  .climax-text {
+    font-size: 0.92rem;
+    line-height: 1.58;
+  }
+  .signoff-left, .signoff-tamil-quote {
+    font-size: 0.78rem;
   }
 }

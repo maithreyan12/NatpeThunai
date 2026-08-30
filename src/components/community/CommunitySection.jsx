@@ -10,8 +10,8 @@ import {
   ArrowUpRight,
   ShieldCheck
 } from 'lucide-react';
-import InstagramIcon from './InstagramIcon';
-import { SQUAD_MEMBERS } from '../services';
+import InstagramIcon from '../ui/InstagramIcon';
+import { SQUAD_MEMBERS } from '../../services';
 import './CommunitySection.css';
 
 export default function CommunitySection({ 

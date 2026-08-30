@@ -1,16 +1,14 @@
-import React, { useEffect } from 'react';
 import { 
   X, 
   Quote, 
   Sparkles, 
   ArrowUpRight, 
-  Clock, 
-  Plus 
+  Clock 
 } from 'lucide-react';
-import InstagramIcon from './InstagramIcon';
+import InstagramIcon from '../ui/InstagramIcon';
 import './FriendModal.css';
 
-export default function FriendModal({ friend, onClose, onAddMemoryWithFriend }) {
+export default function FriendModal({ friend, onClose }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -108,20 +106,6 @@ export default function FriendModal({ friend, onClose, onAddMemoryWithFriend }) 
 
         {/* Footer Actions */}
         <div className="modal-action-footer">
-          {onAddMemoryWithFriend && (
-            <button
-              type="button"
-              className="btn-secondary modal-add-mem-btn"
-              onClick={() => {
-                onClose();
-                onAddMemoryWithFriend(friend);
-              }}
-            >
-              <Plus size={15} />
-              <span>Add Memory With {friend.name}</span>
-            </button>
-          )}
-
           {friend.instagram && (
             <a
               href={friend.instagram}

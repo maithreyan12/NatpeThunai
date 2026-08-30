@@ -1,24 +1,35 @@
 // ═══════════════════════════════════════════════════════════════════
-//  COMPONENTS BARREL EXPORT — CLEAN MODULAR ARCHITECTURE
+//  MODULAR ARCHITECTURE BARREL EXPORT — PREMIUM & EASY TO MAINTAIN
 // ═══════════════════════════════════════════════════════════════════
 
-export { default as Navbar } from './Navbar';
-export { default as Hero } from './Hero';
-export { default as SquadStory } from './SquadStory';
-export { default as FriendshipJourney } from './FriendshipJourney';
-export { default as SquadMembers } from './SquadMembers';
-export { default as MemoryTimeline } from './MemoryTimeline';
-export { default as MemoryCard } from './MemoryCard';
-export { default as MemoryReel } from './MemoryReel';
-export { default as CommunitySection } from './CommunitySection';
-export { default as GroupChat } from './GroupChat';
-export { default as Footer } from './Footer';
-export { default as FriendModal } from './FriendModal';
-export { default as InstagramIcon } from './InstagramIcon';
+// 1. Layout Structure
+export { default as Navbar } from './layout/Navbar';
+export { default as Footer } from './layout/Footer';
 
+// 2. Hero Presentation
+export { default as Hero } from './hero/Hero';
+
+// 3. Heartfelt Story Manifesto
+export { default as SquadStory } from './story/SquadStory';
+
+// 4. Squad Enclave & Profiles
+export { default as SquadMembers } from './squad/SquadMembers';
+export { default as FriendModal } from './squad/FriendModal';
+export { default as FriendshipJourney } from './squad/FriendshipJourney';
+
+// 5. Memory Vault & Reels
+export { default as MemoryTimeline } from './memories/MemoryTimeline';
+export { default as MemoryCard } from './memories/MemoryCard';
+export { default as MemoryReel } from './memories/MemoryReel';
+
+// 6. Community & Realtime / AI Hub
+export { default as CommunitySection } from './community/CommunitySection';
+export { default as GroupChat } from './community/GroupChat';
+
+// 7. Modals & UI Components
+export { default as InstagramIcon } from './ui/InstagramIcon';
 export { 
-  AddMemoryModal, 
   CreatePostModal, 
   AddEventModal, 
   LightboxModal 
-} from './Modals';
+} from './ui/Modals';

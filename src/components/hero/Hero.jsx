@@ -2,14 +2,14 @@ import React from 'react';
 import { 
   Calendar, 
   Film, 
-  Plus 
+  Heart
 } from 'lucide-react';
 import './Hero.css';
 
 export default function Hero({ 
   onExploreTimeline, 
   onWatchReel, 
-  onOpenAddMemory 
+  onReadStory 
 }) {
   return (
     <section id="hero" className="hero-community-section">
@@ -43,14 +43,14 @@ export default function Hero({
           From late-night talks and road trips to milestones celebrated side-by-side.
         </p>
 
-        {/* Soft, Calibrated Button System (No Harsh Neon Gradients) */}
+        {/* Soft, Calibrated Button System */}
         <div className="hero-actions-dock">
           <button 
             className="btn-primary hero-btn-main" 
-            onClick={onOpenAddMemory}
+            onClick={onReadStory}
           >
-            <Plus size={16} />
-            <span>Add a Memory</span>
+            <Heart size={16} fill="white" />
+            <span>Read Namma Story</span>
           </button>
 
           <button 

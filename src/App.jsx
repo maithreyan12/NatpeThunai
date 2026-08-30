@@ -11,14 +11,12 @@ import {
   GroupChat, 
   Footer, 
   FriendModal,
-  AddMemoryModal, 
   CreatePostModal, 
   AddEventModal, 
   LightboxModal 
 } from './components';
 import { 
   subscribeToMemories, 
-  saveMemory, 
   reactToMemory, 
   addCommentToMemory,
   getStoredPosts,
@@ -44,7 +42,6 @@ export default function App() {
   const [events, setEvents] = useState(getStoredEvents());
 
   // Modal States
-  const [isAddMemoryOpen, setIsAddMemoryOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -124,11 +121,6 @@ export default function App() {
   }, []);
 
   // Memory Handlers
-  const handleSaveMemory = async (memoryData) => {
-    await saveMemory(memoryData);
-    showToast(`Memory "${memoryData.title}" saved to the archive! ✨`);
-  };
-
   const handleReactMemory = (memoryId, emoji) => {
     const updated = reactToMemory(memoryId, emoji);
     setMemories(updated);
@@ -180,7 +172,6 @@ export default function App() {
         onNavigate={scrollToSection}
         theme={theme}
         onToggleTheme={toggleTheme}
-        onOpenAddMemory={() => setIsAddMemoryOpen(true)}
         currentUser={currentUser}
       />
 
@@ -190,7 +181,7 @@ export default function App() {
         <Hero 
           onExploreTimeline={() => scrollToSection('timeline')}
           onWatchReel={() => scrollToSection('reel')}
-          onOpenAddMemory={() => setIsAddMemoryOpen(true)}
+          onReadStory={() => scrollToSection('story')}
         />
 
         {/* 2. Namma Natpe Thunai Story (The Unfiltered Chronicle) */}
@@ -199,7 +190,7 @@ export default function App() {
         {/* 3. Friendship Journey Animation */}
         <FriendshipJourney />
 
-        {/* 3. Dedicated Squad Members Showcase (With Real Photos & Journey Milestones) */}
+        {/* 4. Dedicated Squad Members Showcase */}
         <SquadMembers 
           onSelectMember={(member) => setSelectedFriend(member)}
           onFilterByMember={(_memberName) => {
@@ -207,23 +198,21 @@ export default function App() {
           }}
         />
 
-        {/* 4. Chronological Memory Timeline */}
+        {/* 5. Chronological Memory Timeline */}
         <MemoryTimeline 
           memories={memories}
           onReact={handleReactMemory}
           onAddComment={handleAddComment}
-          onOpenAddMemory={() => setIsAddMemoryOpen(true)}
           onOpenLightbox={(m) => setLightboxMemory(m)}
           currentUser={currentUser}
         />
 
-        {/* 5. Cinematic Memory Reel */}
+        {/* 6. Cinematic Memory Reel */}
         <MemoryReel 
           memories={memories}
-          onOpenAddMemory={() => setIsAddMemoryOpen(true)}
         />
 
-        {/* 6. Group Community Hub (Posts & Events) */}
+        {/* 7. Group Community Hub (Posts & Events) */}
         <CommunitySection 
           posts={posts}
           onLikePost={handleLikePost}
@@ -235,20 +224,14 @@ export default function App() {
           currentUser={currentUser}
         />
 
-        {/* 7. Live Group Chat Enclave */}
+        {/* 8. Live Group Chat & AI Story Enclave */}
         <GroupChat />
 
-        {/* 8. Footer */}
+        {/* 9. Footer */}
         <Footer onScrollTop={() => scrollToSection('hero')} />
       </main>
 
       {/* ── MODALS ── */}
-      <AddMemoryModal 
-        isOpen={isAddMemoryOpen}
-        onClose={() => setIsAddMemoryOpen(false)}
-        onSave={handleSaveMemory}
-      />
-
       <CreatePostModal 
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
@@ -271,9 +254,6 @@ export default function App() {
       <FriendModal 
         friend={selectedFriend}
         onClose={() => setSelectedFriend(null)}
-        onAddMemoryWithFriend={(_friend) => {
-          setIsAddMemoryOpen(true);
-        }}
       />
 
       {/* Non-intrusive Toast Notification */}

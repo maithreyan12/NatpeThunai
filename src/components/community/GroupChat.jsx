@@ -13,7 +13,7 @@ import {
   Copy, 
   Check 
 } from 'lucide-react';
-import { signInWithGoogle, logOut, onAuthChange, sendMessage, subscribeToMessages } from '../firebase';
+import { signInWithGoogle, logOut, onAuthChange, sendMessage, subscribeToMessages } from '../../firebase';
 import './GroupChat.css';
 
 const QUICK_EMOJIS = ['❤️', '🔥', '😂', '👏', '✨', '💯', '😍', '🎉'];
