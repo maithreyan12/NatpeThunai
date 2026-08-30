@@ -1,168 +1,229 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Users, Sun, Moon, Wifi, BatteryCharging, MessageCircle, Info, Heart, ArrowUpRight } from 'lucide-react';
-import InstagramIcon from './InstagramIcon';
+import { 
+  Sparkles, 
+  Clock, 
+  Film, 
+  Users, 
+  MessageCircle, 
+  Calendar, 
+  Plus, 
+  Sun, 
+  Moon, 
+  LogOut, 
+  LogIn,
+  Heart 
+} from 'lucide-react';
+import { signInWithGoogle, logOut } from '../firebase';
 import './Navbar.css';
 
-export default function Navbar({ activeSection, onNavigate, theme, onToggleTheme }) {
-  const [time, setTime] = useState('');
+export default function Navbar({ 
+  activeSection, 
+  onNavigate, 
+  theme, 
+  onToggleTheme, 
+  onOpenAddMemory,
+  currentUser 
+}) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleAuthAction = async () => {
+    if (currentUser) {
+      await logOut();
+    } else {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        console.error("Sign in failed:", err);
+      }
+    }
+  };
 
   return (
     <>
-      <header className={`apple-nav-wrapper ${scrolled ? 'scrolled' : ''}`}>
-        {/* Futuristic Dynamic Island Status Bar */}
-        <div className="dynamic-island-bar">
-          <div className="island-time">{time || '09:41'}</div>
-          
-          <div className="dynamic-island-capsule">
-            <span className="live-dot-pulse"></span>
-            <span className="island-status-text">
-              <span className="tamil-accent" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span> • Live Vibe
-            </span>
-          </div>
-
-          <div className="island-meta">
-            <Wifi className="meta-icon" size={13} />
-            <BatteryCharging className="meta-icon" size={14} />
-          </div>
-        </div>
-
-        {/* Floating Glass Pill Dock */}
-        <nav className="glass-pill-dock" aria-label="Main navigation">
+      <header className={`community-navbar-wrapper ${scrolled ? 'scrolled' : ''}`}>
+        <nav className="community-nav-bar" aria-label="Main navigation">
           {/* Brand Identity */}
           <a 
             href="#hero" 
-            className="dock-brand" 
+            className="nav-brand-lockup"
             onClick={(e) => { e.preventDefault(); onNavigate('hero'); }}
           >
-            <div className="dock-brand-icon liquid-shimmer">
+            <div className="brand-badge-icon">
               <Sparkles size={16} />
             </div>
-            <div className="dock-brand-meta">
-              <span className="dock-brand-title" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-              <span className="dock-brand-sub">PRO SQUAD</span>
+            <div className="brand-text-col">
+              <span className="brand-tamil-title" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
+              <span className="brand-meta-year">FRIENDSHIP SANCTUARY</span>
             </div>
           </a>
 
-          {/* Desktop Navigation Links (Segmented Glass Pill) */}
-          <div className="dock-nav-items">
+          {/* Nav Links */}
+          <div className="nav-links-dock">
             <button 
-              className={`dock-link-btn ${activeSection === 'hero' ? 'active' : ''}`}
+              className={`nav-item-btn ${activeSection === 'hero' ? 'active' : ''}`}
               onClick={() => onNavigate('hero')}
             >
               Home
             </button>
             <button 
-              className={`dock-link-btn ${activeSection === 'about' ? 'active' : ''}`}
-              onClick={() => onNavigate('about')}
+              className={`nav-item-btn ${activeSection === 'story' ? 'active' : ''}`}
+              onClick={() => onNavigate('story')}
             >
-              Story
+              Story ❤️
             </button>
             <button 
-              className={`dock-link-btn ${activeSection === 'friends' ? 'active' : ''}`}
-              onClick={() => onNavigate('friends')}
+              className={`nav-item-btn ${activeSection === 'journey' ? 'active' : ''}`}
+              onClick={() => onNavigate('journey')}
+            >
+              Journey
+            </button>
+            <button 
+              className={`nav-item-btn ${activeSection === 'timeline' ? 'active' : ''}`}
+              onClick={() => onNavigate('timeline')}
+            >
+              Timeline
+            </button>
+            <button 
+              className={`nav-item-btn ${activeSection === 'reel' ? 'active' : ''}`}
+              onClick={() => onNavigate('reel')}
+            >
+              Memory Reel
+            </button>
+            <button 
+              className={`nav-item-btn ${activeSection === 'members' ? 'active' : ''}`}
+              onClick={() => onNavigate('members')}
             >
               Squad
             </button>
             <button 
-              className={`dock-link-btn ${activeSection === 'chat' ? 'active' : ''}`}
-              onClick={() => onNavigate('chat')}
+              className={`nav-item-btn ${activeSection === 'community' ? 'active' : ''}`}
+              onClick={() => onNavigate('community')}
             >
-              Chat
+              Community
             </button>
             <button 
-              className={`dock-link-btn ${activeSection === 'follow' ? 'active' : ''}`}
-              onClick={() => onNavigate('follow')}
+              className={`nav-item-btn ${activeSection === 'chat' ? 'active' : ''}`}
+              onClick={() => onNavigate('chat')}
             >
-              Connect
+              Live Chat
             </button>
           </div>
 
-          {/* Action Area: Theme Toggle & Instagram CTA */}
-          <div className="dock-actions">
+          {/* Actions: Add Memory, Theme Toggle, Auth */}
+          <div className="nav-actions-dock">
             <button 
-              className="theme-toggle-btn"
+              className="btn-primary btn-sm add-memory-nav-btn"
+              onClick={onOpenAddMemory}
+            >
+              <Plus size={15} />
+              <span>Add Memory</span>
+            </button>
+
+            <button 
+              className="theme-switcher-btn"
               onClick={onToggleTheme}
-              title={`Switch to ${theme === 'light' ? 'Dark Obsidian' : 'Light Pearl'} Mode`}
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
               aria-label="Toggle theme"
             >
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
 
-            <a 
-              href="https://instagram.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="dock-cta-btn liquid-shimmer"
-            >
-              <InstagramIcon size={14} />
-              <span>Squad Gram</span>
-              <ArrowUpRight size={13} className="arrow-shift" />
-            </a>
+            {/* Profile / Auth Button */}
+            {currentUser ? (
+              <div className="user-profile-menu">
+                <img 
+                  src={currentUser.photoURL || '/photos/friend1.jpg'} 
+                  alt={currentUser.displayName || 'Member'} 
+                  className="user-nav-avatar"
+                  referrerPolicy="no-referrer"
+                />
+                <button 
+                  className="auth-signout-btn" 
+                  onClick={handleAuthAction}
+                  title="Sign out"
+                >
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="btn-secondary btn-sm"
+                onClick={handleAuthAction}
+                title="Sign in with Google"
+              >
+                <LogIn size={14} />
+                <span className="sign-in-text">Sign In</span>
+              </button>
+            )}
           </div>
         </nav>
       </header>
 
-      {/* Mobile Floating Bottom Navigation Bar */}
-      <nav className="mobile-bottom-dock" aria-label="Mobile navigation">
+      {/* Mobile Floating Bottom Bar */}
+      <nav className="mobile-bottom-bar" aria-label="Mobile navigation">
         <button 
-          className={`mobile-dock-item ${activeSection === 'hero' ? 'active' : ''}`}
+          className={`mobile-tab ${activeSection === 'hero' ? 'active' : ''}`}
           onClick={() => onNavigate('hero')}
-          aria-label="Home"
         >
           <Sparkles size={18} />
           <span>Home</span>
         </button>
         <button 
-          className={`mobile-dock-item ${activeSection === 'about' ? 'active' : ''}`}
-          onClick={() => onNavigate('about')}
-          aria-label="Story"
+          className={`mobile-tab ${activeSection === 'story' ? 'active' : ''}`}
+          onClick={() => onNavigate('story')}
         >
-          <Info size={18} />
+          <Heart size={18} />
           <span>Story</span>
         </button>
         <button 
-          className={`mobile-dock-item ${activeSection === 'friends' ? 'active' : ''}`}
-          onClick={() => onNavigate('friends')}
-          aria-label="Squad"
+          className={`mobile-tab ${activeSection === 'journey' ? 'active' : ''}`}
+          onClick={() => onNavigate('journey')}
+        >
+          <Clock size={18} />
+          <span>Journey</span>
+        </button>
+        <button 
+          className={`mobile-tab ${activeSection === 'timeline' ? 'active' : ''}`}
+          onClick={() => onNavigate('timeline')}
+        >
+          <Calendar size={18} />
+          <span>Memories</span>
+        </button>
+        <button 
+          className={`mobile-tab ${activeSection === 'reel' ? 'active' : ''}`}
+          onClick={() => onNavigate('reel')}
+        >
+          <Film size={18} />
+          <span>Reel</span>
+        </button>
+        <button 
+          className={`mobile-tab ${activeSection === 'members' ? 'active' : ''}`}
+          onClick={() => onNavigate('members')}
         >
           <Users size={18} />
           <span>Squad</span>
         </button>
         <button 
-          className={`mobile-dock-item ${activeSection === 'chat' ? 'active' : ''}`}
+          className={`mobile-tab ${activeSection === 'community' ? 'active' : ''}`}
+          onClick={() => onNavigate('community')}
+        >
+          <MessageCircle size={18} />
+          <span>Group</span>
+        </button>
+        <button 
+          className={`mobile-tab ${activeSection === 'chat' ? 'active' : ''}`}
           onClick={() => onNavigate('chat')}
-          aria-label="Chat"
         >
           <MessageCircle size={18} />
           <span>Chat</span>
-        </button>
-        <button 
-          className={`mobile-dock-item ${activeSection === 'follow' ? 'active' : ''}`}
-          onClick={() => onNavigate('follow')}
-          aria-label="Connect"
-        >
-          <Heart size={18} />
-          <span>Love</span>
         </button>
       </nav>
     </>

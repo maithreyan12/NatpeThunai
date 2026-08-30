@@ -1,0 +1,428 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  MODAL DIALOGS & OVERLAYS — CLEAN LIGHT DESIGN                      */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 33, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.22s var(--ease-spring);
+}
+
+[data-theme="dark"] .modal-backdrop {
+  background: rgba(4, 7, 12, 0.70);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-2xl);
+  padding: 32px 30px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: modalScaleUp 0.24s var(--ease-spring);
+}
+
+.modal-card-sm {
+  max-width: 500px;
+}
+
+@keyframes modalScaleUp {
+  from { transform: scale(0.96) translateY(12px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-badge-tag {
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-lavender);
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.modal-close-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+}
+
+.modal-close-icon:hover {
+  background: var(--border-hover);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+/* ── Form Controls ── */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-row {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 0.92rem;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  outline: none;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(109, 88, 217, 0.12);
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+/* ── Year Selector Pills ── */
+.year-selector-row {
+  display: flex;
+  gap: 8px;
+}
+
+.year-chip {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition: var(--transition-fast);
+}
+
+.year-chip:hover {
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+}
+
+.year-chip.active {
+  background: var(--accent-lavender);
+  border-color: var(--accent-lavender);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 81, 206, 0.25);
+}
+
+/* ── Media Preview Box ── */
+.media-preview-box {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+}
+
+.preview-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-controls-overlay {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.80rem;
+}
+
+/* Quick photo choices */
+.quick-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.quick-pick-hint {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.quick-thumb-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  transition: var(--transition-fast);
+}
+
+.quick-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quick-thumb-btn:hover {
+  transform: scale(1.08);
+}
+
+.quick-thumb-btn.selected {
+  border-color: var(--accent-lavender);
+  box-shadow: 0 0 0 2px var(--tint-lavender);
+}
+
+/* ── People Chips Row ── */
+.people-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.people-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.people-chip:hover {
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+}
+
+.people-chip.selected {
+  background: var(--tint-lavender);
+  border-color: rgba(109, 88, 217, 0.35);
+  color: var(--accent-lavender);
+}
+
+/* ── Category Tag Pills ── */
+.category-chips-row {
+  display: flex;
+  gap: 8px;
+}
+
+.category-tag-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+.category-tag-btn.active {
+  background: var(--tint-lavender);
+  border-color: var(--accent-lavender);
+  color: var(--accent-lavender);
+}
+
+/* ── Modal Actions Row ── */
+.modal-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  LIGHTBOX FULLSCREEN OVERLAY                                        */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 22, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: modalFadeIn 0.22s ease;
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  z-index: 10;
+}
+
+.lightbox-close-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.08);
+}
+
+.lightbox-content {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalScaleUp 0.24s var(--ease-spring);
+}
+
+.lightbox-media-container {
+  width: 100%;
+  max-height: 65vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+}
+
+.lightbox-media {
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+}
+
+.lightbox-caption-bar {
+  padding: 20px 24px;
+  background: var(--bg-card);
+}
+
+.caption-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.caption-year-pill {
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.caption-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.caption-desc {
+  font-size: 0.90rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .modal-card {
+    padding: 24px 18px;
+  }
+}

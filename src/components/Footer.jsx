@@ -5,19 +5,21 @@ import './Footer.css';
 
 export default function Footer({ onScrollTop }) {
   return (
-    <footer className="apple-footer-wrapper">
-      <div className="glass-card footer-dock-bar liquid-shimmer">
-        {/* Brand & Quote */}
+    <footer className="community-footer-wrapper">
+      <div className="footer-dock-bar">
+        {/* Brand & Emotional Quote */}
         <div className="footer-identity-col">
           <div className="footer-brand-lockup">
             <div className="footer-brand-icon">
-              <Sparkles size={15} />
+              <Sparkles size={16} />
             </div>
-            <span className="footer-title-text" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-            <span className="footer-subtitle-tag">• UNCONDITIONAL BOND</span>
+            <div className="footer-brand-names">
+              <span className="footer-title-text" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
+              <span className="footer-subtitle-tag">Natpethunai • Friendship Sanctuary</span>
+            </div>
           </div>
           <p className="footer-quote-copy">
-            "True friendship isn't about being inseparable, it's being separated and knowing nothing will change."
+            “Our memories. Our moments. Our bond. A place to keep the little moments that became our biggest memories.”
           </p>
         </div>
 
@@ -27,15 +29,15 @@ export default function Footer({ onScrollTop }) {
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-round-btn liquid-shimmer"
-            title="Instagram Page"
-            aria-label="Instagram Page"
+            className="footer-round-btn"
+            title="Squad Instagram"
+            aria-label="Squad Instagram"
           >
             <InstagramIcon size={16} />
           </a>
 
           <button
-            className="footer-round-btn footer-scroll-btn liquid-shimmer"
+            className="footer-round-btn footer-scroll-btn"
             onClick={onScrollTop}
             title="Back to Top"
             aria-label="Back to top"
@@ -47,9 +49,9 @@ export default function Footer({ onScrollTop }) {
 
       {/* Copyright Line */}
       <div className="footer-sub-metadata">
-        <span>Architected with precision &</span>
+        <span>Curated with genuine love & memories for our squad</span>
         <Heart size={13} className="footer-heart-glow" />
-        <span>for our eternal squad • {new Date().getFullYear()}</span>
+        <span>Eternal Friendship Archive</span>
       </div>
     </footer>
   );

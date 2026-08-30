@@ -1,89 +1,146 @@
 import React from 'react';
-import { ArrowDownRight, Compass, Heart, Camera, Flame } from 'lucide-react';
+import { 
+  Calendar, 
+  Film, 
+  Plus 
+} from 'lucide-react';
 import './Hero.css';
 
-export default function Hero({ onExplore, onMeetFriends }) {
+export default function Hero({ 
+  onExploreTimeline, 
+  onWatchReel, 
+  onOpenAddMemory 
+}) {
   return (
-    <section id="hero" className="hero-section">
-      {/* Studio Radial Glow Behind Hero */}
-      <div className="hero-ambient-glow" aria-hidden="true"></div>
+    <section id="hero" className="hero-community-section">
+      {/* Soft Ambient Spotlight */}
+      <div className="hero-ambient-soft-spot" aria-hidden="true" />
 
-      <div className="hero-content">
-        {/* Small Specular Pill Badge */}
-        <div className="hero-badge-wrapper">
-          <div className="badge-pill hero-pill liquid-shimmer">
-            <span className="badge-dot"></span>
-            <span className="badge-text">
-              <strong style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</strong> • SQUAD SANCTUARY 2026
-            </span>
-          </div>
+      <div className="hero-community-content">
+        {/* Prominent Period Pill */}
+        <div className="hero-period-badge">
+          <span className="period-dot" />
+          <span className="period-text">TIMELESS MEMORIES</span>
+          <span className="period-divider">•</span>
+          <span className="period-sub">SQUAD SANCTUARY</span>
         </div>
 
-        {/* Hero Title */}
-        <h1 className="hero-headline">
-          <span className="hero-title-tamil" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-          <span className="hero-subheadline">
-            Where Moments Turn Into <span className="gradient-text-brand">Forever</span>
-          </span>
-        </h1>
+        {/* Main Headline */}
+        <div className="hero-title-group">
+          <h1 className="hero-main-title">
+            <span className="hero-tamil-name" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
+            <span className="hero-english-name">Natpethunai</span>
+          </h1>
 
-        {/* Tagline Description */}
-        <p className="hero-description">
-          An ultra-premium sanctuary celebrating unfiltered laughter, unconditional loyalty, 
-          and the unbreakable bonds of our close circle.
+          <h2 className="hero-subtitle">
+            Our memories. Our moments. Our bond.
+          </h2>
+        </div>
+
+        {/* Emotional Supporting Text */}
+        <p className="hero-supporting-copy">
+          A place to keep the little moments that became our biggest memories.
+          From late-night talks and road trips to milestones celebrated side-by-side.
         </p>
 
-        {/* Primary & Secondary Action Buttons */}
-        <div className="hero-actions-row">
+        {/* Soft, Calibrated Button System (No Harsh Neon Gradients) */}
+        <div className="hero-actions-dock">
           <button 
-            className="liquid-btn-primary liquid-shimmer"
-            onClick={onMeetFriends}
+            className="btn-primary hero-btn-main" 
+            onClick={onOpenAddMemory}
           >
-            <span className="btn-text">Meet The Squad</span>
-            <div className="btn-icon-circle">
-              <ArrowDownRight size={16} />
-            </div>
+            <Plus size={16} />
+            <span>Add a Memory</span>
           </button>
-          
+
           <button 
-            className="liquid-btn-secondary"
-            onClick={onExplore}
+            className="btn-secondary hero-btn-sub" 
+            onClick={onExploreTimeline}
           >
-            <Compass size={18} className="secondary-btn-icon" />
-            <span className="btn-text">Our Journey</span>
+            <Calendar size={16} />
+            <span>Explore Timeline</span>
+          </button>
+
+          <button 
+            className="btn-outline hero-btn-ghost" 
+            onClick={onWatchReel}
+          >
+            <Film size={16} />
+            <span>Watch Reel</span>
           </button>
         </div>
 
-        {/* Floating Spatial Feature Slabs */}
-        <div className="hero-spatial-cards">
-          <div className="spatial-card glass-card interactive-slab card-vibe">
-            <div className="card-icon-pill rose">
-              <Heart size={16} />
+        {/* Floating Physical Memory Polaroids */}
+        <div className="hero-polaroid-stage" aria-label="Featured memories">
+          {/* Chapter 1 Polaroid */}
+          <div className="polaroid-card card-rotate-left">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend1.jpg" alt="Origins" className="polaroid-img" />
+              <span className="polaroid-year-tag">Origins</span>
             </div>
-            <div className="card-info">
-              <span className="card-label">Pure Vibe</span>
-              <span className="card-metric">100% Unfiltered</span>
-            </div>
-          </div>
-
-          <div className="spatial-card glass-card interactive-slab card-memories">
-            <div className="card-icon-pill blue">
-              <Camera size={16} />
-            </div>
-            <div className="card-info">
-              <span className="card-label">Squad Moments</span>
-              <span className="card-metric">Captured Forever</span>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Where it all began</span>
+              <span className="caption-sub">First laughs & college dawn</span>
             </div>
           </div>
 
-          <div className="spatial-card glass-card interactive-slab card-energy">
-            <div className="card-icon-pill amber">
-              <Flame size={16} />
+          {/* Chapter 2 Polaroid */}
+          <div className="polaroid-card card-elevated">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend2.jpg" alt="Road Trips" className="polaroid-img" />
+              <span className="polaroid-year-tag">Adventures</span>
             </div>
-            <div className="card-info">
-              <span className="card-label">Unbreakable</span>
-              <span className="card-metric">Zero Drama</span>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Spontaneous Drives</span>
+              <span className="caption-sub">Midnight chai runs</span>
             </div>
+          </div>
+
+          {/* Chapter 3 Polaroid */}
+          <div className="polaroid-card card-rotate-right">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend3.jpg" alt="Milestones" className="polaroid-img" />
+              <span className="polaroid-year-tag">Milestones</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Unforgettable Wins</span>
+              <span className="caption-sub">Standing by each other</span>
+            </div>
+          </div>
+
+          {/* Chapter 4 Polaroid */}
+          <div className="polaroid-card card-rotate-far-right">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend4.jpg" alt="Still Together" className="polaroid-img" />
+              <span className="polaroid-year-tag">Forever</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Still Unbreakable</span>
+              <span className="caption-sub">Today & forever</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Subtle Timeline Milestones Bar */}
+        <div className="hero-timeline-strip">
+          <div className="milestone-chip">
+            <span className="milestone-year">Origin</span>
+            <span className="milestone-label">First Chapter</span>
+          </div>
+          <div className="milestone-divider" />
+          <div className="milestone-chip">
+            <span className="milestone-year">Journeys</span>
+            <span className="milestone-label">Adventures</span>
+          </div>
+          <div className="milestone-divider" />
+          <div className="milestone-chip">
+            <span className="milestone-year">Moments</span>
+            <span className="milestone-label">Deepened Bond</span>
+          </div>
+          <div className="milestone-divider" />
+          <div className="milestone-chip active">
+            <span className="milestone-year">Forever</span>
+            <span className="milestone-label">Eternal Squad</span>
           </div>
         </div>
       </div>

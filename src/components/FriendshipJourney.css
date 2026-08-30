@@ -1,0 +1,338 @@
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  FRIENDSHIP JOURNEY ANIMATION (2023 → 2026)                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
+.journey-section {
+  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.journey-stage-card {
+  width: 100%;
+  max-width: 980px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  padding: 36px 40px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Stepper Navigation ── */
+.journey-stepper-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.step-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: var(--transition-fast);
+}
+
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-hover);
+  transition: var(--transition-fast);
+}
+
+.step-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-year {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.step-title-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.stepper-step.active .step-indicator {
+  border-color: var(--accent-lavender);
+  background: var(--tint-lavender);
+  box-shadow: 0 0 0 3px rgba(109, 88, 217, 0.15);
+}
+
+.stepper-step.active .step-dot {
+  background: var(--accent-lavender);
+  transform: scale(1.2);
+}
+
+.stepper-step.active .step-year {
+  color: var(--accent-lavender);
+}
+
+.stepper-step.passed .step-indicator {
+  border-color: var(--accent-lavender);
+  background: var(--tint-lavender);
+}
+
+.stepper-step.passed .step-dot {
+  background: var(--accent-lavender);
+}
+
+/* ── Viewport Display (Side by Side) ── */
+.journey-display-viewport {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 36px;
+  align-items: center;
+}
+
+/* Left Photo Col */
+.journey-photo-col {
+  display: flex;
+  justify-content: center;
+}
+
+.journey-photo-frame {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 380px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-surface);
+}
+
+.journey-milestone-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: photoFadeZoom 0.5s var(--ease-spring);
+}
+
+@keyframes photoFadeZoom {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.journey-floating-year-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(25, 30, 43, 0.85);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+}
+
+.journey-floating-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Right Narrative Col */
+.journey-narrative-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  animation: narrativeSlideIn 0.45s var(--ease-spring);
+}
+
+@keyframes narrativeSlideIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.journey-tagline-text {
+  font-size: 0.80rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent-lavender);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.journey-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  margin-bottom: 16px;
+}
+
+.journey-body {
+  font-size: 1.02rem;
+  line-height: 1.70;
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+}
+
+.journey-quote-box {
+  position: relative;
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent-lavender);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px 20px;
+  margin-bottom: 26px;
+  width: 100%;
+}
+
+.quote-mark {
+  font-family: Georgia, serif;
+  font-size: 2.2rem;
+  color: var(--accent-lavender);
+  line-height: 1;
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  opacity: 0.35;
+}
+
+.quote-text {
+  font-size: 0.94rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.55;
+  font-weight: 500;
+  padding-left: 14px;
+}
+
+/* Squad Members in Chapter */
+.journey-squad-presence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+  width: 100%;
+}
+
+.presence-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.presence-avatars-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.presence-avatar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
+}
+
+.presence-avatar-pill:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+}
+
+.presence-avatar-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-light);
+}
+
+.presence-avatar-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Playback controls */
+.journey-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.journey-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.journey-play-btn {
+  padding: 8px 18px;
+}
+
+@media (max-width: 820px) {
+  .journey-stage-card {
+    padding: 24px 20px;
+  }
+  .journey-display-viewport {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .journey-photo-frame {
+    height: 300px;
+    max-width: 100%;
+  }
+  .step-title-hint {
+    display: none;
+  }
+}

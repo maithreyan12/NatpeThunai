@@ -1,127 +1,221 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Noto+Sans+Tamil:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@300;400;500;600;700;800;900&family=Syne:wght@600;700;800&display=swap');
 
 :root {
-  /* Color Scheme Mode: Light (Default) */
+  /* ── Light Mode (Default) ── */
   --color-scheme: light;
-  
-  /* Canvas Backgrounds — Pure Pearl & Studio Atmosphere */
-  --bg-base: #f8fafc;
-  --bg-mesh-1: rgba(224, 236, 255, 0.55);
-  --bg-mesh-2: rgba(254, 235, 246, 0.45);
-  --bg-mesh-3: rgba(243, 238, 255, 0.50);
-  --bg-mesh-4: rgba(230, 247, 255, 0.40);
-  
-  /* Liquid Glass Surfaces — Refined Multi-Layer Translucency */
-  --glass-surface: rgba(255, 255, 255, 0.72);
-  --glass-surface-hover: rgba(255, 255, 255, 0.88);
-  --glass-surface-active: rgba(255, 255, 255, 0.96);
-  --glass-surface-subtle: rgba(255, 255, 255, 0.48);
-  --glass-surface-card: rgba(255, 255, 255, 0.65);
-  --glass-surface-input: rgba(255, 255, 255, 0.82);
-  --glass-surface-floating: rgba(255, 255, 255, 0.85);
-  
-  /* Glass Specular Borders & Rims */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.85);
-  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.55);
-  --glass-border-highlight: 1px solid rgba(255, 255, 255, 0.95);
-  --glass-border-outer: 1px solid rgba(0, 0, 0, 0.04);
-  
-  /* Optical Blur Levels */
-  --glass-blur-sm: blur(16px) saturate(180%);
-  --glass-blur-md: blur(28px) saturate(190%);
-  --glass-blur-lg: blur(40px) saturate(200%);
-  --glass-blur-heavy: blur(50px) saturate(210%);
-  
-  /* Apple Pro Typography Hierarchy */
-  --text-primary: #0a0d14;
-  --text-secondary: #475166;
-  --text-muted: #7b869e;
-  --text-faint: #9ea8bc;
-  --text-accent: #0071e3;
+
+  /* ── Perfect Light-First Canvas (Warm Cream Alabaster & Porcelain Cards) ── */
+  --bg-base: #faf8f5;
+  --bg-surface: #f4efe6;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-subtle: #f7f4ed;
+
+  /* Harmonious Pastel Tints — Soothing & Velvet Soft */
+  --tint-lavender: #f1edfe;
+  --tint-blue: #ebf3ff;
+  --tint-pink: #fdf2f8;
+  --tint-peach: #fff4ed;
+  --tint-mint: #ecfdf5;
+
+  /* Subtle Ambient Studio Lighting Orbs */
+  --mesh-orb-1: rgba(206, 196, 248, 0.32);
+  --mesh-orb-2: rgba(254, 219, 232, 0.28);
+  --mesh-orb-3: rgba(209, 239, 227, 0.24);
+  --mesh-orb-4: rgba(254, 232, 210, 0.24);
+
+  /* ── Refined Porcelain Glass Surfaces ── */
+  --glass-surface: rgba(255, 255, 255, 0.90);
+  --glass-surface-hover: rgba(255, 255, 255, 0.98);
+  --glass-surface-active: #ffffff;
+  --glass-surface-card: #ffffff;
+  --glass-surface-subtle: rgba(248, 245, 238, 0.85);
+  --glass-surface-floating: rgba(255, 255, 255, 0.94);
+  --glass-surface-input: #ffffff;
+
+  /* ── Clean Micro-Borders ── */
+  --border-light: #eae5da;
+  --border-subtle: #f0ebe0;
+  --border-hover: #dad3c4;
+  --border-focus: #9e8ef0;
+  --border-accent: #6352d4;
+
+  /* Legacy aliases for backwards compatibility */
+  --glass-border: 1px solid var(--border-light);
+  --glass-border-subtle: 1px solid var(--border-subtle);
+  --glass-border-highlight: 1px solid var(--border-light);
+
+  /* ── Deep, Luxurious Typography (High Contrast, Warm Obsidian Charcoal) ── */
+  --text-primary: #171923;
+  --text-secondary: #434c5e;
+  --text-muted: #6f788b;
+  --text-faint: #9ea7b8;
   --text-white: #ffffff;
-  
-  /* Accents — Refined Apple Studio Colors */
-  --accent-apple-blue: #0071e3;
-  --accent-apple-blue-rgb: 0, 113, 227;
-  --accent-indigo: #6366f1;
-  --accent-purple: #8b5cf6;
-  --accent-rose: #f43f5e;
-  --accent-rose-rgb: 244, 63, 94;
-  --accent-amber: #f59e0b;
-  --accent-emerald: #10b981;
-  
-  /* Chromatic Liquid Gradients */
-  --gradient-brand: linear-gradient(135deg, #0071e3 0%, #6366f1 50%, #d946ef 100%);
-  --gradient-liquid-blue: linear-gradient(135deg, #0071e3 0%, #38bdf8 100%);
-  --gradient-liquid-rose: linear-gradient(135deg, #f43f5e 0%, #fb7185 50%, #f97316 100%);
-  --gradient-silver: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.65) 100%);
-  
-  /* Ambient Studio Shadows */
-  --shadow-subtle: 0 2px 10px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-glass-sm: 0 4px 16px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-  --shadow-glass-md: 0 14px 36px -6px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95);
-  --shadow-glass-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.08), 0 8px 24px -4px rgba(0, 0, 0, 0.04), inset 0 2px 2px 0 rgba(255, 255, 255, 1);
-  --shadow-glow-blue: 0 12px 36px -4px rgba(0, 113, 227, 0.28), 0 4px 12px rgba(0, 113, 227, 0.15);
-  --shadow-glow-rose: 0 12px 36px -4px rgba(244, 63, 94, 0.28), 0 4px 12px rgba(244, 63, 94, 0.15);
-  
-  /* Strict Geometry Radius Scale */
-  --radius-xs: 8px;
-  --radius-sm: 14px;
-  --radius-md: 20px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
-  --radius-2xl: 44px;
+
+  /* ── Perfected Signature Accents (Vibrant yet Soft) ── */
+  --accent-lavender: #5b4cdb;
+  --accent-lavender-hover: #4c3cc8;
+  --accent-lavender-light: #efeafc;
+
+  --accent-blue: #1d68ed;
+  --accent-blue-hover: #1555c9;
+  --accent-blue-light: #ebf3ff;
+
+  --accent-peach: #ea580c;
+  --accent-peach-light: #fff3ec;
+
+  --accent-pink: #d63384;
+  --accent-pink-light: #fdedf5;
+
+  --accent-mint: #059669;
+  --accent-mint-light: #ecfdf5;
+
+  /* Aliases */
+  --accent-violet: var(--accent-lavender);
+  --accent-rose: var(--accent-pink);
+  --accent-amber: var(--accent-peach);
+  --accent-emerald: var(--accent-mint);
+
+  /* ── Perfectly Contoured Button Styling ── */
+  --btn-primary-bg: #5240cc;
+  --btn-primary-hover: #4332b8;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #f3effc;
+  --btn-secondary-hover: #e8e1fa;
+  --btn-secondary-text: #3c2a96;
+  --btn-secondary-border: #ded5f5;
+
+  --btn-outline-bg: #ffffff;
+  --btn-outline-hover: #f7f4ed;
+  --btn-outline-text: #171923;
+  --btn-outline-border: #ded8cb;
+
+  /* Soft Gradient Accent */
+  --gradient-brand: linear-gradient(135deg, #5b4cdb 0%, #765fe0 50%, #9878e4 100%);
+  --gradient-soft: linear-gradient(135deg, #f3effd 0%, #faedf3 100%);
+
+  /* ── Natural Velvet Shadows ── */
+  --shadow-xs: 0 1px 3px rgba(30, 24, 16, 0.04);
+  --shadow-sm: 0 3px 10px rgba(30, 24, 16, 0.05), 0 1px 2px rgba(30, 24, 16, 0.03);
+  --shadow-md: 0 8px 22px rgba(30, 24, 16, 0.06), 0 2px 6px rgba(30, 24, 16, 0.03);
+  --shadow-lg: 0 16px 40px rgba(30, 24, 16, 0.08), 0 4px 14px rgba(30, 24, 16, 0.03);
+  --shadow-hover: 0 14px 32px rgba(91, 76, 219, 0.13), 0 4px 10px rgba(30, 24, 16, 0.04);
+
+  /* Aliases */
+  --shadow-subtle: var(--shadow-xs);
+  --shadow-glass-sm: var(--shadow-sm);
+  --shadow-glass-md: var(--shadow-md);
+  --shadow-glass-lg: var(--shadow-lg);
+  --shadow-glow-violet: 0 8px 24px rgba(91, 76, 219, 0.15);
+
+  /* ── Radii ── */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-pill: 9999px;
-  
-  /* Typography Fonts */
-  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  --font-heading: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+
+  /* ── Modern Premium Typography Hierarchy ── */
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Syne', 'Outfit', sans-serif;
   --font-tamil: 'Noto Sans Tamil', 'Plus Jakarta Sans', sans-serif;
-  
-  /* Physics Transitions — Ultra-Fast & Crisp */
+
+  /* ── Easing & Transitions ── */
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring-bounce: cubic-bezier(0.2, 1.2, 0.4, 1);
-  --ease-instant: cubic-bezier(0, 0, 0.2, 1);
   --ease-cinematic: cubic-bezier(0.2, 0.8, 0.2, 1);
-  
-  --transition-instant: all 0.08s var(--ease-instant);
-  --transition-fast: all 0.14s var(--ease-spring);
-  --transition-normal: all 0.20s var(--ease-spring);
-  --transition-slow: all 0.35s var(--ease-cinematic);
+  --transition-fast: all 0.16s var(--ease-spring);
+  --transition-normal: all 0.24s var(--ease-spring);
+  --transition-slow: all 0.4s var(--ease-cinematic);
 }
 
-/* Dark Mode Tokens — Deep Obsidian & Titanium Glass */
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  DARK MODE — Deep Charcoal & Midnight Slate Sanctuary               */
+/* ═══════════════════════════════════════════════════════════════════ */
+
 [data-theme="dark"] {
   --color-scheme: dark;
-  
-  --bg-base: #06080d;
-  --bg-mesh-1: rgba(14, 40, 80, 0.40);
-  --bg-mesh-2: rgba(70, 18, 55, 0.35);
-  --bg-mesh-3: rgba(45, 20, 80, 0.38);
-  --bg-mesh-4: rgba(10, 30, 60, 0.30);
-  
-  --glass-surface: rgba(18, 22, 34, 0.65);
-  --glass-surface-hover: rgba(26, 32, 48, 0.80);
-  --glass-surface-active: rgba(32, 40, 60, 0.90);
-  --glass-surface-subtle: rgba(15, 18, 28, 0.50);
-  --glass-surface-card: rgba(16, 20, 32, 0.60);
-  --glass-surface-input: rgba(12, 16, 26, 0.75);
-  --glass-surface-floating: rgba(18, 22, 34, 0.85);
-  
-  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
-  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-border-highlight: 1px solid rgba(255, 255, 255, 0.20);
-  --glass-border-outer: 1px solid rgba(255, 255, 255, 0.04);
-  
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #8492a6;
-  --text-faint: #475569;
-  --text-accent: #38bdf8;
-  
-  --shadow-glass-sm: 0 4px 16px -2px rgba(0, 0, 0, 0.40), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
-  --shadow-glass-md: 0 14px 36px -6px rgba(0, 0, 0, 0.55), inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.18);
-  --shadow-glass-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.70), inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.22);
-  --shadow-glow-blue: 0 12px 36px -4px rgba(56, 189, 248, 0.35);
-  --shadow-glow-rose: 0 12px 36px -4px rgba(244, 63, 94, 0.35);
+
+  /* Deep Midnight Sanctuary Canvas */
+  --bg-base: #0d1117;
+  --bg-surface: #131923;
+  --bg-elevated: #1a2230;
+  --bg-card: #151c27;
+  --bg-subtle: #111620;
+
+  /* Dark Tints */
+  --tint-lavender: rgba(124, 104, 230, 0.14);
+  --tint-blue: rgba(56, 139, 253, 0.14);
+  --tint-pink: rgba(244, 114, 182, 0.14);
+  --tint-peach: rgba(249, 115, 22, 0.14);
+  --tint-mint: rgba(16, 185, 129, 0.14);
+
+  /* Dark Ambient Mesh Orbs */
+  --mesh-orb-1: rgba(91, 76, 219, 0.22);
+  --mesh-orb-2: rgba(214, 51, 132, 0.16);
+  --mesh-orb-3: rgba(16, 185, 129, 0.12);
+  --mesh-orb-4: rgba(234, 88, 12, 0.12);
+
+  /* Dark Glass Surfaces */
+  --glass-surface: rgba(21, 28, 39, 0.88);
+  --glass-surface-hover: rgba(26, 34, 48, 0.96);
+  --glass-surface-active: #1e2635;
+  --glass-surface-card: #151c27;
+  --glass-surface-subtle: rgba(17, 22, 32, 0.78);
+  --glass-surface-floating: rgba(21, 28, 39, 0.94);
+  --glass-surface-input: #1a2230;
+
+  /* Borders */
+  --border-light: #242d3d;
+  --border-subtle: #1c2432;
+  --border-hover: #323e54;
+  --border-focus: #7a68e6;
+
+  /* Typography */
+  --text-primary: #f3f5f9;
+  --text-secondary: #a4afc2;
+  --text-muted: #6b778c;
+  --text-faint: #475366;
+
+  /* Accents */
+  --accent-lavender: #8b7af0;
+  --accent-lavender-hover: #9c8df6;
+  --accent-lavender-light: rgba(139, 122, 240, 0.18);
+
+  --accent-blue: #5492f7;
+  --accent-blue-light: rgba(84, 146, 247, 0.18);
+
+  --accent-peach: #f28555;
+  --accent-peach-light: rgba(242, 133, 85, 0.18);
+
+  --accent-pink: #e66090;
+  --accent-pink-light: rgba(230, 96, 144, 0.18);
+
+  --accent-mint: #35b37e;
+  --accent-mint-light: rgba(53, 179, 126, 0.18);
+
+  /* Buttons */
+  --btn-primary-bg: #6e5de8;
+  --btn-primary-hover: #7e6ef0;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #222b3b;
+  --btn-secondary-hover: #2b364a;
+  --btn-secondary-text: #e2dbf8;
+  --btn-secondary-border: #323d53;
+
+  --btn-outline-bg: #151c27;
+  --btn-outline-hover: #1c2534;
+  --btn-outline-text: #f3f5f9;
+  --btn-outline-border: #283347;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.30);
+  --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.40);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.60);
+  --shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.65), 0 0 22px rgba(110, 93, 232, 0.20);
 }

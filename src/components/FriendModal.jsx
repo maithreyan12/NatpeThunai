@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
-import { X, Quote, Heart, Sparkles, ArrowUpRight } from 'lucide-react';
+import { 
+  X, 
+  Quote, 
+  Sparkles, 
+  ArrowUpRight, 
+  Clock, 
+  Plus 
+} from 'lucide-react';
 import InstagramIcon from './InstagramIcon';
 import './FriendModal.css';
 
-export default function FriendModal({ friend, onClose }) {
+export default function FriendModal({ friend, onClose, onAddMemoryWithFriend }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -22,15 +29,15 @@ export default function FriendModal({ friend, onClose }) {
   return (
     <div className="spatial-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div 
-        className="glass-card spatial-sheet-card liquid-shimmer" 
+        className="spatial-sheet-card" 
         onClick={(e) => e.stopPropagation()}
       >
-        {/* iOS Grab Handle */}
+        {/* Grab Handle */}
         <div className="sheet-grab-bar-area">
-          <div className="sheet-grab-pill"></div>
+          <div className="sheet-grab-pill" />
         </div>
 
-        {/* Close Button Pill */}
+        {/* Close Button */}
         <button 
           className="sheet-close-btn" 
           onClick={onClose} 
@@ -42,25 +49,18 @@ export default function FriendModal({ friend, onClose }) {
         {/* Header Photo & Identity */}
         <div className="modal-profile-header">
           <div className="modal-portrait-frame">
-            <img src={friend.photo} alt={friend.name} className="modal-portrait-img" />
-            <div className="modal-badge-chip">{friend.badge || "Core Legend"}</div>
+            <img 
+              src={friend.photo} 
+              alt={friend.name} 
+              className="modal-portrait-img"
+              onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
+            />
+            <div className="modal-badge-chip">{friend.role || "Core Member"}</div>
           </div>
 
           <h2 className="modal-friend-name">{friend.name}</h2>
-          <span className="modal-friend-sub">{friend.role} • "{friend.nickname}"</span>
+          <span className="modal-friend-sub">"{friend.nickname}" • Core Squad Member</span>
         </div>
-
-        {/* Dynamic Stats Chips (if stats exist) */}
-        {friend.stats && (
-          <div className="modal-stats-chips-row">
-            {Object.entries(friend.stats).map(([key, val]) => (
-              <div key={key} className="modal-stat-chip">
-                <span className="chip-key">{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</span>
-                <span className="chip-val">{val}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Body Bio & Memory Blocks */}
         <div className="modal-content-blocks">
@@ -68,7 +68,7 @@ export default function FriendModal({ friend, onClose }) {
           <div className="modal-glass-block">
             <div className="block-header-label">
               <Sparkles size={14} className="glyph-rose" />
-              <span>SQUAD BIO</span>
+              <span>SQUAD IDENTITY</span>
             </div>
             <p className="block-body-text">{friend.bio}</p>
           </div>
@@ -84,30 +84,56 @@ export default function FriendModal({ friend, onClose }) {
             </div>
           )}
 
-          {/* Favorite Memory */}
-          {friend.favoriteMemory && (
+          {/* Friendship Journey Milestones */}
+          {friend.journeyMilestones && friend.journeyMilestones.length > 0 && (
             <div className="modal-glass-block">
               <div className="block-header-label">
-                <Heart size={14} className="glyph-amber" />
-                <span>UNFORGETTABLE MOMENT</span>
+                <Clock size={14} className="glyph-amber" />
+                <span>FRIENDSHIP JOURNEY MILESTONES</span>
               </div>
-              <p className="block-body-text">{friend.favoriteMemory}</p>
+              <div className="modal-journey-timeline">
+                {friend.journeyMilestones.map((jm, i) => (
+                  <div key={jm.title || i} className="modal-journey-item">
+                    <span className="timeline-year-bubble">✨</span>
+                    <div className="timeline-text-content">
+                      <strong className="timeline-milestone-title">{jm.title}</strong>
+                      <p className="timeline-milestone-desc">{jm.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer CTA Button */}
+        {/* Footer Actions */}
         <div className="modal-action-footer">
-          <a
-            href={friend.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="modal-liquid-ig-btn liquid-shimmer"
-          >
-            <InstagramIcon size={16} />
-            <span>Connect on Instagram</span>
-            <ArrowUpRight size={15} />
-          </a>
+          {onAddMemoryWithFriend && (
+            <button
+              type="button"
+              className="btn-secondary modal-add-mem-btn"
+              onClick={() => {
+                onClose();
+                onAddMemoryWithFriend(friend);
+              }}
+            >
+              <Plus size={15} />
+              <span>Add Memory With {friend.name}</span>
+            </button>
+          )}
+
+          {friend.instagram && (
+            <a
+              href={friend.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary modal-ig-btn"
+            >
+              <InstagramIcon size={15} />
+              <span>Connect on Instagram</span>
+              <ArrowUpRight size={14} />
+            </a>
+          )}
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════ */
-/*  APPLE PRO GLASS FOOTER BAR                                         */
+/*  FOOTER — CLEAN LIGHT SANCTUARY FOOTER                              */
 /* ═══════════════════════════════════════════════════════════════════ */
 
-.apple-footer-wrapper {
-  margin-top: 50px;
+.community-footer-wrapper {
+  margin-top: 60px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -15,59 +15,68 @@
 
 .footer-dock-bar {
   width: 100%;
-  padding: 26px 36px;
+  padding: 28px 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--glass-surface-card);
+  background: var(--bg-card);
   border-radius: var(--radius-2xl);
-  border: var(--glass-border-highlight);
-  box-shadow: var(--shadow-glass-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
 }
 
 .footer-identity-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .footer-brand-lockup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .footer-brand-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--gradient-brand);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  box-shadow: var(--shadow-glow-blue);
+  box-shadow: var(--shadow-xs);
+  flex-shrink: 0;
+}
+
+.footer-brand-names {
+  display: flex;
+  flex-direction: column;
 }
 
 .footer-title-text {
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .footer-subtitle-tag {
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--text-accent);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-lavender);
 }
 
 .footer-quote-copy {
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  max-width: 540px;
-  line-height: 1.5;
+  max-width: 580px;
+  line-height: 1.55;
   font-style: italic;
 }
 
@@ -81,51 +90,48 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--glass-surface-floating);
-  border: var(--glass-border);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   text-decoration: none;
   cursor: pointer;
-  box-shadow: var(--shadow-glass-sm);
-  transition: transform 0.14s var(--ease-spring), 
-              background 0.14s var(--ease-spring), 
-              box-shadow 0.14s var(--ease-spring);
-  touch-action: manipulation;
-  user-select: none;
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition-fast);
 }
 
 .footer-round-btn:hover {
-  transform: translateY(-2px) scale(1.08);
-  background: var(--glass-surface-hover);
-  box-shadow: var(--shadow-glass-md);
-  color: var(--accent-apple-blue);
+  transform: translateY(-2px);
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+  border-color: var(--border-hover);
 }
 
 .footer-round-btn:active {
-  transform: translateY(1px) scale(0.92);
-  transition: transform 0.04s var(--ease-instant);
+  transform: translateY(1px);
 }
 
 .footer-sub-metadata {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  gap: 7px;
+  font-size: 0.80rem;
+  font-weight: 500;
   color: var(--text-muted);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .footer-heart-glow {
-  color: var(--accent-rose);
-  animation: heartGlow 1.8s infinite ease-in-out;
+  color: var(--accent-pink);
+  animation: heartGlow 2s infinite ease-in-out;
 }
 
 @keyframes heartGlow {
   0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.6)); }
+  50% { transform: scale(1.25); opacity: 1; }
 }
 
 @media (max-width: 760px) {
