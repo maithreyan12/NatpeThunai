@@ -7,7 +7,6 @@ import {
   Sun, 
   Moon, 
   LogOut, 
-  LogIn,
   Heart 
 } from 'lucide-react';
 import { signInWithGoogle, logOut } from '../../firebase';

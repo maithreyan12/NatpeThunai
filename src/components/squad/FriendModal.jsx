@@ -5,8 +5,7 @@ import {
   Sparkles, 
   ArrowUpRight, 
   Clock, 
-  Camera,
-  Heart
+  Camera
 } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './FriendModal.css';

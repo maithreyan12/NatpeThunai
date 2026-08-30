@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { X, UserPlus, Sparkles, Quote, Award } from 'lucide-react';
-import InstagramIcon from '../ui/InstagramIcon';
+import { X, UserPlus, Sparkles } from 'lucide-react';
 import '../ui/Modals.css';
 
 const CATEGORIES = [

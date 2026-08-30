@@ -28,7 +28,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Spark ✨",
     category: "core",
     instagram: "https://www.instagram.com/_.gracxx._",
-    photo: "/photos/friend1.jpg",
+    photo: "/photos/Gracee.jpg",
     bio: "The one who lights up every room she walks into. Bringing unconditional energy, hearty laughs, and unforgettable road trip moments.",
     quote: "Life is too short not to laugh until our stomachs hurt.",
     journeyMilestones: [
@@ -45,7 +45,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Heart 💖",
     category: "core",
     instagram: "https://www.instagram.com/hennesy260",
-    photo: "/photos/friend2.jpg",
+    photo: "/photos/Heenuuu.jpg",
     bio: "The emotional backbone of the squad. Always there with genuine advice, late night calls, and warmest support through every college milestone.",
     quote: "Real ones stay, no matter the distance or time.",
     journeyMilestones: [
@@ -62,7 +62,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Sunshine ☀️",
     category: "core",
     instagram: "https://www.instagram.com/divya_twinkle_cheek",
-    photo: "/photos/friend3.jpg",
+    photo: "/photos/Divyaa.jpg",
     bio: "Pure sunshine energy and an infectious smile. Turning every ordinary college afternoon into an unforgettable squad celebration.",
     quote: "Smile big, laugh louder, treasure each day.",
     journeyMilestones: [
@@ -79,7 +79,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Vibe 🎯",
     category: "core",
     instagram: "https://www.instagram.com/garnett.__.12",
-    photo: "/photos/friend4.jpg",
+    photo: "/photos/Puppy.jpg",
     bio: "The calm soul in our storm. Keeps it 100% authentic, brings chill vibes, and stands by everyone unconditionally.",
     quote: "Good vibes only — everything else can wait.",
     journeyMilestones: [

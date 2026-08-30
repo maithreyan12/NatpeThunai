@@ -6,7 +6,6 @@ import {
   Users,
   Sparkles,
   Flame,
-  Clock,
   Compass
 } from 'lucide-react';
 import './Hero.css';
@@ -16,7 +15,7 @@ export default function Hero({
   onWatchReel, 
   onReadStory,
   onMeetSquad,
-  totalMembers = 15
+  _totalMembers = 15
 }) {
   return (
     <section id="hero" className="hero-community-section">

@@ -3,7 +3,7 @@ import { Heart, ArrowUp, Sparkles } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './Footer.css';
 
-export default function Footer({ onScrollTop, onOpenSignIn, currentUser }) {
+export default function Footer({ onScrollTop, onOpenSignIn, _currentUser }) {
   return (
     <footer className="community-footer-wrapper">
       <div className="footer-dock-bar">

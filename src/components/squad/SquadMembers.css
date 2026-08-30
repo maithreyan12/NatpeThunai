@@ -192,250 +192,556 @@
   color: #ffffff;
 }
 
-/* ── Squad Showcase Grid (3-4 columns) ── */
-.squad-gallery-grid-v2 {
+/* ── Flip Cards Grid (immersive, full-width) ── */
+.flip-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 28px;
   width: 100%;
-  max-width: 1220px;
+  max-width: 1280px;
 }
 
-.squad-member-card-v2 {
+/* ── 3D Flip Card Scene (perspective container) ── */
+.flip-card-scene {
+  perspective: 1000px;
+  cursor: pointer;
+  min-height: 360px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.4, 0.2, 0.2, 1);
+  border-radius: var(--radius-xl);
+}
+
+.flip-card-scene.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* ── Shared face properties ── */
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xl);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════════
+   FRONT FACE — Big circle photo + name only
+   ════════════════════════════════════════════ */
+.flip-card-front {
   background: var(--glass-surface-card);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
   border: var(--glass-border-highlight);
-  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-glass-md);
   display: flex;
   flex-direction: column;
-  transition: transform 0.28s var(--ease-spring), 
-              box-shadow 0.28s var(--ease-spring), 
-              border-color 0.28s ease;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 32px 20px 24px;
+  transition: box-shadow 0.3s ease;
 }
 
-.squad-member-card-v2:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-hover), 0 20px 42px rgba(91, 76, 219, 0.14);
-  border-color: var(--border-hover);
+.flip-card-scene:hover .flip-card-front {
+  box-shadow: var(--shadow-hover), 0 22px 50px rgba(91, 76, 219, 0.2);
 }
 
-/* Card Top Ambient Banner */
-.member-card-banner {
-  height: 64px;
-  width: 100%;
-  position: relative;
-  opacity: 0.85;
-  transition: opacity 0.3s ease;
-}
-
-.squad-member-card-v2:hover .member-card-banner {
-  opacity: 1;
-}
-
-.member-card-banner .member-edit-quick-btn {
+/* Ambient halo behind circle */
+.flip-front-halo {
   position: absolute;
-  top: 10px;
-  right: 12px;
+  width: 240px;
+  height: 240px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -70%);
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s var(--ease-spring);
+}
+
+.flip-card-scene:hover .flip-front-halo {
+  opacity: 0.75;
+  transform: translate(-50%, -70%) scale(1.25);
+}
+
+/* Floating particles */
+.flip-front-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.flip-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-lavender);
+  opacity: 0;
+  animation: floatParticle 6s ease-in-out infinite;
+}
+
+.flip-particle-1 { top: 18%; left: 12%; animation-delay: 0s; background: #f09433; width: 5px; height: 5px; }
+.flip-particle-2 { top: 65%; left: 8%; animation-delay: 1s; background: #dc2743; width: 7px; height: 7px; }
+.flip-particle-3 { top: 22%; right: 14%; animation-delay: 2s; background: #bc1888; width: 4px; height: 4px; }
+.flip-particle-4 { top: 72%; right: 10%; animation-delay: 0.5s; background: #6366f1; width: 6px; height: 6px; }
+.flip-particle-5 { bottom: 14%; left: 30%; animation-delay: 1.5s; background: #06b6d4; width: 5px; height: 5px; }
+.flip-particle-6 { top: 40%; right: 5%; animation-delay: 2.5s; background: #10b981; width: 4px; height: 4px; }
+
+@keyframes floatParticle {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.8); }
+  30% { opacity: 0.7; }
+  50% { opacity: 0.5; transform: translateY(-18px) scale(1.2); }
+  80% { opacity: 0.2; }
+}
+
+/* Story ring + avatar */
+.flip-front-ring-stage {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.flip-card-scene:hover .flip-front-ring-stage {
+  transform: translateY(-6px) scale(1.06);
+}
+
+/* Rotating conic story ring */
+.flip-front-conic-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #f09433 0%,
+    #e6683c 9%,
+    #dc2743 18%,
+    #cc2366 27%,
+    #bc1888 36%,
+    #8a3ab9 45%,
+    #6366f1 54%,
+    #3b82f6 63%,
+    #06b6d4 72%,
+    #10b981 81%,
+    #f09433 100%
+  );
+  animation: spinStoryRing 12s linear infinite;
+  box-shadow: 0 0 18px rgba(220, 39, 67, 0.4);
+}
+
+.flip-card-scene:hover .flip-front-conic-ring {
+  animation-duration: 3.5s;
+  box-shadow: 0 0 32px rgba(220, 39, 67, 0.7), 0 0 54px rgba(99, 102, 241, 0.45);
+}
+
+@keyframes spinStoryRing {
+  to { transform: rotate(360deg); }
+}
+
+/* Inner circle avatar */
+.flip-front-avatar-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--bg-surface);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  z-index: 2;
+  background: var(--bg-surface);
+}
+
+.flip-front-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  border-radius: 50%;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flip-card-scene:hover .flip-front-avatar-img {
+  transform: scale(1.1);
+}
+
+.flip-front-avatar-gradient {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.flip-front-initials {
+  font-family: var(--font-heading);
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 3px 12px rgba(0,0,0,0.35);
+}
+
+/* Verified badge */
+.flip-verified-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  z-index: 4;
+  background: #0284c7;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--bg-surface);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5);
+  transition: transform 0.25s var(--ease-spring), background 0.25s ease;
+}
+
+.flip-card-scene:hover .flip-verified-badge {
+  transform: scale(1.2) rotate(15deg);
+  background: #38bdf8;
+}
+
+/* Front identity text */
+.flip-front-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  z-index: 2;
+}
+
+.flip-front-name {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+.flip-card-scene:hover .flip-front-name {
+  color: var(--accent-lavender);
+}
+
+.flip-front-nick {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.flip-front-role {
+  margin-top: 6px;
+  background: var(--btn-primary-bg);
+  color: #fff;
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(91, 76, 219, 0.28);
+  letter-spacing: -0.01em;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+}
+
+.flip-card-scene:hover .flip-front-role {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(91, 76, 219, 0.42);
+}
+
+/* Tap hint */
+.flip-tap-hint {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+.flip-card-scene:hover .flip-tap-hint {
+  opacity: 1;
+  color: var(--accent-lavender);
+}
+
+.flip-tap-arrow {
+  font-size: 0.85rem;
+  animation: bounceArrow 1.6s ease-in-out infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+/* Edit button */
+.flip-edit-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-pill);
   padding: 6px;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-fast);
+  transition: transform 0.16s var(--ease-spring), background 0.16s ease;
   z-index: 5;
 }
 
-.member-card-banner .member-edit-quick-btn:hover {
+.flip-edit-btn:hover {
   background: var(--accent-lavender);
-  color: #ffffff;
-  border-color: var(--accent-lavender);
+  transform: scale(1.12);
+}
+
+/* ════════════════════════════════════════════
+   BACK FACE — Bio, Instagram, buttons
+   ════════════════════════════════════════════ */
+.flip-card-back {
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: var(--glass-border-highlight);
+  box-shadow: var(--shadow-glass-md), 0 0 40px rgba(225, 48, 108, 0.08) inset;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 16px;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+/* Close button on back */
+.flip-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(225, 48, 108, 0.12);
+  border: 1px solid rgba(225, 48, 108, 0.25);
+  border-radius: var(--radius-pill);
+  padding: 5px;
+  color: #dc2743;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+  z-index: 5;
+}
+
+.flip-close-btn:hover {
+  background: rgba(225, 48, 108, 0.25);
   transform: scale(1.1);
 }
 
-/* Centered Portrait Squircle Stage */
-.member-avatar-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: -46px;
+/* Mini avatar on back */
+.flip-back-mini-avatar {
   position: relative;
-  z-index: 2;
-  padding: 0 16px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
 }
 
-.member-avatar-wrapper {
-  width: 98px;
-  height: 98px;
-  border-radius: 26px; /* Smooth Apple-style Squircle */
-  padding: 3.5px;
-  background: var(--glass-surface-card);
-  border: 2px solid var(--border-light);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(91, 76, 219, 0.16);
-  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring), border-color 0.3s ease;
+.flip-back-mini-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(#f09433, #dc2743, #bc1888, #6366f1, #06b6d4, #10b981, #f09433);
+  animation: spinStoryRing 8s linear infinite;
 }
 
-.squad-member-card-v2:hover .member-avatar-wrapper {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 14px 32px rgba(91, 76, 219, 0.28);
-  border-color: var(--accent-lavender);
-}
-
-.member-avatar-inner {
+.flip-back-mini-shell {
+  position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 22px;
+  border-radius: 50%;
   overflow: hidden;
-  background: var(--bg-surface);
-  position: relative;
+  border: 3px solid var(--bg-surface);
+  z-index: 2;
 }
 
-.member-avatar-img {
+.flip-back-mini-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
-  transition: transform 0.4s var(--ease-spring);
+  object-position: center 18%;
+  border-radius: 50%;
 }
 
-.squad-member-card-v2:hover .member-avatar-img {
-  transform: scale(1.08);
-}
-
-.member-avatar-gradient {
+.flip-back-mini-gradient {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-}
-
-.avatar-initials {
+  color: #fff;
   font-family: var(--font-heading);
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Floating Glass Role Badge */
-.member-glass-role-badge {
-  margin-top: -10px;
-  position: relative;
-  z-index: 4;
-  background: var(--btn-primary-bg);
-  color: #ffffff;
-  font-size: 0.72rem;
+/* Back name + Instagram row */
+.flip-back-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.flip-back-name {
+  font-family: var(--font-heading);
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.flip-back-role {
+  text-align: center;
+  display: block;
+  font-size: 0.70rem;
   font-weight: 700;
+  background: var(--tint-lavender);
+  color: var(--accent-violet);
   padding: 3px 12px;
   border-radius: var(--radius-pill);
-  box-shadow: 0 4px 12px rgba(91, 76, 219, 0.3);
-  letter-spacing: -0.01em;
-  text-align: center;
-  white-space: nowrap;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(124, 58, 237, 0.15);
+  align-self: center;
 }
 
-/* Member Body Details */
-.member-v2-body {
-  padding: 12px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.member-v2-name-row {
-  display: flex;
-  flex-direction: column;
+/* Instagram handle pill */
+.flip-back-insta-pill {
+  display: inline-flex;
   align-items: center;
-  text-align: center;
-  margin-top: 4px;
-  margin-bottom: 8px;
-}
-
-.member-v2-name {
-  font-size: 1.18rem;
-  font-family: var(--font-heading);
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, #f09433, #dc2743, #bc1888);
+  color: #fff;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.2;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(225, 48, 108, 0.35);
+  transition: transform 0.16s var(--ease-spring), box-shadow 0.16s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.member-v2-nickname {
-  font-size: 0.8rem;
-  color: var(--accent-lavender);
-  font-weight: 600;
-  margin-top: 2px;
+.flip-back-insta-pill:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 5px 16px rgba(225, 48, 108, 0.55);
 }
 
-.member-v2-bio {
-  font-size: 0.82rem;
+/* Bio box */
+.flip-back-bio-box {
+  background: var(--glass-surface-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.flip-back-bio {
+  font-size: 0.80rem;
   color: var(--text-secondary);
-  line-height: 1.45;
-  margin-bottom: 12px;
-  text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.member-v2-quote {
-  background: var(--bg-surface);
-  border-left: 2px solid var(--accent-lavender);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 6px 10px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-}
-
-.quote-glyph {
-  font-family: serif;
-  font-size: 1.1rem;
-  color: var(--accent-lavender);
-  line-height: 1;
-}
-
-.quote-snippet {
-  font-size: 0.76rem;
-  font-style: italic;
-  color: var(--text-secondary);
-  line-height: 1.35;
+  line-height: 1.55;
   margin: 0;
 }
 
-.member-v2-tags {
+/* Quote */
+.flip-back-quote {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent-violet);
+  background: var(--glass-surface-subtle);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.flip-back-quote-heart {
+  color: #e1306c;
+  margin-top: 2px;
+  flex-shrink: 0;
+  animation: pulseBeat 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseBeat {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  60% { transform: scale(0.9); }
+}
+
+.flip-back-quote-text {
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Tags */
+.flip-back-tags {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px;
-  margin-bottom: 14px;
+  gap: 6px;
 }
 
-.member-tag-item {
-  font-size: 0.7rem;
-  background: var(--accent-lavender-light);
-  color: var(--accent-lavender);
-  padding: 2px 8px;
+.flip-back-tag {
+  font-size: 0.68rem;
+  background: var(--tint-lavender);
+  color: var(--accent-violet);
+  padding: 3px 10px;
   border-radius: var(--radius-pill);
   font-weight: 600;
+  border: 1px solid rgba(124, 58, 237, 0.15);
 }
 
-/* Action Buttons Dock */
-.member-v2-actions {
+/* Action buttons */
+.flip-back-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -444,43 +750,32 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-.member-profile-action-btn {
+.flip-action-btn {
   flex: 1;
-  padding: 7px 12px;
-  font-size: 0.78rem;
+  padding: 9px 12px;
+  font-size: 0.80rem;
+  font-weight: 700;
   border-radius: var(--radius-pill);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 6px;
+  transition: transform 0.16s var(--ease-spring), box-shadow 0.16s ease;
+  cursor: pointer;
 }
 
-.member-memories-action-btn {
-  padding: 7px 10px;
-  font-size: 0.78rem;
-  border-radius: var(--radius-pill);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+.flip-action-btn.btn-primary {
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.28);
 }
 
-.member-v2-insta-btn {
-  padding: 7px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition-fast);
+.flip-action-btn:hover {
+  transform: translateY(-2px);
 }
 
-.member-v2-insta-btn:hover {
-  background: #e1306c;
-  color: #ffffff;
-  border-color: #e1306c;
+/* section desc hint */
+.section-desc-hint {
+  color: var(--accent-lavender);
+  font-weight: 600;
 }
 
 /* ── Compact Roster View ── */
@@ -513,9 +808,9 @@
 }
 
 .roster-avatar-box {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-pill);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--bg-surface);
@@ -533,7 +828,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
 }
@@ -574,7 +869,7 @@
 }
 
 .roster-bio-preview {
-  font-size: 0.8rem;
+  font-size: 0.80rem;
   color: var(--text-muted);
   margin: 0;
   white-space: nowrap;
@@ -598,7 +893,7 @@
   gap: 5px;
 }
 
-/* Empty State */
+/* ── Empty State ── */
 .squad-empty-state {
   text-align: center;
   padding: 48px 24px;
@@ -621,23 +916,47 @@
   margin: 0 auto 16px;
 }
 
-/* Responsive adjustments */
+/* ── Responsive adjustments ── */
 @media (max-width: 900px) {
-  .squad-gallery-grid-v2 {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+  .flip-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .flip-card-scene,
+  .flip-card-inner {
+    min-height: 320px;
+  }
+  .flip-front-ring-stage {
+    width: 130px;
+    height: 130px;
   }
 }
 
-@media (max-width: 640px) {
-  .squad-gallery-grid-v2 {
-    grid-template-columns: 1fr;
+@media (max-width: 600px) {
+  .flip-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
-  .roster-bio-preview {
-    display: none;
+  .flip-card-scene,
+  .flip-card-inner {
+    min-height: 290px;
+  }
+  .flip-front-ring-stage {
+    width: 110px;
+    height: 110px;
+  }
+  .flip-front-name {
+    font-size: 1.1rem;
   }
   .squad-controls-main-row {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 380px) {
+  .flip-cards-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 }

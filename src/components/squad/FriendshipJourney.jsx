@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, ChevronLeft, ChevronRight, Sparkles, Users, Clock, Heart } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import './FriendshipJourney.css';
 
 const JOURNEY_MILESTONES = [
