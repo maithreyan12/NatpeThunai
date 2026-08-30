@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════ */
-/*  SQUAD COMMUNITY MEMBERS — LUXURY EDITORIAL PORTRAIT SHOWCASE       */
+/*  SQUAD COMMUNITY MEMBERS — ELEGANT SQUIRCLE PORTRAIT SANCTUARY       */
 /* ═══════════════════════════════════════════════════════════════════ */
 
 .squad-community-section {
-  padding: 120px 0 80px 0;
+  padding: 100px 0 80px 0;
   scroll-margin-top: 100px;
   display: flex;
   flex-direction: column;
@@ -12,327 +12,632 @@
   width: 100%;
 }
 
-.squad-gallery-grid {
+/* ── Control Dock (Search + View Toggles + Vibe Pills) ── */
+.squad-control-dock {
+  width: 100%;
+  max-width: 1220px;
+  margin-bottom: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 18px 22px;
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.squad-controls-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.squad-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.squad-search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.squad-search-input {
+  width: 100%;
+  padding: 10px 36px 10px 40px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-light);
+  background: var(--glass-surface-input);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: var(--font-main);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.squad-search-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(99, 82, 212, 0.12);
+}
+
+.squad-search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.squad-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-mode-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  gap: 2px;
+}
+
+.view-toggle-btn {
+  background: none;
+  border: none;
+  padding: 7px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.view-toggle-btn.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.add-member-btn {
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--btn-primary-bg);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.28);
+  transition: var(--transition-fast);
+}
+
+.add-member-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(91, 76, 219, 0.36);
+}
+
+/* Vibe Category Pills Filter Row */
+.squad-filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.squad-filter-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.squad-filter-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.squad-filter-pill:hover {
+  background: var(--glass-surface-hover);
+  color: var(--text-primary);
+}
+
+.squad-filter-pill.active {
+  background: var(--btn-primary-bg);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.28);
+}
+
+.squad-filter-pill .pill-counter {
+  font-size: 0.72rem;
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.squad-filter-pill.active .pill-counter {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* ── Squad Showcase Grid (3-4 columns) ── */
+.squad-gallery-grid-v2 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
   width: 100%;
   max-width: 1220px;
 }
 
-/* ── Member Editorial Card ── */
-.squad-member-card {
+.squad-member-card-v2 {
   background: var(--glass-surface-card);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
   border: var(--glass-border-highlight);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-glass-md);
   display: flex;
   flex-direction: column;
   transition: transform 0.28s var(--ease-spring), 
               box-shadow 0.28s var(--ease-spring), 
-              border-color 0.26s ease;
+              border-color 0.28s ease;
   position: relative;
   overflow: hidden;
   cursor: pointer;
 }
 
-.squad-member-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.85) 50%, transparent 100%);
-  pointer-events: none;
-  z-index: 3;
-}
-
-.squad-member-card:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--shadow-hover), 0 24px 50px rgba(91, 76, 219, 0.16);
+.squad-member-card-v2:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover), 0 20px 42px rgba(91, 76, 219, 0.14);
   border-color: var(--border-hover);
 }
 
-/* ── Hero Portrait Window (Large, Authentic Photo) ── */
-.member-hero-portrait {
-  position: relative;
+/* Card Top Ambient Banner */
+.member-card-banner {
+  height: 64px;
   width: 100%;
-  height: 270px;
-  overflow: hidden;
-  background: var(--bg-surface);
+  position: relative;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
 }
 
-.member-hero-img {
+.squad-member-card-v2:hover .member-card-banner {
+  opacity: 1;
+}
+
+.member-card-banner .member-edit-quick-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-pill);
+  padding: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  z-index: 5;
+}
+
+.member-card-banner .member-edit-quick-btn:hover {
+  background: var(--accent-lavender);
+  color: #ffffff;
+  border-color: var(--accent-lavender);
+  transform: scale(1.1);
+}
+
+/* Centered Portrait Squircle Stage */
+.member-avatar-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -46px;
+  position: relative;
+  z-index: 2;
+  padding: 0 16px;
+}
+
+.member-avatar-wrapper {
+  width: 98px;
+  height: 98px;
+  border-radius: 26px; /* Smooth Apple-style Squircle */
+  padding: 3.5px;
+  background: var(--glass-surface-card);
+  border: 2px solid var(--border-light);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12), 0 3px 8px rgba(91, 76, 219, 0.16);
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring), border-color 0.3s ease;
+}
+
+.squad-member-card-v2:hover .member-avatar-wrapper {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 14px 32px rgba(91, 76, 219, 0.28);
+  border-color: var(--accent-lavender);
+}
+
+.member-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  position: relative;
+}
+
+.member-avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
-  transition: transform 0.45s var(--ease-spring);
+  object-position: center 15%;
+  transition: transform 0.4s var(--ease-spring);
 }
 
-.squad-member-card:hover .member-hero-img {
-  transform: scale(1.06);
+.squad-member-card-v2:hover .member-avatar-img {
+  transform: scale(1.08);
 }
 
-.portrait-glass-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, transparent 40%, rgba(0, 0, 0, 0.42) 100%);
-  pointer-events: none;
-}
-
-/* Floating Pills on Top of Image */
-.portrait-floating-top {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+.member-avatar-gradient {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  z-index: 2;
+  justify-content: center;
+  color: #ffffff;
 }
 
-.member-glass-role {
-  font-family: var(--font-main);
+.avatar-initials {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Floating Glass Role Badge */
+.member-glass-role-badge {
+  margin-top: -10px;
+  position: relative;
+  z-index: 4;
+  background: var(--btn-primary-bg);
+  color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 5px 12px;
+  padding: 3px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: var(--accent-lavender);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(91, 76, 219, 0.3);
+  letter-spacing: -0.01em;
+  text-align: center;
+  white-space: nowrap;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
 }
 
-[data-theme="dark"] .member-glass-role {
-  background: rgba(26, 34, 48, 0.85);
-  color: var(--accent-lavender-light);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-}
-
-.member-glass-tag {
-  font-family: var(--font-main);
-  font-size: 0.70rem;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: var(--radius-pill);
-  background: rgba(0, 0, 0, 0.50);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-}
-
-/* ── Card Content Body ── */
-.member-card-body {
-  padding: 20px 20px 22px 20px;
+/* Member Body Details */
+.member-v2-body {
+  padding: 12px 18px 18px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 12px;
-  background: var(--glass-surface-card);
 }
 
-.member-name-row {
+.member-v2-name-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
-.member-name-title {
+.member-v2-name {
+  font-size: 1.18rem;
   font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.member-nickname-pill {
-  font-size: 0.78rem;
-  font-weight: 600;
+.member-v2-nickname {
+  font-size: 0.8rem;
   color: var(--accent-lavender);
-  background: var(--tint-lavender);
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(91, 76, 219, 0.18);
-  box-shadow: var(--shadow-glass-sm);
+  font-weight: 600;
+  margin-top: 2px;
 }
 
-.member-bio-text {
-  font-size: 0.86rem;
+.member-v2-bio {
+  font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.55;
-  margin: 0;
+  line-height: 1.45;
+  margin-bottom: 12px;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* Signature Quote */
-.member-quote-capsule {
-  position: relative;
-  background: var(--glass-surface-subtle);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border-left: 3px solid var(--accent-lavender);
-  border-top: var(--glass-border-subtle);
-  border-right: var(--glass-border-subtle);
-  border-bottom: var(--glass-border-subtle);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: 8px 12px 8px 18px;
-  margin: 2px 0;
+.member-v2-quote {
+  background: var(--bg-surface);
+  border-left: 2px solid var(--accent-lavender);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .quote-glyph {
-  position: absolute;
-  top: 2px;
-  left: 6px;
-  font-family: Georgia, serif;
-  font-size: 1.4rem;
-  line-height: 1;
+  font-family: serif;
+  font-size: 1.1rem;
   color: var(--accent-lavender);
-  opacity: 0.4;
+  line-height: 1;
 }
 
-.quote-line {
-  font-size: 0.82rem;
+.quote-snippet {
+  font-size: 0.76rem;
   font-style: italic;
-  color: var(--text-primary);
-  line-height: 1.45;
-  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.35;
   margin: 0;
 }
 
-/* Milestone Tags */
-.member-milestone-pills-row {
+.member-v2-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 2px 0 6px 0;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 14px;
 }
 
-.milestone-badge-chip {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--glass-surface-subtle);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: var(--glass-border-subtle);
-  padding: 4px 9px;
+.member-tag-item {
+  font-size: 0.7rem;
+  background: var(--accent-lavender-light);
+  color: var(--accent-lavender);
+  padding: 2px 8px;
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-glass-sm);
+  font-weight: 600;
 }
 
-/* ── Actions Row (Never Overflows) ── */
-.member-card-actions {
+/* Action Buttons Dock */
+.member-v2-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: auto;
-  padding-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.member-profile-action-btn {
+  flex: 1;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.member-memories-action-btn {
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.member-v2-insta-btn {
+  padding: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.member-v2-insta-btn:hover {
+  background: #e1306c;
+  color: #ffffff;
+  border-color: #e1306c;
+}
+
+/* ── Compact Roster View ── */
+.squad-compact-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 1220px;
+}
+
+.roster-row-card {
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.roster-row-card:hover {
+  background: var(--glass-surface-hover);
+  transform: translateX(4px);
+  border-color: var(--border-hover);
+}
+
+.roster-avatar-box {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+}
+
+.roster-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.roster-avatar-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.roster-info-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.roster-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.roster-member-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.roster-nickname {
+  font-size: 0.78rem;
+  color: var(--accent-lavender);
+  font-weight: 600;
+}
+
+.roster-role-chip {
+  font-size: 0.7rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+}
+
+.roster-bio-preview {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roster-actions-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.roster-btn {
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Empty State */
+.squad-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--glass-surface-card);
+  border-radius: var(--radius-xl);
+  border: var(--glass-border);
+  max-width: 500px;
   width: 100%;
 }
 
-.member-journey-action-btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 14px;
-  font-size: 0.82rem;
+.empty-icon-circle {
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-pill);
-  white-space: nowrap;
-}
-
-.member-insta-action-btn {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  display: inline-flex;
+  background: var(--accent-lavender-light);
+  color: var(--accent-lavender);
+  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: var(--tint-pink);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid rgba(214, 51, 132, 0.28);
-  color: var(--accent-pink);
-  text-decoration: none;
-  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
-  position: relative;
-  box-shadow: var(--shadow-glass-sm);
+  margin: 0 auto 16px;
 }
 
-.member-insta-action-btn:hover {
-  background: rgba(214, 51, 132, 0.20);
-  transform: translateY(-2px) scale(1.08);
-  box-shadow: 0 6px 16px rgba(214, 51, 132, 0.30);
-}
-
-.member-insta-action-btn .arrow-glyph {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  opacity: 0.6;
-}
-
-/* ── Responsive Breakpoints ── */
-@media (max-width: 1100px) {
-  .squad-gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-  .member-hero-portrait {
-    height: 250px;
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .squad-gallery-grid-v2 {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
   }
 }
 
 @media (max-width: 640px) {
-  .squad-community-section {
-    padding: 80px 0 50px 0;
-  }
-  .squad-gallery-grid {
+  .squad-gallery-grid-v2 {
     grid-template-columns: 1fr;
-    gap: 20px;
-    max-width: 440px;
-    margin: 0 auto;
   }
-  .member-hero-portrait {
-    height: clamp(220px, 58vw, 280px);
+  .roster-bio-preview {
+    display: none;
   }
-  .member-card-body {
-    padding: 16px 16px 18px 16px;
-    gap: 10px;
-  }
-}
-
-@media (max-width: 380px) {
-  .member-card-body {
-    padding: 14px 12px 16px 12px;
-  }
-  .member-name-title {
-    font-size: 1.22rem;
-  }
-  .member-quote-capsule {
-    padding: 6px 10px 6px 16px;
-  }
-  .quote-line {
-    font-size: 0.78rem;
-  }
-  .milestone-badge-chip {
-    font-size: 0.68rem;
-    padding: 2px 6px;
+  .squad-controls-main-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

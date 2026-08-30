@@ -11,7 +11,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
-import { SQUAD_MEMBERS } from '../../services';
+import { getStoredMembers } from '../../services';
 import './CommunitySection.css';
 
 export default function CommunitySection({ 
@@ -22,9 +22,11 @@ export default function CommunitySection({
   onToggleRsvp, 
   onOpenAddEvent,
   onSelectMember,
+  members,
   _currentUser 
 }) {
   const [activeTab, setActiveTab] = useState('posts'); // 'posts' | 'events' | 'members'
+  const squadList = members && members.length > 0 ? members : getStoredMembers();
 
   return (
     <section id="community" className="community-hub-section">
@@ -74,7 +76,7 @@ export default function CommunitySection({
           >
             <ShieldCheck size={16} />
             <span>Squad Members</span>
-            <span className="tab-count-pill">{SQUAD_MEMBERS.length}</span>
+            <span className="tab-count-pill">{squadList.length}</span>
           </button>
         </div>
 
@@ -98,45 +100,43 @@ export default function CommunitySection({
                 <p className="empty-state-text">
                   “Share something with the group.” Start a discussion, announce a meetup, or share a thought.
                 </p>
-                <button className="btn-primary" onClick={onOpenCreatePost}>
-                  <Plus size={16} />
-                  <span>Create Post</span>
-                </button>
               </div>
             ) : (
-              <div className="community-posts-list">
+              <div className="community-posts-feed">
                 {posts.map(post => (
-                  <article key={post.id} className="community-post-card">
-                    <div className="post-author-row">
-                      <img 
-                        src={post.authorPhoto} 
-                        alt={post.authorName} 
-                        className="post-author-avatar"
-                        onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
-                      />
-                      <div className="post-author-meta">
-                        <span className="author-name">{post.authorName}</span>
-                        <span className="post-timestamp">{post.createdAt}</span>
+                  <article key={post.id} className="community-post-card interactive-slab">
+                    <div className="post-header">
+                      <div className="post-author-info">
+                        <img 
+                          src={post.authorPhoto || "/photos/friend1.jpg"} 
+                          alt={post.authorName} 
+                          className="post-author-avatar"
+                          onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
+                        />
+                        <div className="post-author-meta">
+                          <strong className="post-author-name">{post.authorName}</strong>
+                          <span className="post-time-tag">{post.createdAt || "Recently"}</span>
+                        </div>
                       </div>
-                      <span className="badge-pill post-cat-pill">{post.category}</span>
+                      <span className="post-category-tag">{post.category || "Moment"}</span>
                     </div>
 
                     <p className="post-content-body">{post.content}</p>
 
                     {post.mediaUrl && (
-                      <div className="post-media-attachment">
-                        <img src={post.mediaUrl} alt="Attachment" />
+                      <div className="post-media-frame">
+                        <img src={post.mediaUrl} alt="Post attachment" className="post-media-img" />
                       </div>
                     )}
 
-                    <div className="post-footer-actions">
+                    <div className="post-actions-footer">
                       <button 
                         className="post-like-btn"
                         onClick={() => onLikePost(post.id)}
-                        title="Love this"
+                        aria-label="Love this post"
                       >
-                        <Heart size={14} fill={post.likes > 0 ? "currentColor" : "none"} />
-                        <span>{post.likes || 0}</span>
+                        <Heart size={14} fill="#e11d48" color="#e11d48" />
+                        <span>{post.likes || 0} Loves</span>
                       </button>
                     </div>
                   </article>
@@ -146,14 +146,14 @@ export default function CommunitySection({
           </div>
         )}
 
-        {/* ── TAB 2: MILESTONES & EVENTS ── */}
+        {/* ── TAB 2: EVENTS & REUNIONS ── */}
         {activeTab === 'events' && (
           <div className="community-tab-pane">
             <div className="tab-action-bar">
-              <span className="pane-subtitle">Mark dates for reunions, road trips, and anniversaries</span>
+              <span className="pane-subtitle">Reunions, screenings, and squad get-togethers</span>
               <button className="btn-primary btn-sm" onClick={onOpenAddEvent}>
                 <Plus size={15} />
-                <span>Add Event</span>
+                <span>Schedule Event</span>
               </button>
             </div>
 
@@ -162,39 +162,28 @@ export default function CommunitySection({
                 <div className="empty-state-icon">
                   <Calendar size={26} />
                 </div>
-                <h3 className="empty-state-title">No upcoming events yet.</h3>
+                <h3 className="empty-state-title">No upcoming events.</h3>
                 <p className="empty-state-text">
-                  Plan your next squad reunion, trip, or screening night.
+                  Time to plan the next road trip or dinner! Click "Schedule Event" above.
                 </p>
-                <button className="btn-primary" onClick={onOpenAddEvent}>
-                  <Plus size={16} />
-                  <span>Add Event</span>
-                </button>
               </div>
             ) : (
               <div className="community-events-grid">
                 {events.map(event => (
-                  <div key={event.id} className="event-item-card">
-                    <div className="event-badge-row">
-                      <span className="badge-pill event-cat-tag">{event.category}</span>
-                      <span className="event-time-tag">{event.time}</span>
+                  <div key={event.id} className="event-card interactive-slab">
+                    <div className="event-date-block">
+                      <span className="event-month">{event.date.split(' ')[0]}</span>
+                      <span className="event-day">{event.date.split(' ')[1] || '15'}</span>
                     </div>
 
-                    <h4 className="event-title">{event.title}</h4>
-                    <div className="event-meta-row">
-                      <div className="event-meta-item">
-                        <Calendar size={13} />
-                        <span>{event.date}</span>
-                      </div>
-                      <div className="event-meta-item">
+                    <div className="event-details-col">
+                      <div className="event-category-badge">{event.category || "Reunion"}</div>
+                      <h4 className="event-title">{event.title}</h4>
+                      <div className="event-loc-line">
                         <MapPin size={13} />
                         <span>{event.location}</span>
                       </div>
                     </div>
-
-                    {event.description && (
-                      <p className="event-description">{event.description}</p>
-                    )}
 
                     <div className="event-rsvp-bar">
                       <span className="rsvp-status-text">
@@ -219,11 +208,11 @@ export default function CommunitySection({
         {activeTab === 'members' && (
           <div className="community-tab-pane">
             <div className="tab-action-bar">
-              <span className="pane-subtitle">The four cornerstones of நட்பே துணை</span>
+              <span className="pane-subtitle">All {squadList.length} cornerstones of நட்பே துணை</span>
             </div>
 
             <div className="squad-members-grid">
-              {SQUAD_MEMBERS.map(member => (
+              {squadList.map(member => (
                 <div 
                   key={member.id} 
                   className="member-profile-card interactive-slab"
@@ -232,12 +221,21 @@ export default function CommunitySection({
                   tabIndex={0}
                 >
                   <div className="member-avatar-wrapper">
-                    <img 
-                      src={member.photo} 
-                      alt={member.name} 
-                      className="member-avatar-img"
-                      onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
-                    />
+                    {member.photo ? (
+                      <img 
+                        src={member.photo} 
+                        alt={member.name} 
+                        className="member-avatar-img"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div 
+                        className="member-avatar-gradient"
+                        style={{ background: member.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
+                      >
+                        {member.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     <span className="member-role-badge">{member.role}</span>
                   </div>
 
@@ -245,9 +243,11 @@ export default function CommunitySection({
                   <span className="member-nickname">"{member.nickname}"</span>
                   <p className="member-bio">{member.bio}</p>
 
-                  <div className="member-quote-pill">
-                    <span>"{member.quote}"</span>
-                  </div>
+                  {member.quote && (
+                    <div className="member-quote-pill">
+                      <span>"{member.quote}"</span>
+                    </div>
+                  )}
 
                   {member.instagram && (
                     <a

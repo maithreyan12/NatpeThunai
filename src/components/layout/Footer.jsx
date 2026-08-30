@@ -3,7 +3,7 @@ import { Heart, ArrowUp, Sparkles } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './Footer.css';
 
-export default function Footer({ onScrollTop }) {
+export default function Footer({ onScrollTop, onOpenSignIn, currentUser }) {
   return (
     <footer className="community-footer-wrapper">
       <div className="footer-dock-bar">
@@ -47,10 +47,18 @@ export default function Footer({ onScrollTop }) {
         </div>
       </div>
 
-      {/* Copyright Line */}
+      {/* Copyright Line & Discreet Access */}
       <div className="footer-sub-metadata">
         <span>Curated with genuine love & memories for our squad</span>
-        <Heart size={13} className="footer-heart-glow" />
+        <button 
+          type="button"
+          className="footer-discreet-trigger"
+          onClick={() => onOpenSignIn && onOpenSignIn()}
+          title="Squad Sanctuary"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+        >
+          <Heart size={13} className="footer-heart-glow" />
+        </button>
         <span>Eternal Friendship Archive</span>
       </div>
     </footer>

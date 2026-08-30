@@ -115,8 +115,8 @@ export default function Navbar({
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
 
-            {/* Profile / Auth Button */}
-            {currentUser ? (
+            {/* Profile / Auth Button (Only visible when logged in) */}
+            {currentUser && (
               <div className="user-profile-menu">
                 <button 
                   className="user-profile-avatar-btn"
@@ -139,15 +139,6 @@ export default function Navbar({
                   <LogOut size={14} />
                 </button>
               </div>
-            ) : (
-              <button 
-                className="btn-secondary btn-sm nav-signin-btn"
-                onClick={onOpenSignIn || handleAuthAction}
-                title="Sign in with Google"
-              >
-                <LogIn size={14} />
-                <span className="sign-in-text">Sign In</span>
-              </button>
             )}
           </div>
         </nav>

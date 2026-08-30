@@ -1,47 +1,87 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, Sparkles, Users, Clock, Heart } from 'lucide-react';
 import './FriendshipJourney.css';
 
 const JOURNEY_MILESTONES = [
   {
     stepLabel: "Chapter 1",
-    tagline: "Where our story started",
-    title: "The First Chapter",
-    description: "Spontaneous tea stall conversations, awkward ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
-    quote: "Sometimes the strangers you meet in the hallway become the people you cannot imagine life without.",
+    tagline: "Where strangers met over canteen chai",
+    title: "The Canteen Dawn & First Spark",
+    description: "Spontaneous canteen tea conversations, awkward classroom ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
+    quote: "Sometimes the strangers you meet in the hallway become the family you cannot imagine life without.",
     photo: "/photos/friend1.jpg",
-    badge: "Beginning of the Journey",
-    colorKey: "lavender"
+    badge: "Year 1 • Genesis",
+    colorKey: "lavender",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Grace", role: "The Spark ✨", photo: "/photos/friend1.jpg" },
+      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" },
+      { name: "Heenuuu", role: "The Heart 💖", photo: "/photos/friend2.jpg" },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: "/photos/friend3.jpg" },
+      { name: "Kavin", role: "Captain 🧠", initial: "KA" },
+      { name: "Sid", role: "Road Legend 🚗", initial: "SI" }
+    ],
+    remainingCount: 9
   },
   {
     stepLabel: "Chapter 2",
-    tagline: "More memories, more moments",
-    title: "Adventures & Chaos",
-    description: "Countless midnight drives, exam panic sessions, inside jokes that nobody else would ever understand, and turning everyday college routines into pure adventure.",
-    quote: "We didn't realize we were making memories, we just knew we were having fun.",
+    tagline: "Full tank, loud music, zero sleep",
+    title: "Midnight Drives & Exam Chaos",
+    description: "Countless midnight highway drives, high-volume Tamil bangers in Sid's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
+    quote: "We didn't realize we were making lifelong history; we just knew we were laughing together.",
     photo: "/photos/friend2.jpg",
-    badge: "Shared Experiences",
-    colorKey: "blue"
+    badge: "Year 2 • Chaos & Memories",
+    colorKey: "blue",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Sid", role: "Driver 🚗", initial: "SI" },
+      { name: "Rohan", role: "Music 🎵", initial: "RO" },
+      { name: "Heenuuu", role: "Heart 💖", photo: "/photos/friend2.jpg" },
+      { name: "Pooja", role: "Night Owl 🌙", initial: "PO" },
+      { name: "Vikram", role: "Hype ⚡", initial: "VI" },
+      { name: "Grace", role: "The Spark ✨", photo: "/photos/friend1.jpg" }
+    ],
+    remainingCount: 9
   },
   {
     stepLabel: "Chapter 3",
-    tagline: "Somehow, the ordinary became unforgettable",
-    title: "The Unbreakable Bond",
-    description: "Through individual triumphs, career milestones, and quiet moments when someone just needed a listening ear — friendship proved to be our true sanctuary.",
+    tagline: "When life got real, friendship was our sanctuary",
+    title: "The Unbreakable Bond & Milestones",
+    description: "Through individual triumphs, tough semesters, career milestones, and quiet moments when someone just needed a listening ear — friends stood side by side.",
     quote: "True friends don't just celebrate your sunny days; they stand with you through every unexpected storm.",
     photo: "/photos/friend3.jpg",
-    badge: "Lifelong Trust",
-    colorKey: "pink"
+    badge: "Year 3 • Lifelong Trust",
+    colorKey: "pink",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Divyaaa", role: "Sunshine ☀️", photo: "/photos/friend3.jpg" },
+      { name: "Ananya", role: "Creator 🎨", initial: "AN" },
+      { name: "Meera", role: "Peacekeeper 🕊️", initial: "ME" },
+      { name: "Arjun", role: "Foodie 🍕", initial: "AR" },
+      { name: "Sneha", role: "Chronicler 📸", initial: "SN" },
+      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" }
+    ],
+    remainingCount: 9
   },
   {
     stepLabel: "Chapter 4",
-    tagline: "Still here. Still together.",
-    title: "Eternal Friendship",
-    description: "Our bond continues to deepen every single day. Distance or busy lives mean nothing; when we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",
-    quote: "Our memories. Our moments. Our bond.",
+    tagline: "Still here. Still squad strong.",
+    title: "Eternal Natpe Thunai Sanctuary",
+    description: "Our bond continues to deepen every single day. Distance or busy careers mean nothing; whenever we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",
+    quote: "Namma friendship perfect illa, aana romba real. Squad strong for infinity. ❤️🫂♾️",
     photo: "/photos/friend4.jpg",
-    badge: "Always Together",
-    colorKey: "peach"
+    badge: "Year 4 & Forever",
+    colorKey: "peach",
+    gangCount: "Squad Family",
+    attendees: [
+      { name: "Squad", role: "United Gang", photo: "/photos/friend1.jpg" },
+      { name: "Heenuuu", role: "Heart 💖", photo: "/photos/friend2.jpg" },
+      { name: "Divyaaa", role: "Sunshine ☀️", photo: "/photos/friend3.jpg" },
+      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" },
+      { name: "KK", role: "Party 🎉", initial: "KK" },
+      { name: "Harini", role: "Anchor ⚓", initial: "HA" }
+    ],
+    remainingCount: 9
   }
 ];
 
@@ -74,13 +114,13 @@ export default function FriendshipJourney() {
       <div className="section-header">
         <div className="badge-pill">
           <Sparkles size={14} />
-          <span>FRIENDSHIP EVOLUTION</span>
+          <span>THE SQUAD EVOLUTION</span>
         </div>
         <h2 className="section-title">
           Our Friendship Journey
         </h2>
         <p className="section-desc">
-          How small moments, shared laughter, and quiet support evolved into our lifelong bond.
+          How small canteen moments, midnight highway runs, and unconditional support evolved into our lifelong bond.
         </p>
       </div>
 
@@ -139,33 +179,39 @@ export default function FriendshipJourney() {
               <p className="quote-text">{currentMilestone.quote}</p>
             </div>
 
-            {/* Squad Members Presence with Photos */}
+            {/* Squad Members Presence with Avatar Stack */}
             <div className="journey-squad-presence">
-              <span className="presence-label">Squad in this chapter:</span>
+              <div className="presence-label-row">
+                <span className="presence-label">Gang in this Era:</span>
+                <span className="presence-count-pill">{currentMilestone.gangCount}</span>
+              </div>
+
               <div className="presence-avatars-row">
-                {[
-                  { name: "Grace", photo: "/photos/friend1.jpg", role: "The Spark ✨" },
-                  { name: "Heenuuu", photo: "/photos/friend2.jpg", role: "The Heart 💖" },
-                  { name: "Divyaaa", photo: "/photos/friend3.jpg", role: "The Sunshine ☀️" },
-                  { name: "Puppy", photo: "/photos/friend4.jpg", role: "The Vibe 🎯" }
-                ].map(member => (
-                  <div key={member.name} className="presence-avatar-pill" title={`${member.name} (${member.role})`}>
-                    <img 
-                      src={member.photo} 
-                      alt={member.name} 
-                      className="presence-avatar-img"
-                      onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
-                    />
-                    <span className="presence-avatar-name">{member.name}</span>
+                {currentMilestone.attendees.map((att, i) => (
+                  <div key={i} className="presence-avatar-chip" title={`${att.name} • ${att.role}`}>
+                    {att.photo ? (
+                      <img src={att.photo} alt={att.name} className="presence-avatar-img" />
+                    ) : (
+                      <div className="presence-avatar-initial">
+                        {att.initial || att.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="presence-avatar-name">{att.name}</span>
                   </div>
                 ))}
+                {currentMilestone.remainingCount > 0 && (
+                  <span className="presence-plus-pill">
+                    +{currentMilestone.remainingCount} more
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Playback Controls */}
-            <div className="journey-controls-row">
+            {/* Play / Pause & Navigation Controls */}
+            <div className="journey-actions-row">
               <button 
-                className="btn-outline btn-sm journey-ctrl-btn" 
+                type="button"
+                className="btn-secondary journey-nav-circle"
                 onClick={handlePrev}
                 aria-label="Previous Chapter"
               >
@@ -173,16 +219,17 @@ export default function FriendshipJourney() {
               </button>
 
               <button 
-                className="btn-secondary btn-sm journey-play-btn"
+                type="button"
+                className="btn-primary journey-play-toggle-btn"
                 onClick={() => setIsPlaying(prev => !prev)}
-                aria-label={isPlaying ? "Pause autoplay" : "Play autoplay"}
               >
-                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                <span>{isPlaying ? "Pause" : "Play Story"}</span>
+                {isPlaying ? <Pause size={15} /> : <Play size={15} fill="white" />}
+                <span>{isPlaying ? 'Pause Journey' : 'Play Story'}</span>
               </button>
 
               <button 
-                className="btn-outline btn-sm journey-ctrl-btn" 
+                type="button"
+                className="btn-secondary journey-nav-circle"
                 onClick={handleNext}
                 aria-label="Next Chapter"
               >

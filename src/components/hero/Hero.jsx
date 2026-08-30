@@ -2,14 +2,21 @@ import React from 'react';
 import { 
   Calendar, 
   Film, 
-  Heart
+  Heart,
+  Users,
+  Sparkles,
+  Flame,
+  Clock,
+  Compass
 } from 'lucide-react';
 import './Hero.css';
 
 export default function Hero({ 
   onExploreTimeline, 
   onWatchReel, 
-  onReadStory 
+  onReadStory,
+  onMeetSquad,
+  totalMembers = 15
 }) {
   return (
     <section id="hero" className="hero-community-section">
@@ -20,9 +27,9 @@ export default function Hero({
         {/* Prominent Period Pill */}
         <div className="hero-period-badge">
           <span className="period-dot" />
-          <span className="period-text">TIMELESS MEMORIES</span>
+          <span className="period-text">SQUAD SANCTUARY</span>
           <span className="period-divider">•</span>
-          <span className="period-sub">SQUAD SANCTUARY</span>
+          <span className="period-sub">NATPE THUNAI</span>
         </div>
 
         {/* Main Headline */}
@@ -33,17 +40,17 @@ export default function Hero({
           </h1>
 
           <h2 className="hero-subtitle">
-            Our memories. Our moments. Our bond.
+            Our memories. Our moments. Our unbreakable bond.
           </h2>
         </div>
 
         {/* Emotional Supporting Text */}
         <p className="hero-supporting-copy">
-          A place to keep the little moments that became our biggest memories.
-          From late-night talks and road trips to milestones celebrated side-by-side.
+          From first-year canteen tea and midnight highway drives to shared exam panic and lifelong celebrations.
+          A timeless digital home for our squad.
         </p>
 
-        {/* Soft, Calibrated Button System */}
+        {/* Calibrated Button System */}
         <div className="hero-actions-dock">
           <button 
             className="btn-primary hero-btn-main" 
@@ -55,10 +62,18 @@ export default function Hero({
 
           <button 
             className="btn-secondary hero-btn-sub" 
+            onClick={onMeetSquad || onExploreTimeline}
+          >
+            <Users size={16} />
+            <span>Meet The Squad</span>
+          </button>
+
+          <button 
+            className="btn-outline hero-btn-ghost" 
             onClick={onExploreTimeline}
           >
             <Calendar size={16} />
-            <span>Explore Timeline</span>
+            <span>Memory Timeline</span>
           </button>
 
           <button 
@@ -70,77 +85,126 @@ export default function Hero({
           </button>
         </div>
 
-        {/* Floating Physical Memory Polaroids */}
-        <div className="hero-polaroid-stage" aria-label="Featured memories">
-          {/* Chapter 1 Polaroid */}
-          <div className="polaroid-card card-rotate-left">
-            <div className="polaroid-photo-frame">
-              <img src="/photos/friend1.jpg" alt="Origins" className="polaroid-img" />
-              <span className="polaroid-year-tag">Origins</span>
+        {/* Dynamic Squad Statistics Strip */}
+        <div className="hero-stats-strip">
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Users size={18} />
             </div>
-            <div className="polaroid-caption">
-              <span className="caption-heading">Where it all began</span>
-              <span className="caption-sub">First laughs & college dawn</span>
+            <div className="stat-text-group">
+              <span className="stat-number">Lifelong Gang</span>
+              <span className="stat-desc">One Unbreakable Circle</span>
             </div>
           </div>
 
-          {/* Chapter 2 Polaroid */}
-          <div className="polaroid-card card-elevated">
-            <div className="polaroid-photo-frame">
-              <img src="/photos/friend2.jpg" alt="Road Trips" className="polaroid-img" />
-              <span className="polaroid-year-tag">Adventures</span>
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Sparkles size={18} />
             </div>
-            <div className="polaroid-caption">
-              <span className="caption-heading">Spontaneous Drives</span>
-              <span className="caption-sub">Midnight chai runs</span>
+            <div className="stat-text-group">
+              <span className="stat-number">100+ Stories</span>
+              <span className="stat-desc">Shared Laughs & Banter</span>
             </div>
           </div>
 
-          {/* Chapter 3 Polaroid */}
-          <div className="polaroid-card card-rotate-right">
-            <div className="polaroid-photo-frame">
-              <img src="/photos/friend3.jpg" alt="Milestones" className="polaroid-img" />
-              <span className="polaroid-year-tag">Milestones</span>
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Compass size={18} />
             </div>
-            <div className="polaroid-caption">
-              <span className="caption-heading">Unforgettable Wins</span>
-              <span className="caption-sub">Standing by each other</span>
+            <div className="stat-text-group">
+              <span className="stat-number">Countless Drives</span>
+              <span className="stat-desc">Road Trips & Hangouts</span>
             </div>
           </div>
 
-          {/* Chapter 4 Polaroid */}
-          <div className="polaroid-card card-rotate-far-right">
-            <div className="polaroid-photo-frame">
-              <img src="/photos/friend4.jpg" alt="Still Together" className="polaroid-img" />
-              <span className="polaroid-year-tag">Forever</span>
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Flame size={18} />
             </div>
-            <div className="polaroid-caption">
-              <span className="caption-heading">Still Unbreakable</span>
-              <span className="caption-sub">Today & forever</span>
+            <div className="stat-text-group">
+              <span className="stat-number">Infinite ♾️</span>
+              <span className="stat-desc">Natpe Thunai Forever</span>
             </div>
           </div>
         </div>
 
-        {/* Subtle Timeline Milestones Bar */}
+        {/* Interactive Dynamic Squad Memory Mosaic Fan */}
+        <div className="hero-polaroid-stage" aria-label="Featured collective memories">
+          {/* Moment 1: Canteen Talks */}
+          <div className="polaroid-card card-rotate-left">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend1.jpg" alt="First Chapter Canteen Talks" className="polaroid-img" />
+              <span className="polaroid-year-tag">Chapter 1</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Where It All Began</span>
+              <span className="caption-sub">Canteen tea & first icebreakers</span>
+            </div>
+          </div>
+
+          {/* Moment 2: Highway Drives */}
+          <div className="polaroid-card card-elevated">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend2.jpg" alt="Midnight Highway Road Trips" className="polaroid-img" />
+              <span className="polaroid-year-tag">Adventures</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Midnight Highway Runs</span>
+              <span className="caption-sub">Full tank & high bass anthems</span>
+            </div>
+          </div>
+
+          {/* Moment 3: Celebrations */}
+          <div className="polaroid-card card-rotate-right">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend3.jpg" alt="Squad Milestones & Festivities" className="polaroid-img" />
+              <span className="polaroid-year-tag">Milestones</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Celebration Days</span>
+              <span className="caption-sub">Wins, birthdays & candid smiles</span>
+            </div>
+          </div>
+
+          {/* Moment 4: Eternal Sanctuary */}
+          <div className="polaroid-card card-rotate-far-right">
+            <div className="polaroid-photo-frame">
+              <img src="/photos/friend4.jpg" alt="Squad Forever" className="polaroid-img" />
+              <span className="polaroid-year-tag">Forever</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Squad Forever. Unbreakable.</span>
+              <span className="caption-sub">No matter the time or distance</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Era Timeline Milestones Bar */}
         <div className="hero-timeline-strip">
           <div className="milestone-chip">
-            <span className="milestone-year">Origin</span>
-            <span className="milestone-label">First Chapter</span>
+            <span className="milestone-year">Year 1</span>
+            <span className="milestone-label">The First Spark</span>
           </div>
           <div className="milestone-divider" />
           <div className="milestone-chip">
-            <span className="milestone-year">Journeys</span>
-            <span className="milestone-label">Adventures</span>
+            <span className="milestone-year">Year 2</span>
+            <span className="milestone-label">Adventures & Chaos</span>
           </div>
           <div className="milestone-divider" />
           <div className="milestone-chip">
-            <span className="milestone-year">Moments</span>
-            <span className="milestone-label">Deepened Bond</span>
+            <span className="milestone-year">Year 3</span>
+            <span className="milestone-label">Deepened Anchor</span>
           </div>
           <div className="milestone-divider" />
           <div className="milestone-chip active">
             <span className="milestone-year">Forever</span>
-            <span className="milestone-label">Eternal Squad</span>
+            <span className="milestone-label">Squad Sanctuary</span>
           </div>
         </div>
       </div>

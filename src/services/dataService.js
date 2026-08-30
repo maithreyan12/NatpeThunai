@@ -3,28 +3,30 @@
 // ═══════════════════════════════════════════════════════════════════
 
 import { db } from '../firebase';
-import { 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  orderBy, 
-  serverTimestamp 
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
 } from 'firebase/firestore';
 
 const STORAGE_KEYS = {
+  MEMBERS: 'natpethunai_members_v2',
   MEMORIES: 'natpethunai_memories_v2',
   POSTS: 'natpethunai_posts_v2',
   EVENTS: 'natpethunai_events_v2'
 };
 
-// ── Authentic Squad Members ──
-export const SQUAD_MEMBERS = [
+// ── Authentic 15-Member Gang Roster ──
+export const INITIAL_SQUAD_MEMBERS = [
   {
     id: "grace",
     name: "Grace",
     nickname: "Gracxx",
     role: "The Spark ✨",
+    category: "core",
     instagram: "https://www.instagram.com/_.gracxx._",
     photo: "/photos/friend1.jpg",
     bio: "The one who lights up every room she walks into. Bringing unconditional energy, hearty laughs, and unforgettable road trip moments.",
@@ -41,6 +43,7 @@ export const SQUAD_MEMBERS = [
     name: "Heenuuu",
     nickname: "Hennesy",
     role: "The Heart 💖",
+    category: "core",
     instagram: "https://www.instagram.com/hennesy260",
     photo: "/photos/friend2.jpg",
     bio: "The emotional backbone of the squad. Always there with genuine advice, late night calls, and warmest support through every college milestone.",
@@ -57,6 +60,7 @@ export const SQUAD_MEMBERS = [
     name: "Divyaaa",
     nickname: "Twinkle Cheek",
     role: "The Sunshine ☀️",
+    category: "core",
     instagram: "https://www.instagram.com/divya_twinkle_cheek",
     photo: "/photos/friend3.jpg",
     bio: "Pure sunshine energy and an infectious smile. Turning every ordinary college afternoon into an unforgettable squad celebration.",
@@ -73,6 +77,7 @@ export const SQUAD_MEMBERS = [
     name: "Puppy",
     nickname: "Garnett",
     role: "The Vibe 🎯",
+    category: "core",
     instagram: "https://www.instagram.com/garnett.__.12",
     photo: "/photos/friend4.jpg",
     bio: "The calm soul in our storm. Keeps it 100% authentic, brings chill vibes, and stands by everyone unconditionally.",
@@ -83,139 +88,165 @@ export const SQUAD_MEMBERS = [
       { title: "Loyalty In Action", desc: "Never hesitated to show up whenever a friend called." },
       { title: "Unbreakable Pillar", desc: "Anchoring our shared bond with timeless loyalty." }
     ]
+  },
+  {
+    id: "farish",
+    name: "Farish Sharif",
+    nickname: "fairs",
+    role: "The Mastermind 🧠",
+    category: "core",
+    instagram: "https://www.instagram.com/fairsh_sharif",
+    photo: "/photos/farish.jpg",
+    bio: "The planner behind every squad reunion and last-minute travel plan. Keeps everyone organized even in the midst of pure chaos.",
+    quote: "Plan A never works, that's why the alphabet has 25 more letters.",
+    journeyMilestones: [
+      { title: "The Master Plan", desc: "Coordinated the very first squad hill-station road trip." },
+      { title: "Reliable Support", desc: "Always has a solution before a problem even happens." }
+    ]
+  },
+  {
+    id: "kafil",
+    name: "Kafil",
+    nickname: "Anu",
+    role: "The Creative Soul 🎨",
+    category: "creators",
+    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    bio: "The aesthetic eye of the gang. Capturing candid laughs, curating squad playlists, and designing surprise birthday cakes.",
+    quote: "Every memory with namma gang deserves its own soundtrack.",
+    journeyMilestones: [
+      { title: "Aesthetic Vibes", desc: "Transformed our regular hangout spots into pure cinematic frames." },
+      { title: "Heartfelt Surprises", desc: "Crafted personalized keepsakes for every squad milestone." }
+    ]
+  },
+  {
+    id: "siddharth",
+    name: "Siddharth",
+    nickname: "Sid",
+    role: "The Road Trip Legend 🚗",
+    category: "chaos",
+    avatarGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    bio: "Always behind the wheel for midnight highway drives. Ready to pack bags at a 5-minute notice for an impromptu adventure.",
+    quote: "Petrol tank full, squad in the car — life doesn't get better than this.",
+    journeyMilestones: [
+      { title: "Midnight Highways", desc: "Drove hundreds of kilometers under starry skies with the squad." },
+      { title: "Zero Hesitation", desc: "First to say 'yes' to every spontaneous crazy idea." }
+    ]
+  },
+  {
+    id: "pooja",
+    name: "Pooja",
+    nickname: "Poo",
+    role: "The Night Owl 🌙",
+    category: "vibe",
+    avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+    bio: "The 3 AM conversationalist. Whether it's deep philosophical life talks or unstoppable meme-sharing, she keeps the chat alive.",
+    quote: "The realest conversations happen when the rest of the world is asleep.",
+    journeyMilestones: [
+      { title: "Late Night Sanctuary", desc: "Helped everyone through sleepless exam nights and life dilemmas." },
+      { title: "Unstoppable Laughs", desc: "Sparked the funniest group chat voice note chains." }
+    ]
+  },
+  {
+    id: "rohan",
+    name: "Rohan",
+    nickname: "Ro",
+    role: "The Music Maestro 🎵",
+    category: "creators",
+    avatarGradient: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
+    bio: "The undisputed AUX chord master. If the squad is on the road, Rohan has the absolute best Tamil bangers queued up.",
+    quote: "Life hits harder with high bass and real friends by your side.",
+    journeyMilestones: [
+      { title: "Squad Anthems", desc: "Created our legendary road trip playlist that everyone still sings." },
+      { title: "Jam Sessions", desc: "Turned quiet hostel balconies into live acoustic mini concerts." }
+    ]
+  },
+  {
+    id: "meera",
+    name: "Meera",
+    nickname: "Mimi",
+    role: "The Peacekeeper 🕊️",
+    category: "brains",
+    avatarGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    bio: "The gentle voice of reason whenever squad banter gets fiery. The warmest smile, gentlest hugs, and unconditional listener.",
+    quote: "Arguments pass in minutes, but namma bond is for a lifetime.",
+    journeyMilestones: [
+      { title: "The Healing Voice", desc: "United the group during tough times with compassion." },
+      { title: "Quiet Pillar", desc: "Always noticed when a friend was feeling low and cheered them up." }
+    ]
+  },
+  {
+    id: "arjun",
+    name: "Arjun",
+    nickname: "AJ",
+    role: "The Foodie King 🍕",
+    category: "chaos",
+    avatarGradient: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+    bio: "Knows every hidden midnight biryani spot, chai stall, and food street in town. Never eats alone, always shares with everyone.",
+    quote: "Good food + good gang = zero regrets in life.",
+    journeyMilestones: [
+      { title: "Food Trail Expeditions", desc: "Took the squad on legendary street food hunts across the city." },
+      { title: "Midnight Feast Master", desc: "Cooked spontaneous Maggi and tea during college nights." }
+    ]
+  },
+  {
+    id: "sneha",
+    name: "Sneha",
+    nickname: "Sneh",
+    role: "The Candid Chronicler 📸",
+    category: "creators",
+    avatarGradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
+    bio: "Has 10,000 unreleased funny photos and videos in her cloud gallery. The official historian of every funny squad memory.",
+    quote: "Delete that photo? Never! It belongs in the Natpe Thunai vault.",
+    journeyMilestones: [
+      { title: "The Memory Vault", desc: "Preserved hundreds of unseen candid squad moments." },
+      { title: "Year-End Recaps", desc: "Compiled hilarious year-end wrap videos for the gang." }
+    ]
+  },
+  {
+    id: "vikram",
+    name: "Vikram",
+    nickname: "Vicky",
+    role: "The Adrenaline Junkie ⚡",
+    category: "chaos",
+    avatarGradient: "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
+    bio: "First to dive into beach waves, first to suggest trekking, and the ultimate squad hype-man who fears nothing.",
+    quote: "Don't overthink, just take the leap and let's make a story!",
+    journeyMilestones: [
+      { title: "Wild Treks", desc: "Led the squad to the highest sunrise viewpoint in the hills." },
+      { title: "The Hype Engine", desc: "Never let a dull moment exist in any gathering." }
+    ]
+  },
+  {
+    id: "harini",
+    name: "Harini",
+    nickname: "Hari",
+    role: "The Golden Anchor ⚓",
+    category: "vibe",
+    avatarGradient: "linear-gradient(135deg, #84cc16 0%, #65a30d 100%)",
+    bio: "Always shows up when you need a hug or a cup of chai. The steady ground that keeps everyone connected across different cities.",
+    quote: "No matter how busy life gets, namma squad always comes first.",
+    journeyMilestones: [
+      { title: "Constant Check-Ins", desc: "The glue that kept the circle close even during long holidays." },
+      { title: "Unfiltered Support", desc: "Cheered loudest at everyone's career and personal wins." }
+    ]
+  },
+  {
+    id: "karthik",
+    name: "Karthik",
+    nickname: "KK",
+    role: "The Party Starter 🎉",
+    category: "chaos",
+    avatarGradient: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+    bio: "Turns even a boring exam study hall into an absolute laughing riot. Energy level 1000% at all times with endless punchlines.",
+    quote: "Why be normal when we can be unforgettable together?",
+    journeyMilestones: [
+      { title: "Banter King", desc: "Coined all our classic inside jokes and legendary group memes." },
+      { title: "Celebration Fuel", desc: "Made every college birthday party a festival." }
+    ]
   }
 ];
 
-// Initial real memories anchored to our timeless journey
-const INITIAL_MEMORIES = [
-  {
-    id: "mem-01",
-    year: "Chapter 1",
-    title: "Where Our Story Started",
-    description: "The very first day our squad bonded over chai and shared goals. Nobody knew back then that this ordinary gathering would turn into a lifelong bond.",
-    date: "August 14",
-    location: "Campus Common & Café",
-    mediaUrl: "/photos/friend1.jpg",
-    mediaType: "image",
-    people: ["Grace", "Puppy", "Heenuuu", "Divyaaa"],
-    category: "Milestone",
-    reactions: { "❤️": 12, "✨": 8, "🫂": 10, "😂": 4 },
-    comments: [
-      { id: "c1", author: "Grace", text: "I still remember how we couldn't stop laughing at that silly joke!", time: "August" }
-    ]
-  },
-  {
-    id: "mem-02",
-    year: "Chapter 2",
-    title: "Late Night Talks & Spontaneous Trips",
-    description: "The semester that tested everyone, but late-night video calls and midnight chai runs kept our spirits unshakeable.",
-    date: "April 22",
-    location: "Midnight Highway Drive",
-    mediaUrl: "/photos/friend2.jpg",
-    mediaType: "image",
-    people: ["Heenuuu", "Divyaaa", "Grace"],
-    category: "Adventures",
-    reactions: { "❤️": 15, "✨": 9, "🫂": 14, "😂": 7 },
-    comments: [
-      { id: "c2", author: "Heenuuu", text: "Best memory of second year hands down!", time: "April" }
-    ]
-  },
-  {
-    id: "mem-03",
-    year: "Chapter 3",
-    title: "Unforgettable Milestone Celebration",
-    description: "Celebrating shared wins, project submissions, and overcoming challenges together. Friendship proved to be our greatest support system.",
-    date: "November 18",
-    location: "Beachside Gathering",
-    mediaUrl: "/photos/friend3.jpg",
-    mediaType: "image",
-    people: ["Divyaaa", "Puppy", "Grace", "Heenuuu"],
-    category: "Celebration",
-    reactions: { "❤️": 18, "✨": 12, "🫂": 16, "😂": 5 },
-    comments: [
-      { id: "c3", author: "Divyaaa", text: "Look at all our genuine smiles here!", time: "November" }
-    ]
-  },
-  {
-    id: "mem-04",
-    year: "Chapter 4",
-    title: "Still Here. Still Unbreakable.",
-    description: "Through every change of life, the circle stands solid. More than friends — family by choice.",
-    date: "Always & Forever",
-    location: "Squad Sanctuary",
-    mediaUrl: "/photos/friend4.jpg",
-    mediaType: "image",
-    people: ["Puppy", "Grace", "Heenuuu", "Divyaaa"],
-    category: "Daily Laughs",
-    reactions: { "❤️": 24, "✨": 19, "🫂": 22, "😂": 9 },
-    comments: [
-      { id: "c4", author: "Puppy", text: "Natpe Thunai forever. Always and infinity.", time: "Recent" }
-    ]
-  }
-];
-
-const INITIAL_POSTS = [
-  {
-    id: "post-manifesto",
-    authorName: "Natpe Thunai Squad",
-    authorPhoto: "/photos/friend1.jpg",
-    content: "“First year la start aana namma group, ippo varaikum ivlo strong ah irukum nu appo namma yaarume nenachiruka maatom. Serndhu sapta moments, cooking pannadhu, dance aadinadhu, movies, birthday bashes, random suthinadhu nu neraya memories! Sila neram 'pothum da, indha group ah vittudalam' nu feel pannirupom 😂 but still, yaarum yaaraiyum vittu kudukkala. Namma friendship perfect illa, aana romba real. ❤️ Endha situation vandhalum, ippadiye last varaikum strong ah irukanum! ❤️🫂♾️”",
-    category: "Story",
-    likes: 42,
-    createdAt: "Featured Manifesto",
-    comments: [
-      { id: "cm1", author: "Puppy", text: "100% true! Natpe Thunai forever ♾️" },
-      { id: "cm2", author: "Heenuuu", text: "Namma friendship eppavum special dhan 💖" }
-    ]
-  },
-  {
-    id: "post-1",
-    authorName: "Grace",
-    authorPhoto: "/photos/friend1.jpg",
-    content: "Reminder that our grand reunion planning is on! Drop your favorite memories in the timeline so we can compile our complete memory reel.",
-    category: "Announcement",
-    likes: 8,
-    createdAt: "2 days ago",
-    comments: [
-      { id: "pc1", author: "Puppy", text: "Already looking forward to it!" }
-    ]
-  },
-  {
-    id: "post-2",
-    authorName: "Divyaaa",
-    authorPhoto: "/photos/friend3.jpg",
-    content: "Going through our old memories right now... we have changed so much yet our banter is literally identical 😂💖",
-    category: "Moment",
-    likes: 11,
-    createdAt: "5 days ago",
-    comments: []
-  }
-];
-
-const INITIAL_EVENTS = [
-  {
-    id: "evt-1",
-    title: "Annual Squad Grand Reunion",
-    date: "September 15",
-    time: "6:00 PM",
-    location: "City Hilltop Viewpoint",
-    description: "Our landmark gathering celebrating our timeless friendship, photoshoots, and reminiscing our shared journey.",
-    category: "Reunion",
-    rsvpCount: 4,
-    userRsvpd: true
-  },
-  {
-    id: "evt-2",
-    title: "Memory Reel Screening Night",
-    date: "October 02, 2026",
-    time: "8:30 PM",
-    location: "Discord / Private Screen",
-    description: "Streaming our compiled digital memory reel with all video clips and road trip moments.",
-    category: "Celebration",
-    rsvpCount: 4,
-    userRsvpd: false
-  }
-];
+export const SQUAD_MEMBERS = INITIAL_SQUAD_MEMBERS;
 
 // Helper: load from localStorage
 const getLocal = (key, fallback) => {
@@ -237,6 +268,213 @@ const setLocal = (key, data) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════
+//  SQUAD MEMBERS API (15+ GANG MEMBERS)
+// ═══════════════════════════════════════════════════════════════════
+
+export const getStoredMembers = () => {
+  const local = getLocal(STORAGE_KEYS.MEMBERS, null);
+  if (!local || !Array.isArray(local) || local.length === 0) {
+    setLocal(STORAGE_KEYS.MEMBERS, INITIAL_SQUAD_MEMBERS);
+    return INITIAL_SQUAD_MEMBERS;
+  }
+  
+  // Merge code-defined squad roster (updating photos/fields from code) with any custom entries
+  const synced = INITIAL_SQUAD_MEMBERS.map(initialMember => {
+    const existing = local.find(m => m.id === initialMember.id || m.name?.toLowerCase().trim() === initialMember.name?.toLowerCase().trim());
+    return existing ? { ...existing, ...initialMember, photo: initialMember.photo || existing.photo } : initialMember;
+  });
+
+  // Keep any user-added custom members from UI
+  const customMembers = local.filter(m => !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim()));
+  const fullList = [...synced, ...customMembers];
+  setLocal(STORAGE_KEYS.MEMBERS, fullList);
+  return fullList;
+};
+
+export const saveSquadMember = (memberData) => {
+  const existing = getStoredMembers();
+  const newMember = {
+    id: memberData.id || `member-${Date.now()}`,
+    name: memberData.name.trim(),
+    nickname: memberData.nickname?.trim() || memberData.name.trim(),
+    role: memberData.role?.trim() || "Squad Member 🌟",
+    category: memberData.category || "vibe",
+    instagram: memberData.instagram?.trim() || "",
+    photo: memberData.photo || "/photos/friend1.jpg",
+    bio: memberData.bio?.trim() || "Proud member of namma Natpe Thunai sanctuary.",
+    quote: memberData.quote?.trim() || "Natpe Thunai forever and infinity.",
+    journeyMilestones: memberData.journeyMilestones || [
+      { title: "Joined the Gang", desc: "Added endless laughter and energy to our lifelong bond." }
+    ]
+  };
+
+  const updated = [newMember, ...existing];
+  setLocal(STORAGE_KEYS.MEMBERS, updated);
+  return updated;
+};
+
+export const updateSquadMember = (memberId, updatedFields) => {
+  const existing = getStoredMembers();
+  const updated = existing.map(m => {
+    if (m.id === memberId) {
+      return { ...m, ...updatedFields };
+    }
+    return m;
+  });
+  setLocal(STORAGE_KEYS.MEMBERS, updated);
+  return updated;
+};
+
+export const deleteSquadMember = (memberId) => {
+  const existing = getStoredMembers();
+  const updated = existing.filter(m => m.id !== memberId);
+  setLocal(STORAGE_KEYS.MEMBERS, updated);
+  return updated;
+};
+
+// ═══════════════════════════════════════════════════════════════════
+//  INITIAL RICH SQUAD MEMORIES (Diverse group events & multi-tags)
+// ═══════════════════════════════════════════════════════════════════
+
+const INITIAL_MEMORIES = [
+  {
+    id: "mem-01",
+    year: "Chapter 1",
+    title: "Where Our Story Started",
+    description: "The very first day our squad bonded over chai and shared goals at the canteen. Nobody knew back then that this ordinary gathering would turn into a lifelong bond.",
+    date: "August 14",
+    location: "Campus Common & Café",
+    mediaUrl: "/photos/friend1.jpg",
+    mediaType: "image",
+    people: ["Grace", "Puppy", "Heenuuu", "Divyaaa", "Kavin", "Sid"],
+    category: "Milestone",
+    reactions: { "❤️": 28, "✨": 18, "🫂": 25, "😂": 12 },
+    comments: [
+      { id: "c1", author: "Grace", text: "I still remember how we couldn't stop laughing at that silly joke!", time: "August" },
+      { id: "c2", author: "Sid", text: "That tea was 5 rupees but the memories are priceless ❤️", time: "August" }
+    ]
+  },
+  {
+    id: "mem-02",
+    year: "Chapter 2",
+    title: "Late Night Talks & Spontaneous Highway Trips",
+    description: "The semester that tested everyone, but midnight chai runs, high-volume music in Sid's car, and late-night calls kept our spirits unshakeable.",
+    date: "April 22",
+    location: "Midnight Highway Drive",
+    mediaUrl: "/photos/friend2.jpg",
+    mediaType: "image",
+    people: ["Heenuuu", "Divyaaa", "Grace", "Sid", "Rohan", "Pooja"],
+    category: "Adventures",
+    reactions: { "❤️": 35, "✨": 21, "🫂": 29, "😂": 16 },
+    comments: [
+      { id: "c3", author: "Heenuuu", text: "Best memory of second year hands down!", time: "April" },
+      { id: "c4", author: "Rohan", text: "And that playlist is still unskippable 🔥", time: "April" }
+    ]
+  },
+  {
+    id: "mem-03",
+    year: "Chapter 3",
+    title: "Unforgettable Milestone Celebration",
+    description: "Celebrating shared wins, project submissions, and overcoming challenges together. Friendship proved to be our greatest sanctuary and strength.",
+    date: "November 18",
+    location: "Beachside Gathering",
+    mediaUrl: "/photos/friend3.jpg",
+    mediaType: "image",
+    people: ["Divyaaa", "Puppy", "Grace", "Heenuuu", "Ananya", "Meera", "Arjun"],
+    category: "Celebration",
+    reactions: { "❤️": 42, "✨": 30, "🫂": 38, "😂": 14 },
+    comments: [
+      { id: "c5", author: "Divyaaa", text: "Look at all our genuine smiles here!", time: "November" },
+      { id: "c6", author: "Ananya", text: "We took over 200 candid photos that evening!", time: "November" }
+    ]
+  },
+  {
+    id: "mem-04",
+    year: "Chapter 4",
+    title: "Still Here. Still 15 Strong.",
+    description: "Through every turn of life, busy careers, and different cities, the circle stands solid. More than friends — family by choice.",
+    date: "Always & Forever",
+    location: "Squad Sanctuary",
+    mediaUrl: "/photos/friend4.jpg",
+    mediaType: "image",
+    people: ["Puppy", "Grace", "Heenuuu", "Divyaaa", "Vikram", "Sneha", "Harini", "KK"],
+    category: "Daily Laughs",
+    reactions: { "❤️": 58, "✨": 45, "🫂": 50, "😂": 27 },
+    comments: [
+      { id: "c7", author: "Puppy", text: "Natpe Thunai forever. Always and infinity.", time: "Recent" },
+      { id: "c8", author: "KK", text: "15 members and infinite memories to go ♾️❤️", time: "Recent" }
+    ]
+  }
+];
+
+const INITIAL_POSTS = [
+  {
+    id: "post-manifesto",
+    authorName: "Natpe Thunai Squad (15 Strong)",
+    authorPhoto: "/photos/friend1.jpg",
+    content: "“First year la start aana namma 15-member gang, ippo varaikum ivlo strong ah irukum nu appo namma yaarume nenachiruka maatom. Serndhu sapta moments, cooking pannadhu, dance aadinadhu, movies, birthday bashes, random suthinadhu nu neraya memories! Sila neram 'pothum da, indha group ah vittudalam' nu feel pannirupom 😂 but still, yaarum yaaraiyum vittu kudukkala. Namma friendship perfect illa, aana romba real. ❤️ Endha situation vandhalum, ippadiye last varaikum strong ah irukanum! ❤️🫂♾️”",
+    category: "Story",
+    likes: 54,
+    createdAt: "Featured Manifesto",
+    comments: [
+      { id: "cm1", author: "Puppy", text: "100% true! Natpe Thunai forever ♾️" },
+      { id: "cm2", author: "Heenuuu", text: "Namma friendship eppavum special dhan 💖" },
+      { id: "cm3", author: "Kavin", text: "Proud of all 15 of us! Next trip planning soon!" }
+    ]
+  },
+  {
+    id: "post-1",
+    authorName: "Grace",
+    authorPhoto: "/photos/friend1.jpg",
+    content: "Reminder that our 15-member grand reunion planning is on! Drop your favorite memories in the timeline so we can compile our complete memory reel.",
+    category: "Announcement",
+    likes: 19,
+    createdAt: "2 days ago",
+    comments: [
+      { id: "pc1", author: "Puppy", text: "Already looking forward to it!" },
+      { id: "pc2", author: "Sid", text: "Car is serviced and ready to roll 🚗" }
+    ]
+  },
+  {
+    id: "post-2",
+    authorName: "Divyaaa",
+    authorPhoto: "/photos/friend3.jpg",
+    content: "Going through our old memories right now... 15 of us have changed so much yet our banter is literally identical 😂💖",
+    category: "Moment",
+    likes: 24,
+    createdAt: "5 days ago",
+    comments: [
+      { id: "pc3", author: "Sneha", text: "I still have the photos from day 1!" }
+    ]
+  }
+];
+
+const INITIAL_EVENTS = [
+  {
+    id: "evt-1",
+    title: "Annual 15-Member Squad Grand Reunion",
+    date: "September 15",
+    time: "6:00 PM",
+    location: "City Hilltop Viewpoint",
+    description: "Our landmark gathering celebrating our timeless 15-member friendship, photoshoots, and reminiscing our shared journey.",
+    category: "Reunion",
+    rsvpCount: 15,
+    userRsvpd: true
+  },
+  {
+    id: "evt-2",
+    title: "Squad Memory Reel Screening Night",
+    date: "October 02, 2026",
+    time: "8:30 PM",
+    location: "Private Screen & Hangout",
+    description: "Streaming our compiled digital memory reel with all video clips, road trip moments, and hilarious voice notes.",
+    category: "Celebration",
+    rsvpCount: 12,
+    userRsvpd: false
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════
 //  MEMORIES API
 // ═══════════════════════════════════════════════════════════════════
 
@@ -245,7 +483,6 @@ export const getStoredMemories = () => {
 };
 
 export const subscribeToMemories = (callback) => {
-  // Start with local copy instantly for zero-latency paint
   const local = getStoredMemories();
   callback(local);
 
@@ -258,11 +495,10 @@ export const subscribeToMemories = (callback) => {
         callback(firestoreMemories);
       }
     }, (error) => {
-      // Fallback silently to local cache if Firestore permissions or offline
       console.info("Using local memory storage:", error.message);
     });
   } catch {
-    return () => {};
+    return () => { };
   }
 };
 
@@ -276,19 +512,17 @@ export const saveMemory = async (memory) => {
     location: memory.location || "Squad Circle",
     mediaUrl: memory.mediaUrl || "/photos/friend1.jpg",
     mediaType: memory.mediaType || "image",
-    people: memory.people && memory.people.length ? memory.people : ["The Squad"],
+    people: memory.people && memory.people.length ? memory.people : ["The Squad "],
     category: memory.category || "Moment",
     reactions: { "❤️": 1, "✨": 0, "🫂": 0, "😂": 0 },
     comments: [],
     createdAt: new Date().toISOString()
   };
 
-  // Save to local cache
   const existing = getStoredMemories();
   const updated = [newMemory, ...existing];
   setLocal(STORAGE_KEYS.MEMORIES, updated);
 
-  // Sync to Firestore if available
   try {
     await addDoc(collection(db, 'natpe-thunai-memories'), {
       ...newMemory,

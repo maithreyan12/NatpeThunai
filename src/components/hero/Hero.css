@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════ */
-/*  HERO COMMUNITY SECTION — WARM, NOSTALGIC, EMOTIONAL               */
+/*  HERO COMMUNITY SECTION — WARM, NOSTALGIC, 15-MEMBER SANCTUARY      */
 /* ═══════════════════════════════════════════════════════════════════ */
 
 .hero-community-section {
@@ -140,7 +140,7 @@
   color: var(--text-muted);
   max-width: 650px;
   line-height: 1.70;
-  margin-bottom: 36px;
+  margin-bottom: 30px;
   font-weight: 400;
 }
 
@@ -149,7 +149,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 52px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .hero-btn-main {
@@ -165,6 +167,68 @@
 .hero-btn-ghost {
   padding: 12px 22px;
   font-size: 0.96rem;
+}
+
+/* ── Dynamic Squad Statistics Strip ── */
+.hero-stats-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 16px 28px;
+  margin-bottom: 44px;
+  box-shadow: var(--shadow-glass-sm);
+  width: 100%;
+  max-width: 860px;
+  flex-wrap: wrap;
+}
+
+.hero-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-icon-wrapper {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-text-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.stat-number {
+  font-family: var(--font-heading);
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.stat-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.hero-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-light);
 }
 
 /* ── Physical Polaroid Stage ── */
@@ -189,7 +253,7 @@
   border: var(--glass-border-highlight);
   box-shadow: var(--shadow-glass-md);
   transition: transform 0.28s var(--ease-spring), 
-              box-shadow 0.28s var(--ease-spring),
+              box-shadow 0.28s var(--ease-spring), 
               border-color 0.24s ease;
   cursor: pointer;
   position: relative;
@@ -366,6 +430,10 @@
   .polaroid-photo-frame {
     height: 130px;
   }
+  .hero-stats-strip {
+    gap: 14px;
+    padding: 12px 18px;
+  }
   .hero-timeline-strip {
     flex-wrap: wrap;
     border-radius: var(--radius-lg);
@@ -374,6 +442,15 @@
 }
 
 @media (max-width: 600px) {
+  .hero-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+  .hero-stat-divider {
+    display: none;
+  }
   .hero-timeline-strip {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -424,21 +501,5 @@
   .hero-btn-main, .hero-btn-sub, .hero-btn-ghost {
     width: 100%;
     justify-content: center;
-  }
-}
-
-@media (max-width: 360px) {
-  .hero-polaroid-stage {
-    gap: 6px;
-  }
-  .hero-period-badge {
-    padding: 4px 10px;
-    gap: 6px;
-  }
-  .period-text {
-    font-size: 0.72rem;
-  }
-  .period-sub {
-    font-size: 0.65rem;
   }
 }

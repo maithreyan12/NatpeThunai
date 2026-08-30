@@ -4,12 +4,14 @@ import {
   Quote, 
   Sparkles, 
   ArrowUpRight, 
-  Clock 
+  Clock, 
+  Camera,
+  Heart
 } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './FriendModal.css';
 
-export default function FriendModal({ friend, onClose }) {
+export default function FriendModal({ friend, onClose, onFilterMemories }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
@@ -48,17 +50,33 @@ export default function FriendModal({ friend, onClose }) {
         {/* Header Photo & Identity */}
         <div className="modal-profile-header">
           <div className="modal-portrait-frame">
-            <img 
-              src={friend.photo} 
-              alt={friend.name} 
-              className="modal-portrait-img"
-              onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
-            />
-            <div className="modal-badge-chip">{friend.role || "Core Member"}</div>
+            {friend.photo ? (
+              <img 
+                src={friend.photo} 
+                alt={friend.name} 
+                className="modal-portrait-img"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.classList.add('fallback-gradient');
+                }}
+              />
+            ) : (
+              <div 
+                className="modal-portrait-gradient"
+                style={{ background: friend.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
+              >
+                <span className="modal-avatar-initials">
+                  {friend.name.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="modal-badge-chip">{friend.role || "Squad Member 🌟"}</div>
           </div>
 
           <h2 className="modal-friend-name">{friend.name}</h2>
-          <span className="modal-friend-sub">"{friend.nickname}" • Core Squad Member</span>
+          <span className="modal-friend-sub">
+            "{friend.nickname || friend.name}" • Squad Sanctuary
+          </span>
         </div>
 
         {/* Body Bio & Memory Blocks */}
@@ -107,6 +125,20 @@ export default function FriendModal({ friend, onClose }) {
 
         {/* Footer Actions */}
         <div className="modal-action-footer">
+          <button
+            type="button"
+            className="btn-secondary modal-memories-btn"
+            onClick={() => {
+              onClose();
+              if (onFilterMemories) {
+                onFilterMemories(friend.name);
+              }
+            }}
+          >
+            <Camera size={15} />
+            <span>View {friend.name}'s Memories</span>
+          </button>
+
           {friend.instagram && (
             <a
               href={friend.instagram}
@@ -115,7 +147,7 @@ export default function FriendModal({ friend, onClose }) {
               className="btn-primary modal-ig-btn"
             >
               <InstagramIcon size={15} />
-              <span>Connect on Instagram</span>
+              <span>Instagram</span>
               <ArrowUpRight size={14} />
             </a>
           )}

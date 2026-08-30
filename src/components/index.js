@@ -16,6 +16,7 @@ export { default as SquadStory } from './story/SquadStory';
 export { default as SquadMembers } from './squad/SquadMembers';
 export { default as FriendModal } from './squad/FriendModal';
 export { default as FriendshipJourney } from './squad/FriendshipJourney';
+export { default as AddMemberModal } from './squad/AddMemberModal';
 
 // 5. Memory Vault & Reels
 export { default as MemoryTimeline } from './memories/MemoryTimeline';

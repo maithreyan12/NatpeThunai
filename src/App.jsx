@@ -11,12 +11,16 @@ import {
   GroupChat, 
   Footer, 
   FriendModal,
+  AddMemberModal,
   CreatePostModal, 
   AddEventModal, 
   LightboxModal,
   SignInModal 
 } from './components';
 import { 
+  getStoredMembers,
+  saveSquadMember,
+  updateSquadMember,
   subscribeToMemories, 
   reactToMemory, 
   addCommentToMemory,
@@ -38,14 +42,20 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
 
   // Data States
+  const [members, setMembers] = useState(getStoredMembers());
   const [memories, setMemories] = useState([]);
   const [posts, setPosts] = useState(getStoredPosts());
   const [events, setEvents] = useState(getStoredEvents());
+
+  // Filter States
+  const [activeMemberFilter, setActiveMemberFilter] = useState('All');
 
   // Modal States
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [lightboxMemory, setLightboxMemory] = useState(null);
 
@@ -75,6 +85,18 @@ export default function App() {
       setCurrentUser(user);
     });
     return () => unsub();
+  }, []);
+
+  // Discreet keyboard shortcut for squad portal login (Ctrl+Shift+L or Cmd+Shift+L)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+        e.preventDefault();
+        setIsSignInOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // Listen to real-time Memories
@@ -121,6 +143,26 @@ export default function App() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Member Management Handlers
+  const handleSaveMember = (memberData) => {
+    if (editingMember) {
+      const updated = updateSquadMember(editingMember.id, memberData);
+      setMembers(updated);
+      showToast(`${memberData.name}'s profile updated! ✨`);
+    } else {
+      const updated = saveSquadMember(memberData);
+      setMembers(updated);
+      showToast(`Added ${memberData.name} to the gang! 🎉`);
+    }
+    setEditingMember(null);
+  };
+
+  const handleFilterMemories = (memberName) => {
+    setActiveMemberFilter(memberName);
+    scrollToSection('timeline');
+    showToast(`Filtered memories for ${memberName} 📸`);
+  };
 
   // Memory Handlers
   const handleReactMemory = (memoryId, emoji) => {
@@ -182,9 +224,11 @@ export default function App() {
       <main className="app-container">
         {/* 1. Hero Section */}
         <Hero 
+          totalMembers={members.length}
           onExploreTimeline={() => scrollToSection('timeline')}
           onWatchReel={() => scrollToSection('reel')}
           onReadStory={() => scrollToSection('story')}
+          onMeetSquad={() => scrollToSection('members')}
         />
 
         {/* 2. Namma Natpe Thunai Story (The Unfiltered Chronicle) */}
@@ -193,17 +237,28 @@ export default function App() {
         {/* 3. Friendship Journey Animation */}
         <FriendshipJourney />
 
-        {/* 4. Dedicated Squad Members Showcase */}
+        {/* 4. Dedicated Squad Sanctuary Showcase */}
         <SquadMembers 
+          members={members}
+          currentUser={currentUser}
           onSelectMember={(member) => setSelectedFriend(member)}
-          onFilterByMember={(_memberName) => {
-            scrollToSection('timeline');
+          onFilterByMember={handleFilterMemories}
+          onOpenAddMember={() => {
+            setEditingMember(null);
+            setIsAddMemberOpen(true);
+          }}
+          onEditMember={(member) => {
+            setEditingMember(member);
+            setIsAddMemberOpen(true);
           }}
         />
 
-        {/* 5. Chronological Memory Timeline */}
+        {/* 5. Chronological Memory Timeline with Scrollable Filter */}
         <MemoryTimeline 
           memories={memories}
+          members={members}
+          activeMemberFilter={activeMemberFilter}
+          onSelectMemberFilter={setActiveMemberFilter}
           onReact={handleReactMemory}
           onAddComment={handleAddComment}
           onOpenLightbox={(m) => setLightboxMemory(m)}
@@ -224,6 +279,7 @@ export default function App() {
           onToggleRsvp={handleToggleRsvp}
           onOpenAddEvent={() => setIsAddEventOpen(true)}
           onSelectMember={(member) => setSelectedFriend(member)}
+          members={members}
           currentUser={currentUser}
         />
 
@@ -231,7 +287,11 @@ export default function App() {
         <GroupChat onOpenSignIn={() => setIsSignInOpen(true)} />
 
         {/* 9. Footer */}
-        <Footer onScrollTop={() => scrollToSection('hero')} />
+        <Footer 
+          onScrollTop={() => scrollToSection('hero')} 
+          onOpenSignIn={() => setIsSignInOpen(true)}
+          currentUser={currentUser}
+        />
       </main>
 
       {/* ── MODALS ── */}
@@ -248,6 +308,16 @@ export default function App() {
         onSave={handleSaveEvent}
       />
 
+      <AddMemberModal 
+        isOpen={isAddMemberOpen}
+        onClose={() => {
+          setIsAddMemberOpen(false);
+          setEditingMember(null);
+        }}
+        onSave={handleSaveMember}
+        existingMember={editingMember}
+      />
+
       <LightboxModal 
         isOpen={Boolean(lightboxMemory)}
         onClose={() => setLightboxMemory(null)}
@@ -257,6 +327,7 @@ export default function App() {
       <FriendModal 
         friend={selectedFriend}
         onClose={() => setSelectedFriend(null)}
+        onFilterMemories={handleFilterMemories}
       />
 
       <SignInModal 
