@@ -22,6 +22,8 @@ import {
   saveSquadMember,
   updateSquadMember,
   subscribeToMemories, 
+  getStoredMemories,
+  saveMemory,
   reactToMemory, 
   addCommentToMemory,
   getStoredPosts,
@@ -176,6 +178,15 @@ export default function App() {
     showToast("Comment posted! 💌");
   };
 
+  const handleUploadPhotos = async (uploadedMemories) => {
+    for (const mem of uploadedMemories) {
+      await saveMemory(mem);
+    }
+    const updated = getStoredMemories();
+    setMemories(updated);
+    showToast(`✨ ${uploadedMemories.length} ${uploadedMemories.length === 1 ? 'photo' : 'photos'} added to your Squad Album!`);
+  };
+
   // Community Post Handlers
   const handleSavePost = async (postData, user) => {
     const updated = await savePost(postData, user);
@@ -262,6 +273,7 @@ export default function App() {
           onReact={handleReactMemory}
           onAddComment={handleAddComment}
           onOpenLightbox={(m) => setLightboxMemory(m)}
+          onUploadPhotos={handleUploadPhotos}
           currentUser={currentUser}
         />
 

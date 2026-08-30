@@ -58,13 +58,13 @@ export default function SquadMembers({
       <div className="section-header">
         <div className="badge-pill">
           <Users size={14} />
-          <span>SQUAD CIRCLE • LIFELONG SANCTUARY</span>
+          <span>OFFICIAL SQUAD MEMBERS DIRECTORY</span>
         </div>
         <h2 className="section-title">
-          The Squad Sanctuary
+          The Squad Members
         </h2>
         <p className="section-desc">
-          Meet every cornerstone of நட்பே துணை. From midnight drivers and masterminds to late-night listeners and chaos makers.
+          Meet every cornerstone of நட்பே துணை — Grace, Heenuuu, Divyaa, Puppy & Farish. Click on any friend to open their complete profile, quotes, and memories.
         </p>
       </div>
 

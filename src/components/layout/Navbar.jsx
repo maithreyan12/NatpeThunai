@@ -88,19 +88,19 @@ export default function Navbar({
               className={`nav-item-btn ${isSquadActive ? 'active' : ''}`}
               onClick={() => onNavigate('members')}
             >
-              Squad
+              Members
             </button>
             <button 
               className={`nav-item-btn ${isMemoriesActive ? 'active' : ''}`}
               onClick={() => onNavigate('timeline')}
             >
-              Memories
+              Album 📸
             </button>
             <button 
               className={`nav-item-btn ${isChatActive ? 'active' : ''}`}
               onClick={() => onNavigate('chat')}
             >
-              AI Chat 💬
+              Dashboard {currentUser ? '💬' : '🔒'}
             </button>
           </div>
 
@@ -165,21 +165,21 @@ export default function Navbar({
           onClick={() => onNavigate('members')}
         >
           <Users size={19} />
-          <span>Squad</span>
+          <span>Members</span>
         </button>
         <button 
           className={`mobile-tab ${isMemoriesActive ? 'active' : ''}`}
           onClick={() => onNavigate('timeline')}
         >
           <Film size={19} />
-          <span>Memories</span>
+          <span>Album</span>
         </button>
         <button 
           className={`mobile-tab ${isChatActive ? 'active' : ''}`}
           onClick={() => onNavigate('chat')}
         >
           <MessageCircle size={19} />
-          <span>Chat</span>
+          <span>Dashboard</span>
         </button>
       </nav>
     </>

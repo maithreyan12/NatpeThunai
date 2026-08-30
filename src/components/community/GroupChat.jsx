@@ -266,219 +266,220 @@ export default function GroupChat({ onOpenSignIn }) {
           Live Chat & AI Story Enclave
         </h2>
         <p className="section-desc">
-          Chat live with the squad or interact with our Natpe AI Companion to analyze and recount our memories.
+          Chat live with the squad or interact with our Natpe AI Companion to recount our shared memories.
         </p>
       </div>
 
       <div className="glass-card chat-spatial-container">
-        {/* Top Channel Navigation Bar: Switch between AI Story Companion and Live Squad Room */}
-        <div className="chat-channel-switcher-bar">
-          <button
-            type="button"
-            className={`chat-channel-tab ${activeTab === 'ai' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ai')}
-          >
-            <Bot size={16} />
-            <span>✨ Natpe AI Storyteller</span>
-            <span className="channel-badge-pulse">Online</span>
-          </button>
-
-          <button
-            type="button"
-            className={`chat-channel-tab ${activeTab === 'live' ? 'active' : ''}`}
-            onClick={() => setActiveTab('live')}
-          >
-            <Users size={16} />
-            <span>👥 Squad Live Room</span>
-            {user && <span className="live-count-chip">{messages.length}</span>}
-          </button>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/*  MODE 1: NATPE AI STORYTELLER & MEMORY COMPANION                */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {activeTab === 'ai' && (
-          <div className="chat-console ai-mode-console">
-            {/* Top AI Console Banner */}
-            <div className="ai-top-banner">
-              <div className="ai-avatar-badge">
-                <Sparkles size={18} />
+        {!user ? (
+          <div className="chat-login-experience auth-enclave-locked">
+            <div className="login-beacon-graphic">
+              <div className="beacon-ring">
+                <div className="beacon-core">
+                  <Lock size={32} />
+                </div>
               </div>
-              <div className="ai-identity-text">
-                <div className="ai-title-row">
-                  <h3 className="ai-bot-name">Natpe AI Story Companion</h3>
-                  {aiIsTyping && (
-                    <div className="ai-typing-soundwave" aria-label="AI Generating response">
-                      <span className="wave-bar bar-1" />
-                      <span className="wave-bar bar-2" />
-                      <span className="wave-bar bar-3" />
-                      <span className="wave-bar bar-4" />
-                      <span className="wave-text">Thinking...</span>
-                    </div>
-                  )}
-                </div>
-                <span className="ai-bot-sub">Trained on our authentic first year journey, cooking, laughs & fights</span>
+              <div className="floating-chat-bubble bubble-alpha">Squad Dashboard 🔒</div>
+              <div className="floating-chat-bubble bubble-beta">Members Only ✨</div>
+            </div>
+
+            <span className="modal-badge-tag">AUTHENTICATION REQUIRED</span>
+            <h3 className="chat-login-heading">Authorized Squad Enclave</h3>
+            <p className="chat-login-caption">
+              Live group chat and our Natpe AI Storyteller are restricted to authorized squad members. Please sign in with your Google account to unlock access.
+            </p>
+
+            <button className="google-liquid-btn" onClick={onOpenSignIn || handleGoogleSignIn}>
+              <svg className="google-vector-icon" viewBox="0 0 24 24" width="18" height="18">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <span>Sign In with Google</span>
+            </button>
+
+            {authError && (
+              <div className="chat-auth-alert">
+                <Shield size={14} />
+                <span>{authError}</span>
               </div>
+            )}
+
+            <div className="chat-privacy-footnote">
+              <Shield size={12} />
+              <span>🔒 256-Bit Firebase Secured • Authorized Squad Access Only</span>
             </div>
-
-            {/* AI Suggested Prompts Strip */}
-            <div className="ai-prompt-chips-scroll">
-              {AI_PROMPT_CHIPS.map(chip => (
-                <button
-                  key={chip.label}
-                  type="button"
-                  className="ai-suggestion-chip"
-                  onClick={() => handleSendAiMessage(chip.query)}
-                >
-                  <span className="chip-sparkle-dot" />
-                  <span>{chip.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* AI Messages Stream */}
-            <div className="chat-stream-viewport ai-stream" ref={chatContainerRef}>
-              <div className="chat-ambient-glow glow-1" aria-hidden="true" />
-              <div className="chat-ambient-glow glow-2" aria-hidden="true" />
-
-              {aiMessages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className={`chat-bubble-row ${msg.sender === 'user' ? 'own-side' : 'other-side'}`}
-                >
-                  {msg.sender === 'ai' && (
-                    <div className="ai-sender-icon-bubble">
-                      <Bot size={16} />
-                    </div>
-                  )}
-
-                  <div className="chat-bubble-column">
-                    <div className={`chat-imessage-bubble ${msg.sender === 'user' ? 'bubble-own' : 'bubble-ai'}`}>
-                      <div className="bubble-markdown-text">
-                        {msg.text.split('\n\n').map((paragraph, pIdx) => (
-                          <p key={pIdx}>{paragraph}</p>
-                        ))}
-                      </div>
-                      
-                      <div className="bubble-meta">
-                        <span className="bubble-timestamp">{msg.timestamp}</span>
-                        {msg.sender === 'ai' && (
-                          <div className="ai-bubble-actions">
-                            <button
-                              type="button"
-                              className={`ai-action-icon-btn ai-heart-btn ${likedAiMsgIds.has(msg.id) ? 'liked' : ''}`}
-                              onClick={() => toggleLikeAi(msg.id)}
-                              title={likedAiMsgIds.has(msg.id) ? "Loved this memory" : "Love this memory"}
-                              aria-label="Love this memory"
-                            >
-                              <Heart size={12} className={likedAiMsgIds.has(msg.id) ? 'heart-filled' : ''} />
-                              {likedAiMsgIds.has(msg.id) && <span className="heart-count">1</span>}
-                            </button>
-
-                            <button
-                              type="button"
-                              className="ai-action-icon-btn ai-copy-text-btn"
-                              onClick={() => copyAiText(msg.id, msg.text)}
-                              title="Copy message"
-                              aria-label="Copy message"
-                            >
-                              {copiedId === msg.id ? <Check size={12} className="copy-checked-icon" /> : <Copy size={12} />}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {aiIsTyping && (
-                <div className="chat-bubble-row other-side">
-                  <div className="ai-sender-icon-bubble">
-                    <Bot size={16} />
-                  </div>
-                  <div className="chat-imessage-bubble bubble-ai typing-indicator-bubble">
-                    <span className="typing-dot" />
-                    <span className="typing-dot" />
-                    <span className="typing-dot" />
-                  </div>
-                </div>
-              )}
-              <div ref={aiMessagesEndRef} />
-            </div>
-
-            {/* AI Message Input Bar */}
-            <form 
-              className="chat-input-bar" 
-              onSubmit={(e) => { e.preventDefault(); handleSendAiMessage(); }}
-            >
-              <input
-                type="text"
-                className="chat-glass-input"
-                placeholder="Ask about namma memories, fights, cooking, or members..."
-                value={aiChatInput}
-                onChange={(e) => setAiChatInput(e.target.value)}
-                maxLength={500}
-                autoComplete="off"
-              />
-
-              <button 
-                type="submit" 
-                className={`chat-submit-btn ${aiChatInput.trim() ? 'active' : ''}`}
-                disabled={!aiChatInput.trim() || aiIsTyping}
-                aria-label="Send to AI Companion"
-              >
-                <Send size={16} />
-              </button>
-            </form>
           </div>
-        )}
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/*  MODE 2: LIVE SQUAD ROOM (GOOGLE AUTHENTICATED)                 */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {activeTab === 'live' && (
+        ) : (
           <>
-            {!user ? (
-              <div className="chat-login-experience">
-                <div className="login-beacon-graphic">
-                  <div className="beacon-ring">
-                    <div className="beacon-core">
-                      <Lock size={32} />
+            {/* Top Channel Navigation Bar: Switch between AI Story Companion and Live Squad Room */}
+            <div className="chat-channel-switcher-bar">
+              <button
+                type="button"
+                className={`chat-channel-tab ${activeTab === 'ai' ? 'active' : ''}`}
+                onClick={() => setActiveTab('ai')}
+              >
+                <Bot size={16} />
+                <span>✨ Natpe AI Storyteller</span>
+                <span className="channel-badge-pulse">Online</span>
+              </button>
+
+              <button
+                type="button"
+                className={`chat-channel-tab ${activeTab === 'live' ? 'active' : ''}`}
+                onClick={() => setActiveTab('live')}
+              >
+                <Users size={16} />
+                <span>👥 Squad Live Room</span>
+                <span className="live-count-chip">{messages.length}</span>
+              </button>
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/*  MODE 1: NATPE AI STORYTELLER & MEMORY COMPANION                */}
+            {/* ═══════════════════════════════════════════════════════════════ */}
+            {activeTab === 'ai' && (
+              <div className="chat-console ai-mode-console">
+                {/* Top AI Console Banner */}
+                <div className="ai-top-banner">
+                  <div className="ai-avatar-badge">
+                    <Sparkles size={18} />
+                  </div>
+                  <div className="ai-identity-text">
+                    <div className="ai-title-row">
+                      <h3 className="ai-bot-name">Natpe AI Story Companion</h3>
+                      {aiIsTyping && (
+                        <div className="ai-typing-soundwave" aria-label="AI Generating response">
+                          <span className="wave-bar bar-1" />
+                          <span className="wave-bar bar-2" />
+                          <span className="wave-bar bar-3" />
+                          <span className="wave-bar bar-4" />
+                          <span className="wave-text">Thinking...</span>
+                        </div>
+                      )}
                     </div>
+                    <span className="ai-bot-sub">Trained on our authentic first year journey, cooking, laughs & fights</span>
                   </div>
-                  <div className="floating-chat-bubble bubble-alpha">Squad Live ✨</div>
-                  <div className="floating-chat-bubble bubble-beta">Private Room 🔒</div>
                 </div>
 
-                <h3 className="chat-login-heading">Enter The Squad Chat</h3>
-                <p className="chat-login-caption">
-                  Sign in with your Google account to access the private squad live room.
-                </p>
-
-                <button className="google-liquid-btn" onClick={onOpenSignIn || handleGoogleSignIn}>
-                  <svg className="google-vector-icon" viewBox="0 0 24 24" width="18" height="18">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-
-                {authError && (
-                  <div className="chat-auth-alert">
-                    <Shield size={14} />
-                    <span>{authError}</span>
-                  </div>
-                )}
-
-                <div className="chat-privacy-footnote">
-                  <Shield size={12} />
-                  <span>End-to-end Firebase security • Verified members only</span>
+                {/* AI Suggested Prompts Strip */}
+                <div className="ai-prompt-chips-scroll">
+                  {AI_PROMPT_CHIPS.map(chip => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      className="ai-suggestion-chip"
+                      onClick={() => handleSendAiMessage(chip.query)}
+                    >
+                      <span className="chip-sparkle-dot" />
+                      <span>{chip.label}</span>
+                    </button>
+                  ))}
                 </div>
+
+                {/* AI Messages Stream */}
+                <div className="chat-stream-viewport ai-stream" ref={chatContainerRef}>
+                  <div className="chat-ambient-glow glow-1" aria-hidden="true" />
+                  <div className="chat-ambient-glow glow-2" aria-hidden="true" />
+
+                  {aiMessages.map((msg) => (
+                    <div 
+                      key={msg.id} 
+                      className={`chat-bubble-row ${msg.sender === 'user' ? 'own-side' : 'other-side'}`}
+                    >
+                      {msg.sender === 'ai' && (
+                        <div className="ai-sender-icon-bubble">
+                          <Bot size={16} />
+                        </div>
+                      )}
+
+                      <div className="chat-bubble-column">
+                        <div className={`chat-imessage-bubble ${msg.sender === 'user' ? 'bubble-own' : 'bubble-ai'}`}>
+                          <div className="bubble-markdown-text">
+                            {msg.text.split('\n\n').map((paragraph, pIdx) => (
+                              <p key={pIdx}>{paragraph}</p>
+                            ))}
+                          </div>
+                          
+                          <div className="bubble-meta">
+                            <span className="bubble-timestamp">{msg.timestamp}</span>
+                            {msg.sender === 'ai' && (
+                              <div className="ai-bubble-actions">
+                                <button
+                                  type="button"
+                                  className={`ai-action-icon-btn ai-heart-btn ${likedAiMsgIds.has(msg.id) ? 'liked' : ''}`}
+                                  onClick={() => toggleLikeAi(msg.id)}
+                                  title={likedAiMsgIds.has(msg.id) ? "Loved this memory" : "Love this memory"}
+                                  aria-label="Love this memory"
+                                >
+                                  <Heart size={12} className={likedAiMsgIds.has(msg.id) ? 'heart-filled' : ''} />
+                                  {likedAiMsgIds.has(msg.id) && <span className="heart-count">1</span>}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="ai-action-icon-btn ai-copy-text-btn"
+                                  onClick={() => copyAiText(msg.id, msg.text)}
+                                  title="Copy message"
+                                  aria-label="Copy message"
+                                >
+                                  {copiedId === msg.id ? <Check size={12} className="copy-checked-icon" /> : <Copy size={12} />}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {aiIsTyping && (
+                    <div className="chat-bubble-row other-side">
+                      <div className="ai-sender-icon-bubble">
+                        <Bot size={16} />
+                      </div>
+                      <div className="chat-imessage-bubble bubble-ai typing-indicator-bubble">
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                      </div>
+                    </div>
+                  )}
+                  <div ref={aiMessagesEndRef} />
+                </div>
+
+                {/* AI Message Input Bar */}
+                <form 
+                  className="chat-input-bar" 
+                  onSubmit={(e) => { e.preventDefault(); handleSendAiMessage(); }}
+                >
+                  <input
+                    type="text"
+                    className="chat-glass-input"
+                    placeholder="Ask about namma memories, fights, cooking, or members..."
+                    value={aiChatInput}
+                    onChange={(e) => setAiChatInput(e.target.value)}
+                    maxLength={500}
+                    autoComplete="off"
+                  />
+
+                  <button 
+                    type="submit" 
+                    className={`chat-submit-btn ${aiChatInput.trim() ? 'active' : ''}`}
+                    disabled={!aiChatInput.trim() || aiIsTyping}
+                    aria-label="Send to AI Companion"
+                  >
+                    <Send size={16} />
+                  </button>
+                </form>
               </div>
-            ) : (
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════════ */}
+            {/*  MODE 2: LIVE SQUAD ROOM (GOOGLE AUTHENTICATED)                 */}
+            {/* ═══════════════════════════════════════════════════════════════ */}
+            {activeTab === 'live' && (
               <div className="chat-console">
                 {/* Live Console Header */}
                 <div className="chat-top-console">

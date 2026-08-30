@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Calendar, 
   Search, 
   Camera,
   Users,
   ChevronLeft,
   ChevronRight,
-  Filter
+  UploadCloud,
+  ImagePlus,
+  RotateCcw
 } from 'lucide-react';
 import MemoryCard from './MemoryCard';
 import { getStoredMembers } from '../../services';
@@ -22,12 +23,81 @@ export default function MemoryTimeline({
   onReact, 
   onAddComment, 
   onOpenLightbox,
+  onUploadPhotos,
   currentUser 
 }) {
   const [selectedCategory, setSelectedCategory] = useState('All Moments');
   const [selectedMember, setSelectedMember] = useState(activeMemberFilter || 'All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const scrollTrackRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
+  };
+
+  const processFiles = async (fileList) => {
+    const imageFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) return;
+    setIsUploading(true);
+
+    const newMemories = [];
+    for (const file of imageFiles) {
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve(event.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const cleanName = file.name
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[-_]/g, ' ')
+          .trim();
+        
+        const formattedTitle = cleanName 
+          ? (cleanName.charAt(0).toUpperCase() + cleanName.slice(1)) 
+          : 'Squad Memory';
+
+        newMemories.push({
+          title: formattedTitle,
+          description: 'Cherished squad memory added to the album ❤️',
+          mediaUrl: dataUrl,
+          mediaType: 'image',
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          location: 'Squad Sanctuary',
+          people: ['Grace', 'Heenuuu', 'Divyaa', 'Puppy', 'Farish'],
+          category: selectedCategory === 'All Moments' ? 'Moments' : selectedCategory
+        });
+      } catch (err) {
+        console.warn('Error reading file:', err);
+      }
+    }
+
+    if (newMemories.length > 0 && onUploadPhotos) {
+      await onUploadPhotos(newMemories);
+      setSelectedCategory('All Moments');
+      setSelectedMember('All');
+    }
+    setIsUploading(false);
+  };
 
   // Sync with prop changes if parent triggers filter from friend card
   useEffect(() => {
@@ -79,14 +149,14 @@ export default function MemoryTimeline({
     <section id="timeline" className="timeline-section">
       <div className="section-header">
         <div className="badge-pill">
-          <Calendar size={14} />
-          <span>TIMELESS GANG VAULT</span>
+          <Camera size={14} />
+          <span>SQUAD PHOTO ALBUM & VAULT</span>
         </div>
         <h2 className="section-title">
-          Our Memory Timeline
+          Our Photo Album & Memories
         </h2>
         <p className="section-desc">
-          Every photo, late-night adventure, and shared smile with our gang, preserved in timeless beauty.
+          Browse authentic squad photos from first year to now, filter by friend, view high-res polaroids, and relive every journey.
         </p>
       </div>
 
@@ -184,7 +254,7 @@ export default function MemoryTimeline({
             ))}
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar & Upload Button */}
           <div className="timeline-actions-group">
             <div className="timeline-search-box">
               <Search size={15} className="search-icon" />
@@ -205,30 +275,83 @@ export default function MemoryTimeline({
                 </button>
               )}
             </div>
+
+            <button
+              type="button"
+              className="album-upload-header-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              title="Upload group photos from your device"
+            >
+              <UploadCloud size={15} />
+              <span>{isUploading ? 'Uploading...' : 'Upload Photos'}</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Memory Grid or Empty State */}
       {filteredMemories.length === 0 ? (
-        <div className="empty-state-box">
-          <div className="empty-state-icon">
-            <Camera size={26} />
-          </div>
-          <h3 className="empty-state-title">No memories found</h3>
-          <p className="empty-state-text">
-            {selectedMember !== 'All' 
-              ? `No memories tagged with ${selectedMember} in this category.` 
-              : `No memories match "${searchQuery}". Try choosing another category or clearing your search.`}
-          </p>
-          <button 
-            type="button" 
-            className="btn-outline"
-            onClick={() => { setSelectedCategory('All Moments'); handleMemberChange('All'); setSearchQuery(''); }}
+        memories.length === 0 ? (
+          <div 
+            className={`album-dropzone-box ${isDragging ? 'drag-over' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
-            Reset All Filters
-          </button>
-        </div>
+            <div className="dropzone-ambient-orb" aria-hidden="true" />
+            <div className="dropzone-icon-ring">
+              <UploadCloud size={36} />
+            </div>
+            <span className="modal-badge-tag">SQUAD PHOTO VAULT</span>
+            <h3 className="dropzone-title">Your Squad Photo Album is Ready</h3>
+            <p className="dropzone-desc">
+              Drag & drop your favorite squad group photos here, or click below to upload directly from your device.
+            </p>
+
+            <button 
+              type="button" 
+              className="dropzone-select-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+            >
+              <ImagePlus size={18} />
+              <span>{isUploading ? 'Uploading Photos...' : 'Upload Group Photos'}</span>
+            </button>
+
+            <div className="dropzone-supported-tags">
+              <span>PNG</span>
+              <span className="dot">•</span>
+              <span>JPG</span>
+              <span className="dot">•</span>
+              <span>WEBP</span>
+              <span className="dot">•</span>
+              <span>Multi-Upload Ready</span>
+            </div>
+          </div>
+        ) : (
+          <div className="empty-state-box">
+            <div className="empty-state-icon">
+              <Camera size={26} />
+            </div>
+            <h3 className="empty-state-title">No photos found in this filter</h3>
+            <p className="empty-state-text">
+              No memories match "{selectedCategory}" or "{selectedMember}".
+            </p>
+            <button 
+              type="button" 
+              className="filter-reset-pill-btn"
+              onClick={() => { 
+                setSelectedCategory('All Moments'); 
+                handleMemberChange('All'); 
+                setSearchQuery(''); 
+              }}
+            >
+              <RotateCcw size={14} />
+              <span>Show All Squad Moments ({memories.length})</span>
+            </button>
+          </div>
+        )
       ) : (
         <div className="memory-cards-grid">
           {filteredMemories.map(memory => (
@@ -243,6 +366,21 @@ export default function MemoryTimeline({
           ))}
         </div>
       )}
+
+      {/* Hidden File Input for Native File Picker */}
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*" 
+        multiple 
+        style={{ display: 'none' }} 
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            processFiles(e.target.files);
+            e.target.value = '';
+          }
+        }} 
+      />
     </section>
   );
 }

@@ -579,6 +579,219 @@
   cursor: not-allowed;
 }
 
+/* ── Album Upload Header Button ── */
+.album-upload-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-brand);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-family: var(--font-main);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.30);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.album-upload-header-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+}
+
+.album-upload-header-btn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.album-upload-header-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Album Drag & Drop Box ── */
+.album-dropzone-box {
+  width: 100%;
+  max-width: 760px;
+  margin: 10px auto 40px;
+  padding: 56px 36px;
+  border-radius: 28px;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 2px dashed rgba(124, 58, 237, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-glass-md);
+  transition: border-color 0.22s ease, transform 0.22s var(--ease-spring), background 0.22s ease;
+}
+
+.album-dropzone-box.drag-over {
+  border-color: var(--accent-violet);
+  background: var(--glass-surface-hover);
+  transform: scale(1.02);
+  box-shadow: 0 0 32px rgba(124, 58, 237, 0.25);
+}
+
+.dropzone-ambient-orb {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 260px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.dropzone-icon-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.08);
+  border: 2px solid rgba(124, 58, 237, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-violet);
+  margin-bottom: 20px;
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.15);
+  animation: floatBubble 3s infinite ease-in-out;
+}
+
+.dropzone-title {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.dropzone-desc {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 460px;
+  margin-bottom: 28px;
+}
+
+.dropzone-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  border-radius: var(--radius-pill);
+  background: var(--gradient-brand);
+  color: white;
+  border: var(--glass-border-highlight);
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.dropzone-select-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 26px rgba(124, 58, 237, 0.50);
+}
+
+.dropzone-select-btn:active {
+  transform: translateY(2px) scale(0.97);
+}
+
+.dropzone-supported-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.dropzone-supported-tags .dot {
+  opacity: 0.4;
+}
+
+/* ── Filter Empty State Box ── */
+.empty-state-box {
+  width: 100%;
+  max-width: 580px;
+  margin: 20px auto 40px;
+  padding: 44px 28px;
+  border-radius: var(--radius-xl);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--tint-lavender);
+  color: var(--accent-lavender);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.empty-state-title {
+  font-family: var(--font-heading);
+  font-size: 1.20rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.empty-state-text {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.filter-reset-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-surface-floating);
+  border: var(--glass-border-highlight);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease-spring), background 0.16s ease;
+}
+
+.filter-reset-pill-btn:hover {
+  transform: translateY(-2px);
+  background: var(--glass-surface-hover);
+  color: var(--accent-lavender);
+}
+
 @media (max-width: 980px) {
   .memory-cards-grid {
     grid-template-columns: repeat(2, 1fr);
