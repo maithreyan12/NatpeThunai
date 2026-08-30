@@ -119,129 +119,115 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "siddharth",
-    name: "Siddharth",
-    nickname: "Sid",
-    role: "The Road Trip Legend 🚗",
-    category: "chaos",
-    avatarGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    bio: "Always behind the wheel for midnight highway drives. Ready to pack bags at a 5-minute notice for an impromptu adventure.",
-    quote: "Petrol tank full, squad in the car — life doesn't get better than this.",
-    journeyMilestones: [
-      { title: "Midnight Highways", desc: "Drove hundreds of kilometers under starry skies with the squad." },
-      { title: "Zero Hesitation", desc: "First to say 'yes' to every spontaneous crazy idea." }
-    ]
-  },
-  {
-    id: "pooja",
-    name: "Pooja",
-    nickname: "Poo",
-    role: "The Night Owl 🌙",
+    id: "haniya",
+    name: "Haniya",
+    nickname: "hanuuuu",
+    role: "The Chill Sloth 🦥",
     category: "vibe",
     avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-    bio: "The 3 AM conversationalist. Whether it's deep philosophical life talks or unstoppable meme-sharing, she keeps the chat alive.",
-    quote: "The realest conversations happen when the rest of the world is asleep.",
+    bio: "The undisputed chill master of the squad. Certified queen of cozy naps, relaxed vibes, and turning any stressful day into pure peace.",
+    quote: "Why stress when you can sleep? Good vibes and cozy dreams always. 😴✨",
     journeyMilestones: [
-      { title: "Late Night Sanctuary", desc: "Helped everyone through sleepless exam nights and life dilemmas." },
-      { title: "Unstoppable Laughs", desc: "Sparked the funniest group chat voice note chains." }
+      { title: "Peak Cozy Vibes", desc: "Master of effortless relaxation and turning chaos into calm." },
+      { title: "Late Night Banter", desc: "Wakes up right on time for the best late-night laughs." }
     ]
   },
   {
-    id: "rohan",
-    name: "Rohan",
-    nickname: "Ro",
-    role: "The Music Maestro 🎵",
-    category: "creators",
-    avatarGradient: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
-    bio: "The undisputed AUX chord master. If the squad is on the road, Rohan has the absolute best Tamil bangers queued up.",
-    quote: "Life hits harder with high bass and real friends by your side.",
+    id: "jafreen",
+    name: "Jafreen",
+    nickname: "jaffuuuu",
+    role: "The Sweet Heart 🌸",
+    category: "core",
+    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    bio: "Pure warmth and genuine sweetness. Always checking in on everyone, sharing the sweetest smiles, and bringing endless harmony to our squad.",
+    quote: "Smile always, spread kindness everywhere, and love your squad unconditionally. 💖",
     journeyMilestones: [
-      { title: "Squad Anthems", desc: "Created our legendary road trip playlist that everyone still sings." },
-      { title: "Jam Sessions", desc: "Turned quiet hostel balconies into live acoustic mini concerts." }
+      { title: "Gentle Anchor", desc: "Brought genuine warmth and care to every single friend." },
+      { title: "Golden Smiles", desc: "Cheered up the whole gang with her gentle positivity." }
     ]
   },
   {
-    id: "meera",
-    name: "Meera",
-    nickname: "Mimi",
-    role: "The Peacekeeper 🕊️",
-    category: "brains",
-    avatarGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-    bio: "The gentle voice of reason whenever squad banter gets fiery. The warmest smile, gentlest hugs, and unconditional listener.",
-    quote: "Arguments pass in minutes, but namma bond is for a lifetime.",
-    journeyMilestones: [
-      { title: "The Healing Voice", desc: "United the group during tough times with compassion." },
-      { title: "Quiet Pillar", desc: "Always noticed when a friend was feeling low and cheered them up." }
-    ]
-  },
-  {
-    id: "arjun",
-    name: "Arjun",
-    nickname: "AJ",
-    role: "The Foodie King 🍕",
+    id: "afnan",
+    name: "Afnan",
+    nickname: "affuuuuu",
+    role: "The Energy Dynamo ⚡",
     category: "chaos",
     avatarGradient: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
-    bio: "Knows every hidden midnight biryani spot, chai stall, and food street in town. Never eats alone, always shares with everyone.",
-    quote: "Good food + good gang = zero regrets in life.",
+    bio: "The powerhouse of unstoppable energy. Whenever Afnan joins the room, laughter multiplies by 100x and spontaneous plans take off instantly.",
+    quote: "Life is too short for boring days — let's bring the hype! 🔥",
     journeyMilestones: [
-      { title: "Food Trail Expeditions", desc: "Took the squad on legendary street food hunts across the city." },
-      { title: "Midnight Feast Master", desc: "Cooked spontaneous Maggi and tea during college nights." }
+      { title: "The Hype Engine", desc: "Energized every gathering with infectious excitement." },
+      { title: "Spontaneous Adventures", desc: "Turned quiet hangouts into legendary laugh riots." }
     ]
   },
   {
-    id: "sneha",
-    name: "Sneha",
-    nickname: "Sneh",
-    role: "The Candid Chronicler 📸",
+    id: "meshak",
+    name: "Meshak",
+    nickname: "meshuuu",
+    role: "The Silent Strength 🛡️",
+    category: "brains",
+    avatarGradient: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
+    bio: "A reliable brother who always has your back. Calm in any crisis, fiercely loyal, and bringing unmatched warmth to our squad circle.",
+    quote: "Actions speak louder than words, but namma friendship speaks for itself. 👊✨",
+    journeyMilestones: [
+      { title: "Steady Shield", desc: "Always standing up for every friend without hesitation." },
+      { title: "Chill Evenings", desc: "Anchor of our most memorable campus and canteen chats." }
+    ]
+  },
+  {
+    id: "samual",
+    name: "Samual",
+    nickname: "sam",
+    role: "The Joyful Soul 🌟",
+    category: "chaos",
+    avatarGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    bio: "Brings pure smiles and positive vibes everywhere. Turning any mundane study session or drive into an unforgettable laughter riot.",
+    quote: "Count the memories, not the days. Let's make every second count! 😄🔥",
+    journeyMilestones: [
+      { title: "Laughter Booster", desc: "Never failed to turn a bad day into a laughing memory." },
+      { title: "Spontaneous Squad Runs", desc: "Always ready at a minute's notice for any group adventure." }
+    ]
+  },
+  {
+    id: "maithreyan",
+    name: "Maithreyan",
+    nickname: "maithuu",
+    role: "The Tech & Vibe Pilot 🚀",
     category: "creators",
-    avatarGradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
-    bio: "Has 10,000 unreleased funny photos and videos in her cloud gallery. The official historian of every funny squad memory.",
-    quote: "Delete that photo? Never! It belongs in the Natpe Thunai vault.",
+    avatarGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    bio: "The visionary brain and creator spirit. From building digital wonders to organizing memorable road trips, Maithuu makes big things happen.",
+    quote: "Code can build apps, but loyalty builds forever friendships. 💻❤️",
     journeyMilestones: [
-      { title: "The Memory Vault", desc: "Preserved hundreds of unseen candid squad moments." },
-      { title: "Year-End Recaps", desc: "Compiled hilarious year-end wrap videos for the gang." }
+      { title: "The Architect", desc: "Co-crafted digital memories and squad sanctuary projects." },
+      { title: "Unstoppable Drive", desc: "Always pushing the squad toward shared milestones and dreams." }
     ]
   },
   {
-    id: "vikram",
-    name: "Vikram",
-    nickname: "Vicky",
-    role: "The Adrenaline Junkie ⚡",
-    category: "chaos",
-    avatarGradient: "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
-    bio: "First to dive into beach waves, first to suggest trekking, and the ultimate squad hype-man who fears nothing.",
-    quote: "Don't overthink, just take the leap and let's make a story!",
+    id: "harshitha",
+    name: "Harshitha",
+    nickname: "harshuuuu",
+    role: "The Radiant Sunshine 🌻",
+    category: "core",
+    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    bio: "Spreading genuine kindness, joyful energy, and endless sparkle. The sister who listens with her whole heart and lights up our circle.",
+    quote: "In a world of noise, true friends are the sweetest melody. 🌸💖",
     journeyMilestones: [
-      { title: "Wild Treks", desc: "Led the squad to the highest sunrise viewpoint in the hills." },
-      { title: "The Hype Engine", desc: "Never let a dull moment exist in any gathering." }
+      { title: "Heart of Gold", desc: "Always thoughtful, compassionate, and cheering on every friend." },
+      { title: "Endless Smiles", desc: "Lit up every squad celebration with contagious positivity." }
     ]
   },
   {
-    id: "harini",
-    name: "Harini",
-    nickname: "Hari",
-    role: "The Golden Anchor ⚓",
+    id: "shyam",
+    name: "Shyam",
+    nickname: "Shyam",
+    role: "The Chill Anchor ⚡",
     category: "vibe",
-    avatarGradient: "linear-gradient(135deg, #84cc16 0%, #65a30d 100%)",
-    bio: "Always shows up when you need a hug or a cup of chai. The steady ground that keeps everyone connected across different cities.",
-    quote: "No matter how busy life gets, namma squad always comes first.",
+    avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+    bio: "Brings unbeatable positive energy, candid humor, and constant loyalty. Always ready for a good conversation, spontaneous drive, or late-night laugh.",
+    quote: "True friends make the good times better and the hard times easier. 🫂♾️",
     journeyMilestones: [
-      { title: "Constant Check-Ins", desc: "The glue that kept the circle close even during long holidays." },
-      { title: "Unfiltered Support", desc: "Cheered loudest at everyone's career and personal wins." }
-    ]
-  },
-  {
-    id: "karthik",
-    name: "Karthik",
-    nickname: "KK",
-    role: "The Party Starter 🎉",
-    category: "chaos",
-    avatarGradient: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-    bio: "Turns even a boring exam study hall into an absolute laughing riot. Energy level 1000% at all times with endless punchlines.",
-    quote: "Why be normal when we can be unforgettable together?",
-    journeyMilestones: [
-      { title: "Banter King", desc: "Coined all our classic inside jokes and legendary group memes." },
-      { title: "Celebration Fuel", desc: "Made every college birthday party a festival." }
+      { title: "True Companion", desc: "Always showing up with good vibes and unwavering support." },
+      { title: "Unfiltered Laughter", desc: "Co-creator of our most legendary inside jokes and stories." }
     ]
   }
 ];
@@ -271,21 +257,26 @@ const setLocal = (key, data) => {
 //  SQUAD MEMBERS API (15+ GANG MEMBERS)
 // ═══════════════════════════════════════════════════════════════════
 
+const OLD_PLACEHOLDER_IDS = new Set(["siddharth", "pooja", "rohan", "meera", "arjun", "sneha", "vikram", "harini", "karthik"]);
+
 export const getStoredMembers = () => {
   const local = getLocal(STORAGE_KEYS.MEMBERS, null);
   if (!local || !Array.isArray(local) || local.length === 0) {
     setLocal(STORAGE_KEYS.MEMBERS, INITIAL_SQUAD_MEMBERS);
     return INITIAL_SQUAD_MEMBERS;
   }
-  
+
   // Merge code-defined squad roster (updating photos/fields from code) with any custom entries
   const synced = INITIAL_SQUAD_MEMBERS.map(initialMember => {
     const existing = local.find(m => m.id === initialMember.id || m.name?.toLowerCase().trim() === initialMember.name?.toLowerCase().trim());
     return existing ? { ...existing, ...initialMember, photo: initialMember.photo || existing.photo } : initialMember;
   });
 
-  // Keep any user-added custom members from UI
-  const customMembers = local.filter(m => !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim()));
+  // Keep any user-added custom members from UI (excluding old placeholder names)
+  const customMembers = local.filter(m => 
+    !OLD_PLACEHOLDER_IDS.has(m.id) &&
+    !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim())
+  );
   const fullList = [...synced, ...customMembers];
   setLocal(STORAGE_KEYS.MEMBERS, fullList);
   return fullList;
