@@ -11,7 +11,8 @@ import {
   Lock, 
   Bot, 
   Copy, 
-  Check 
+  Check,
+  Heart 
 } from 'lucide-react';
 import { signInWithGoogle, logOut, onAuthChange, sendMessage, subscribeToMessages } from '../../firebase';
 import './GroupChat.css';
@@ -36,6 +37,7 @@ export default function GroupChat({ onOpenSignIn }) {
   const [showEmojis, setShowEmojis] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [likedAiMsgIds, setLikedAiMsgIds] = useState(new Set());
 
   // AI Story Companion State
   const [aiChatInput, setAiChatInput] = useState('');
@@ -204,6 +206,15 @@ export default function GroupChat({ onOpenSignIn }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const toggleLikeAi = (id) => {
+    setLikedAiMsgIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const formatTime = (timestamp) => {
     if (!timestamp) return '';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -294,7 +305,18 @@ export default function GroupChat({ onOpenSignIn }) {
                 <Sparkles size={18} />
               </div>
               <div className="ai-identity-text">
-                <h3 className="ai-bot-name">Natpe AI Story Companion</h3>
+                <div className="ai-title-row">
+                  <h3 className="ai-bot-name">Natpe AI Story Companion</h3>
+                  {aiIsTyping && (
+                    <div className="ai-typing-soundwave" aria-label="AI Generating response">
+                      <span className="wave-bar bar-1" />
+                      <span className="wave-bar bar-2" />
+                      <span className="wave-bar bar-3" />
+                      <span className="wave-bar bar-4" />
+                      <span className="wave-text">Thinking...</span>
+                    </div>
+                  )}
+                </div>
                 <span className="ai-bot-sub">Trained on our authentic first year journey, cooking, laughs & fights</span>
               </div>
             </div>
@@ -308,6 +330,7 @@ export default function GroupChat({ onOpenSignIn }) {
                   className="ai-suggestion-chip"
                   onClick={() => handleSendAiMessage(chip.query)}
                 >
+                  <span className="chip-sparkle-dot" />
                   <span>{chip.label}</span>
                 </button>
               ))}
@@ -315,6 +338,9 @@ export default function GroupChat({ onOpenSignIn }) {
 
             {/* AI Messages Stream */}
             <div className="chat-stream-viewport ai-stream" ref={chatContainerRef}>
+              <div className="chat-ambient-glow glow-1" aria-hidden="true" />
+              <div className="chat-ambient-glow glow-2" aria-hidden="true" />
+
               {aiMessages.map((msg) => (
                 <div 
                   key={msg.id} 
@@ -337,15 +363,28 @@ export default function GroupChat({ onOpenSignIn }) {
                       <div className="bubble-meta">
                         <span className="bubble-timestamp">{msg.timestamp}</span>
                         {msg.sender === 'ai' && (
-                          <button
-                            type="button"
-                            className="ai-copy-text-btn"
-                            onClick={() => copyAiText(msg.id, msg.text)}
-                            title="Copy message"
-                            aria-label="Copy message"
-                          >
-                            {copiedId === msg.id ? <Check size={13} /> : <Copy size={13} />}
-                          </button>
+                          <div className="ai-bubble-actions">
+                            <button
+                              type="button"
+                              className={`ai-action-icon-btn ai-heart-btn ${likedAiMsgIds.has(msg.id) ? 'liked' : ''}`}
+                              onClick={() => toggleLikeAi(msg.id)}
+                              title={likedAiMsgIds.has(msg.id) ? "Loved this memory" : "Love this memory"}
+                              aria-label="Love this memory"
+                            >
+                              <Heart size={12} className={likedAiMsgIds.has(msg.id) ? 'heart-filled' : ''} />
+                              {likedAiMsgIds.has(msg.id) && <span className="heart-count">1</span>}
+                            </button>
+
+                            <button
+                              type="button"
+                              className="ai-action-icon-btn ai-copy-text-btn"
+                              onClick={() => copyAiText(msg.id, msg.text)}
+                              title="Copy message"
+                              aria-label="Copy message"
+                            >
+                              {copiedId === msg.id ? <Check size={12} className="copy-checked-icon" /> : <Copy size={12} />}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>

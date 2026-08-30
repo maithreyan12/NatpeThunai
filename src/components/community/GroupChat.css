@@ -404,20 +404,46 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
-/* ── iMessage Bubbles ── */
+/* ── iMessage Bubbles & Rich Entrance Animations ── */
 .chat-bubble-row {
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
+  animation: messageRowSlide 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+  position: relative;
+  z-index: 1;
 }
 
 .chat-bubble-row.own-side {
   flex-direction: row-reverse;
+  animation-name: messageRowSlideOwn;
 }
 
 .chat-bubble-row.grouped-msg {
   margin-top: -3px;
+}
+
+@keyframes messageRowSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px) translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+}
+
+@keyframes messageRowSlideOwn {
+  0% {
+    opacity: 0;
+    transform: translateX(16px) translateY(8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
 }
 
 .chat-sender-avatar {
@@ -428,6 +454,11 @@
   flex-shrink: 0;
   border: 2px solid white;
   box-shadow: 0 2px 6px rgba(124, 58, 237, 0.15);
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.chat-bubble-row:hover .chat-sender-avatar {
+  transform: scale(1.12);
 }
 
 [data-theme="dark"] .chat-sender-avatar {
@@ -462,10 +493,28 @@
   word-break: break-word;
   box-shadow: var(--shadow-subtle);
   position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+}
+
+.chat-imessage-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glass-sm);
+}
+
+.chat-imessage-bubble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, transparent 60%);
+  pointer-events: none;
 }
 
 .bubble-other {
   background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border: var(--glass-border);
   border-bottom-left-radius: 6px;
   color: var(--text-primary);
@@ -842,6 +891,13 @@
   gap: 2px;
 }
 
+.ai-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .ai-bot-name {
   font-family: var(--font-heading);
   font-size: 0.98rem;
@@ -849,19 +905,59 @@
   color: var(--text-primary);
 }
 
+/* Equalizer soundwave animation */
+.ai-typing-soundwave {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  background: var(--tint-lavender);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(91, 76, 219, 0.25);
+  animation: fadeInSoundwave 0.25s ease;
+}
+
+@keyframes fadeInSoundwave {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.wave-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent-lavender);
+  animation: waveEqualizer 0.8s ease-in-out infinite alternate;
+}
+.bar-1 { animation-delay: 0s; height: 8px; }
+.bar-2 { animation-delay: 0.2s; height: 14px; }
+.bar-3 { animation-delay: 0.4s; height: 10px; }
+.bar-4 { animation-delay: 0.15s; height: 16px; }
+
+@keyframes waveEqualizer {
+  0% { transform: scaleY(0.3); opacity: 0.6; }
+  100% { transform: scaleY(1.2); opacity: 1; }
+}
+
+.wave-text {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: var(--accent-lavender);
+  margin-left: 4px;
+}
+
 .ai-bot-sub {
   font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
-/* ── Prompt Chips ── */
+/* ── Prompt Chips with Micro-Spring Animations ── */
 .ai-prompt-chips-scroll {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
   overflow-x: auto;
-  background: var(--bg-surface);
+  background: var(--glass-surface-subtle);
   border-bottom: 1px solid var(--border-subtle);
   scrollbar-width: none;
 }
@@ -871,8 +967,10 @@
 }
 
 .ai-suggestion-chip {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  background: var(--glass-surface-floating);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border);
   border-radius: var(--radius-pill);
   padding: 6px 14px;
   font-size: 0.78rem;
@@ -880,41 +978,103 @@
   color: var(--text-primary);
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: var(--shadow-xs);
-  transition: var(--transition-fast);
+  box-shadow: var(--shadow-glass-sm);
+  transition: transform 0.2s var(--ease-spring), 
+              box-shadow 0.2s ease, 
+              border-color 0.2s ease, 
+              color 0.2s ease,
+              background-color 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+}
+
+.chip-sparkle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-lavender);
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.7);
+  transition: transform 0.2s ease;
 }
 
 .ai-suggestion-chip:hover {
   background: var(--tint-lavender);
   border-color: var(--accent-lavender);
   color: var(--accent-lavender);
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.22);
+}
+
+.ai-suggestion-chip:hover .chip-sparkle-dot {
+  transform: scale(1.5);
+}
+
+.ai-suggestion-chip:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ── Ambient Glow in Chat Viewport ── */
+.chat-ambient-glow {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.30;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatChatAura 8s infinite alternate ease-in-out;
+}
+
+.glow-1 {
+  top: 10%;
+  right: -40px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.28) 0%, transparent 70%);
+}
+
+.glow-2 {
+  bottom: 15%;
+  left: -40px;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.24) 0%, transparent 70%);
+  animation-delay: -4s;
+}
+
+@keyframes floatChatAura {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-25px, 35px) scale(1.15); }
 }
 
 /* ── AI Chat Bubbles ── */
 .bubble-ai {
-  background: var(--bg-card);
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
   color: var(--text-primary);
-  border: 1px solid var(--border-light);
+  border: var(--glass-border-highlight);
   border-bottom-left-radius: 4px;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-glass-sm);
   max-width: 92%;
 }
 
 .ai-sender-icon-bubble {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--tint-lavender);
-  color: var(--accent-lavender);
+  background: var(--gradient-brand);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(91, 76, 219, 0.35);
+  animation: aiAuraPulse 3s infinite ease-in-out;
+}
+
+@keyframes aiAuraPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(91, 76, 219, 0.35); }
+  50% { transform: scale(1.08); box-shadow: 0 6px 18px rgba(91, 76, 219, 0.55); }
 }
 
 .bubble-markdown-text {
@@ -929,45 +1089,120 @@
   color: var(--text-primary);
 }
 
-.ai-copy-text-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: var(--radius-xs);
+/* ── AI Bubble Actions (Heart & Copy) ── */
+.ai-bubble-actions {
   display: flex;
   align-items: center;
-  transition: color 0.16s ease;
+  gap: 6px;
+  margin-left: 8px;
 }
 
-.ai-copy-text-btn:hover {
+.ai-action-icon-btn {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: transform 0.16s var(--ease-spring), color 0.16s ease, background-color 0.16s ease;
+}
+
+[data-theme="dark"] .ai-action-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ai-action-icon-btn:hover {
+  transform: scale(1.12);
   color: var(--accent-lavender);
+  border-color: var(--accent-lavender);
 }
 
-/* Typing Indicator */
+.ai-heart-btn.liked {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.12);
+  border-color: rgba(225, 29, 72, 0.35);
+  animation: heartBurst 0.34s var(--ease-spring);
+}
+
+.heart-filled {
+  fill: #e11d48;
+}
+
+.heart-count {
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+@keyframes heartBurst {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.copy-checked-icon {
+  color: #10b981;
+  animation: checkPop 0.28s var(--ease-spring);
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Upgraded Typing Wave Indicator ── */
 .typing-indicator-bubble {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 12px 18px;
+  gap: 5px;
+  padding: 12px 20px;
+  background: var(--glass-surface-card);
+  backdrop-filter: var(--glass-blur-md);
+  border: var(--glass-border-highlight);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-glass-sm), 0 4px 14px rgba(124, 58, 237, 0.15);
 }
 
 .typing-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--accent-lavender);
-  opacity: 0.6;
-  animation: typingBounce 1.2s infinite ease-in-out;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+  animation: typingWave 1.2s infinite ease-in-out;
 }
 
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.typing-dot:nth-child(2) { animation-delay: 0.18s; }
+.typing-dot:nth-child(3) { animation-delay: 0.36s; }
 
-@keyframes typingBounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-  40% { transform: translateY(-5px); opacity: 1; }
+@keyframes typingWave {
+  0%, 100% {
+    transform: translateY(0) scale(0.85);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(-7px) scale(1.25);
+    opacity: 1;
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.9);
+  }
+}
+
+/* ── Submit Button Pulse Animation ── */
+.chat-submit-btn.active {
+  background: var(--gradient-brand);
+  color: white;
+  cursor: pointer;
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.40);
+  animation: readyPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes readyPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(124, 58, 237, 0.40); }
+  50% { box-shadow: 0 6px 24px rgba(124, 58, 237, 0.70); }
 }
 
 @keyframes pulseLight {
