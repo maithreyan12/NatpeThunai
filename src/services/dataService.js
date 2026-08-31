@@ -133,8 +133,8 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "jafreen",
-    name: "Jafreen",
+    id: "jaffreen",
+    name: "Jaffreen MV",
     nickname: "jaffuuuu",
     role: "The Sweet Heart 🌸",
     category: "core",
@@ -147,8 +147,8 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "afnan",
-    name: "Afnan",
+    id: "afnaan",
+    name: "Afnaaan",
     nickname: "affuuuuu",
     role: "The Energy Dynamo ⚡",
     category: "chaos",
@@ -273,7 +273,7 @@ export const getStoredMembers = () => {
   });
 
   // Keep any user-added custom members from UI (excluding old placeholder names)
-  const customMembers = local.filter(m => 
+  const customMembers = local.filter(m =>
     !OLD_PLACEHOLDER_IDS.has(m.id) &&
     !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim())
   );
