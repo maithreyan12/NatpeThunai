@@ -6,11 +6,14 @@ import { db } from '../firebase';
 import {
   collection,
   addDoc,
+  doc,
+  deleteDoc,
   onSnapshot,
   query,
   orderBy,
   serverTimestamp
 } from 'firebase/firestore';
+import { deleteFromR2 } from './r2StorageService';
 
 const STORAGE_KEYS = {
   MEMBERS: 'natpethunai_members_v2',
@@ -177,7 +180,7 @@ export const INITIAL_SQUAD_MEMBERS = [
   {
     id: "samual",
     name: "Samual",
-    nickname: "sam",
+    nickname: "samual",
     role: "The Joyful Soul 🌟",
     category: "chaos",
     avatarGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
@@ -554,6 +557,29 @@ export const addCommentToMemory = (memoryId, authorName, commentText) => {
     return m;
   });
   setLocal(STORAGE_KEYS.MEMORIES, updated);
+  return updated;
+};
+
+export const deleteMemory = async (memoryId) => {
+  const memories = getStoredMemories();
+  const memoryToDelete = memories.find(m => m.id === memoryId);
+
+  // If the memory contains an R2 object key, delete from Cloudflare R2 and reclaim storage
+  if (memoryToDelete?.r2ObjectKey) {
+    await deleteFromR2(memoryToDelete.r2ObjectKey);
+  }
+
+  const updated = memories.filter(m => m.id !== memoryId);
+  setLocal(STORAGE_KEYS.MEMORIES, updated);
+
+  try {
+    if (db && memoryId) {
+      await deleteDoc(doc(db, 'natpe-thunai-memories', memoryId));
+    }
+  } catch (err) {
+    console.info("Synced local memory deletion:", err.message);
+  }
+
   return updated;
 };
 

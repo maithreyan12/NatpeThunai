@@ -10,7 +10,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import MemoryCard from './MemoryCard';
-import { getStoredMembers } from '../../services';
+import { getStoredMembers, uploadToR2WithGuardrails } from '../../services';
 import './MemoryTimeline.css';
 
 const CATEGORY_TABS = ['All Moments', 'Adventures', 'Milestones', 'Reunions', 'Daily Laughs'];
@@ -31,6 +31,7 @@ export default function MemoryTimeline({
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const scrollTrackRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -53,19 +54,23 @@ export default function MemoryTimeline({
   };
 
   const processFiles = async (fileList) => {
-    const imageFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-    if (imageFiles.length === 0) return;
+    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    if (validFiles.length === 0) return;
     setIsUploading(true);
+    setUploadProgress(10);
 
     const newMemories = [];
-    for (const file of imageFiles) {
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
       try {
-        const dataUrl = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (event) => resolve(event.target.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        const uploadResult = await uploadToR2WithGuardrails(
+          file, 
+          'memories',
+          (percent) => {
+            const stepProgress = Math.round(((i + (percent / 100)) / validFiles.length) * 100);
+            setUploadProgress(stepProgress);
+          }
+        );
 
         const cleanName = file.name
           .replace(/\.[^/.]+$/, '')
@@ -79,15 +84,16 @@ export default function MemoryTimeline({
         newMemories.push({
           title: formattedTitle,
           description: 'Cherished squad memory added to the album ❤️',
-          mediaUrl: dataUrl,
-          mediaType: 'image',
+          mediaUrl: uploadResult.publicUrl,
+          mediaType: uploadResult.fileType,
+          r2ObjectKey: uploadResult.objectKey || null,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           location: 'Squad Sanctuary',
           people: ['Grace', 'Heenuuu', 'Divyaa', 'Puppy', 'Farish'],
           category: selectedCategory === 'All Moments' ? 'Moments' : selectedCategory
         });
       } catch (err) {
-        console.warn('Error reading file:', err);
+        console.warn('Error uploading media to R2:', err);
       }
     }
 
@@ -97,6 +103,7 @@ export default function MemoryTimeline({
       setSelectedMember('All');
     }
     setIsUploading(false);
+    setUploadProgress(0);
   };
 
   // Sync with prop changes if parent triggers filter from friend card

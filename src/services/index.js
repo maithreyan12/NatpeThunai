@@ -3,3 +3,5 @@
 // ═══════════════════════════════════════════════════════════════════
 
 export * from './dataService';
+export * from './r2StorageService';
+export * from './r2QuotaService';
