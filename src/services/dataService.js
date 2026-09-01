@@ -42,6 +42,21 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
+    id: "haniya",
+    name: "Haniya",
+    nickname: "hanuuuu",
+    role: "The Chill Sloth 🦥",
+    category: "vibe",
+    avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+    photo: r2Photo('hanuu.jpg'),
+    bio: "The undisputed chill master of the squad. Certified queen of cozy naps, relaxed vibes, and turning any stressful day into pure peace.",
+    quote: "Why stress when you can sleep? Good vibes and cozy dreams always.",
+    journeyMilestones: [
+      { title: "Peak Cozy Vibes", desc: "Master of effortless relaxation and turning chaos into calm." },
+      { title: "Late Night Banter", desc: "Wakes up right on time for the best late-night laughs." }
+    ]
+  },
+  {
     id: "grace",
     name: "Grace",
     nickname: "Gracee",
@@ -56,7 +71,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "jafteen",
+    id: "jaffreen",
     name: "Jaffreen",
     nickname: "jaffuuuu",
     role: "The Sweet Heart 💖",
@@ -68,21 +83,6 @@ export const INITIAL_SQUAD_MEMBERS = [
     journeyMilestones: [
       { title: "Gentle Anchor", desc: "Brought genuine warmth and care to every single friend." },
       { title: "Golden Smiles", desc: "Cheered up the whole gang with her gentle positivity." }
-    ]
-  },
-  {
-    id: "haniya",
-    name: "Haniya",
-    nickname: "hanuuuu",
-    role: "The Chill Sloth 🦥",
-    category: "vibe",
-    avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-    photo: r2Photo('hanuu.jpg'),
-    bio: "The undisputed chill master of the squad. Certified queen of cozy naps, relaxed vibes, and turning any stressful day into pure peace.",
-    quote: "Why stress when you can sleep? Good vibes and cozy dreams always.",
-    journeyMilestones: [
-      { title: "Peak Cozy Vibes", desc: "Master of effortless relaxation and turning chaos into calm." },
-      { title: "Late Night Banter", desc: "Wakes up right on time for the best late-night laughs." }
     ]
   },
   {

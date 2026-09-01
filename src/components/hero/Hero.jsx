@@ -134,11 +134,32 @@ export default function Hero({
           </div>
         </div>
 
-        {/* Interactive Dynamic Squad Memory Mosaic Fan — 3x2 Grid (3 Top / 3 Bottom) */}
-        <div className="hero-polaroid-stage hero-polaroid-grid-3x2" aria-label="Major Squad Members">
-          {/* ── ROW 1 ── */}
-          {/* Member 1: Kafil */}
-          <div className="polaroid-card card-rotate-left" onClick={onMeetSquad}>
+        {/* Interactive Dynamic Squad Memory Mosaic Fan — 2-3-2 Staggered Grid Pattern */}
+        <div className="hero-polaroid-stage hero-polaroid-grid-staggered" aria-label="Major Squad Members">
+          {/* ── ROW 1 (2 Cards: Core 01 & Core 02) ── */}
+          {/* Member 1: Haniya (Core 01 -> Row 1, Col 1) */}
+          <div className="polaroid-card card-rotate-left hero-grid-r1-c1" onClick={onMeetSquad}>
+            <div className="polaroid-photo-frame">
+              <img
+                src={r2Photo('hanuu.jpg')}
+                alt="Haniya"
+                className="polaroid-img"
+                style={{ objectPosition: 'center 15%' }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/photos/hanuu.jpg';
+                }}
+              />
+              <span className="polaroid-year-tag">Core 01</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Haniya</span>
+              <span className="caption-sub">The Chill Sloth 🦥</span>
+            </div>
+          </div>
+
+          {/* Member 2: Kafil (Core 02 -> Row 1, Col 2) */}
+          <div className="polaroid-card card-rotate-right hero-grid-r1-c2" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
               <img
                 src={r2Photo('kafil.jpg')}
@@ -150,7 +171,7 @@ export default function Hero({
                   e.target.src = '/photos/kafil.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 01</span>
+              <span className="polaroid-year-tag">Core 02</span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Kafil..KK</span>
@@ -158,29 +179,9 @@ export default function Hero({
             </div>
           </div>
 
-          {/* Member 2: Grace */}
-          <div className="polaroid-card card-elevated" onClick={onMeetSquad}>
-            <div className="polaroid-photo-frame">
-              <img
-                src={r2Photo('Gracee.jpg')}
-                alt="Grace"
-                className="polaroid-img"
-                style={{ objectPosition: 'center 15%' }}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '/photos/Gracee.jpg';
-                }}
-              />
-              <span className="polaroid-year-tag">Core 02</span>
-            </div>
-            <div className="polaroid-caption">
-              <span className="caption-heading">Grace</span>
-              <span className="caption-sub">The Spark & Creative ✨</span>
-            </div>
-          </div>
-
-          {/* Member 3: Jaffreen */}
-          <div className="polaroid-card card-rotate-right" onClick={onMeetSquad}>
+          {/* ── ROW 2 (3 Cards: Core 03, Core 04, Core 05) ── */}
+          {/* Member 3: Jaffreen (Core 03 -> Row 2, Col 1) */}
+          <div className="polaroid-card card-rotate-left hero-grid-r2-c1" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
               <img
                 src={r2Photo('jaffreen.jpg')}
@@ -200,30 +201,51 @@ export default function Hero({
             </div>
           </div>
 
-          {/* ── ROW 2 ── */}
-          {/* Member 4: Haniya */}
-          <div className="polaroid-card card-rotate-left" onClick={onMeetSquad}>
+          {/* Member 4: Grace (Core 04 -> Row 2, Col 2) */}
+          <div className="polaroid-card card-elevated hero-grid-r2-c2" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
               <img
-                src={r2Photo('hanuu.jpg')}
-                alt="Haniya"
+                src={r2Photo('Gracee.jpg')}
+                alt="Grace"
                 className="polaroid-img"
                 style={{ objectPosition: 'center 15%' }}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/photos/hanuu.jpg';
+                  e.target.src = '/photos/Gracee.jpg';
                 }}
               />
               <span className="polaroid-year-tag">Core 04</span>
             </div>
             <div className="polaroid-caption">
-              <span className="caption-heading">Haniya</span>
-              <span className="caption-sub">The Chill Sloth 🦥</span>
+              <span className="caption-heading">Grace</span>
+              <span className="caption-sub">The Spark & Creative ✨</span>
             </div>
           </div>
 
-          {/* Member 5: Farish Sharif */}
-          <div className="polaroid-card card-elevated" onClick={onMeetSquad}>
+          {/* Member 5: Samuel (Core 05 -> Row 2, Col 3) */}
+          <div className="polaroid-card card-rotate-right hero-grid-r2-c3" onClick={onMeetSquad}>
+            <div className="polaroid-photo-frame">
+              <img
+                src={r2Photo('samuel.jpg')}
+                alt="Samuel"
+                className="polaroid-img"
+                style={{ objectPosition: 'center 10%' }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/photos/samuel.jpg';
+                }}
+              />
+              <span className="polaroid-year-tag">Core 05</span>
+            </div>
+            <div className="polaroid-caption">
+              <span className="caption-heading">Samuel</span>
+              <span className="caption-sub">The Joyful Soul 🌟</span>
+            </div>
+          </div>
+
+          {/* ── ROW 3 (2 Cards: Core 06 & Core 07 — Col 1 Empty) ── */}
+          {/* Member 6: Farish Sharif (Core 06 -> Row 3, Col 2) */}
+          <div className="polaroid-card card-elevated hero-grid-r3-c2" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
               <img
                 src={r2Photo('farish.jpg')}
@@ -235,7 +257,7 @@ export default function Hero({
                   e.target.src = '/photos/farish.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 05</span>
+              <span className="polaroid-year-tag">Core 06</span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Farish Sharif</span>
@@ -243,8 +265,8 @@ export default function Hero({
             </div>
           </div>
 
-          {/* Member 6: Divya */}
-          <div className="polaroid-card card-rotate-far-right" onClick={onMeetSquad}>
+          {/* Member 7: Divyaa (Core 07 -> Row 3, Col 3) */}
+          <div className="polaroid-card card-rotate-far-right hero-grid-r3-c3" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
               <img
                 src={r2Photo('Divyaa.jpg')}
@@ -256,7 +278,7 @@ export default function Hero({
                   e.target.src = '/photos/Divyaa.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 06</span>
+              <span className="polaroid-year-tag">Core 07</span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Divyaa</span>
