@@ -153,7 +153,7 @@ export default function Hero({
               <span className="polaroid-year-tag">Core 01</span>
             </div>
             <div className="polaroid-caption">
-              <span className="caption-heading">Kafil</span>
+              <span className="caption-heading">Kafil..KK</span>
               <span className="caption-sub">The Creative Soul 🎨</span>
             </div>
           </div>
