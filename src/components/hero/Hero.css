@@ -534,36 +534,85 @@
   .hero-polaroid-grid-3x2,
   .hero-polaroid-grid-staggered {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 8px;
     width: 100%;
-    max-width: 360px;
-    margin: 0 auto 30px auto;
+    max-width: 380px;
+    margin: 0 auto 28px auto;
   }
-  .hero-grid-r1-c1,
-  .hero-grid-r1-c2,
-  .hero-grid-r2-c1,
-  .hero-grid-r2-c2,
-  .hero-grid-r2-c3,
-  .hero-grid-r3-c2,
-  .hero-grid-r3-c3 {
-    grid-column: auto !important;
-    grid-row: auto !important;
-  }
+
+  /* Retain exact 2-3-2 stepped layout on mobile */
+  .hero-grid-r1-c1 { grid-column: 1; grid-row: 1; }
+  .hero-grid-r1-c2 { grid-column: 2; grid-row: 1; }
+  .hero-grid-r2-c1 { grid-column: 1; grid-row: 2; }
+  .hero-grid-r2-c2 { grid-column: 2; grid-row: 2; }
+  .hero-grid-r2-c3 { grid-column: 3; grid-row: 2; }
+  .hero-grid-r3-c2 { grid-column: 2; grid-row: 3; }
+  .hero-grid-r3-c3 { grid-column: 3; grid-row: 3; }
+
   .polaroid-card {
     width: 100%;
-    transform: none !important;
-    padding: 7px 7px 10px 7px;
+    padding: 5px 5px 8px 5px;
+    border-radius: var(--radius-sm);
+  }
+  .card-rotate-left {
+    transform: rotate(-1.5deg) translateY(1px);
+  }
+  .card-elevated {
+    transform: rotate(1deg) translateY(-2px);
+  }
+  .card-rotate-right {
+    transform: rotate(1.5deg) translateY(1px);
+  }
+  .card-rotate-far-right {
+    transform: rotate(-1deg) translateY(2px);
   }
   .polaroid-photo-frame {
-    height: clamp(110px, 30vw, 140px);
-    margin-bottom: 6px;
+    height: clamp(86px, 25vw, 115px);
+    margin-bottom: 5px;
+    border-radius: 6px;
+  }
+  .polaroid-year-tag {
+    top: 4px;
+    left: 4px;
+    font-size: 0.52rem;
+    padding: 1px 4.5px;
+    border-radius: 3px;
   }
   .caption-heading {
-    font-size: 0.76rem;
+    font-size: 0.68rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
   .caption-sub {
-    font-size: 0.64rem;
+    font-size: 0.52rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    opacity: 0.85;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-polaroid-stage,
+  .hero-polaroid-grid-3x2,
+  .hero-polaroid-grid-staggered {
+    gap: 7px 6px;
+    max-width: 330px;
+  }
+  .polaroid-photo-frame {
+    height: 80px;
+  }
+  .caption-heading {
+    font-size: 0.62rem;
+  }
+  .caption-sub {
+    font-size: 0.48rem;
   }
 }
 
