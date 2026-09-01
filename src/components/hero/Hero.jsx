@@ -20,6 +20,14 @@ export default function Hero({
 }) {
   return (
     <section id="hero" className="hero-community-section">
+      {/* Smoky cinematic background orbs */}
+      <div className="hero-smoke-bg" aria-hidden="true">
+        <div className="smoke-orb smoke-orb-1" />
+        <div className="smoke-orb smoke-orb-2" />
+        <div className="smoke-orb smoke-orb-3" />
+        <div className="smoke-orb smoke-orb-4" />
+      </div>
+
       {/* Soft Ambient Spotlight */}
       <div className="hero-ambient-soft-spot" aria-hidden="true" />
 
@@ -39,7 +47,6 @@ export default function Hero({
             <div className="hero-ink-swash" aria-hidden="true">
               <svg viewBox="0 0 320 55" fill="none" xmlns="http://www.w3.org/2000/svg" className="ink-swash-svg">
                 <path d="M20 45 Q80 8 160 20 Q240 32 300 10" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" fill="none" className="ink-path-main"/>
-                <path d="M110 18 Q155 4 200 14" stroke="#dc2626" strokeWidth="2.5" strokeLinecap="round" fill="none" className="ink-path-red"/>
               </svg>
             </div>
 
@@ -47,10 +54,7 @@ export default function Hero({
               {/* Cinematic Tamil Title */}
               <div className="hero-cinematic-tamil-block">
                 <span className="hero-tamil-cinematic">நட்பே</span>
-                <div className="hero-tamil-accent-row">
-                  <span className="hero-tamil-cinematic hero-tamil-thunai">துணை</span>
-                  <span className="hero-ink-dot" aria-hidden="true" />
-                </div>
+                <span className="hero-tamil-cinematic hero-tamil-thunai">துணை</span>
               </div>
               <span className="hero-english-name">Natpethunai</span>
             </h1>
