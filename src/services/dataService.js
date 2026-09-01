@@ -17,7 +17,7 @@ import { deleteFromR2 } from './r2StorageService';
 import { r2Photo } from './r2Assets';
 
 const STORAGE_KEYS = {
-  MEMBERS: 'natpethunai_members_v9', // bumped: added Jaffreen and Samuel R2 photos
+  MEMBERS: 'natpethunai_members_v9',
   MEMORIES: 'natpethunai_memories_v2',
   POSTS: 'natpethunai_posts_v2',
   EVENTS: 'natpethunai_events_v2'
