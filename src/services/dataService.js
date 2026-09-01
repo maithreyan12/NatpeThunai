@@ -14,9 +14,10 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { deleteFromR2 } from './r2StorageService';
+import { r2Photo } from './r2Assets';
 
 const STORAGE_KEYS = {
-  MEMBERS: 'natpethunai_members_v2',
+  MEMBERS: 'natpethunai_members_v9', // bumped: added Jaffreen and Samuel R2 photos
   MEMORIES: 'natpethunai_memories_v2',
   POSTS: 'natpethunai_posts_v2',
   EVENTS: 'natpethunai_events_v2'
@@ -24,101 +25,49 @@ const STORAGE_KEYS = {
 
 // ── Authentic 15-Member Gang Roster ──
 export const INITIAL_SQUAD_MEMBERS = [
-  {
-    id: "grace",
-    name: "Grace",
-    nickname: "Gracxx",
-    role: "The Spark ✨",
-    category: "core",
-    instagram: "https://www.instagram.com/_.gracxx._",
-    photo: "/photos/Gracee.jpg",
-    bio: "The one who lights up every room she walks into. Bringing unconditional energy, hearty laughs, and unforgettable road trip moments.",
-    quote: "Life is too short not to laugh until our stomachs hurt.",
-    journeyMilestones: [
-      { title: "The First Spark", desc: "Started the late-night tea talks that founded our circle." },
-      { title: "Spontaneous Adventures", desc: "Turned every random road trip into an unforgettable memory." },
-      { title: "Unshakable Support", desc: "Celebrated shared wins and lifted everyone's spirits." },
-      { title: "Eternal Energy", desc: "Still the spark that keeps our laughter alive today." }
-    ]
-  },
-  {
-    id: "heenuuu",
-    name: "Heenuuu",
-    nickname: "Hennesy",
-    role: "The Heart 💖",
-    category: "core",
-    instagram: "https://www.instagram.com/hennesy260",
-    photo: "/photos/Heenuuu.jpg",
-    bio: "The emotional backbone of the squad. Always there with genuine advice, late night calls, and warmest support through every college milestone.",
-    quote: "Real ones stay, no matter the distance or time.",
-    journeyMilestones: [
-      { title: "The Open Arms", desc: "Welcomed everyone with genuine warmth from day one." },
-      { title: "Midnight Deep Talks", desc: "Hours of listening, comforting, and heartfelt guidance." },
-      { title: "Unconditional Anchor", desc: "The calm presence that helped the squad navigate any storm." },
-      { title: "Forever Golden Heart", desc: "The keeper of our deepest secrets and warmest hugs." }
-    ]
-  },
-  {
-    id: "divyaaa",
-    name: "Divyaaa",
-    nickname: "Twinkle Cheek",
-    role: "The Sunshine ☀️",
-    category: "core",
-    instagram: "https://www.instagram.com/divya_twinkle_cheek",
-    photo: "/photos/Divyaa.jpg",
-    bio: "Pure sunshine energy and an infectious smile. Turning every ordinary college afternoon into an unforgettable squad celebration.",
-    quote: "Smile big, laugh louder, treasure each day.",
-    journeyMilestones: [
-      { title: "Radiant Smiles", desc: "Lit up every hallway with infectious positivity." },
-      { title: "Squad Festivities", desc: "Made every birthday celebration an epic memory." },
-      { title: "Unfiltered Joy", desc: "The photographer behind our sweetest candid memories." },
-      { title: "Endless Sunshine", desc: "Proof that true friendship grows brighter with time." }
-    ]
-  },
-  {
-    id: "puppy",
-    name: "Puppy",
-    nickname: "Garnett",
-    role: "The Vibe 🎯",
-    category: "core",
-    instagram: "https://www.instagram.com/garnett.__.12",
-    photo: "/photos/Puppy.jpg",
-    bio: "The calm soul in our storm. Keeps it 100% authentic, brings chill vibes, and stands by everyone unconditionally.",
-    quote: "Good vibes only — everything else can wait.",
-    journeyMilestones: [
-      { title: "The Real Foundation", desc: "Brought grounded authenticity and calm to our group." },
-      { title: "Chill Sanctuary", desc: "The safe space where everyone could be their true selves." },
-      { title: "Loyalty In Action", desc: "Never hesitated to show up whenever a friend called." },
-      { title: "Unbreakable Pillar", desc: "Anchoring our shared bond with timeless loyalty." }
-    ]
-  },
-  {
-    id: "farish",
-    name: "Farish Sharif",
-    nickname: "fairs",
-    role: "The Mastermind 🧠",
-    category: "core",
-    instagram: "https://www.instagram.com/fairsh_sharif",
-    photo: "/photos/farish.jpg",
-    bio: "The planner behind every squad reunion and last-minute travel plan. Keeps everyone organized even in the midst of pure chaos.",
-    quote: "Plan A never works, that's why the alphabet has 25 more letters.",
-    journeyMilestones: [
-      { title: "The Master Plan", desc: "Coordinated the very first squad hill-station road trip." },
-      { title: "Reliable Support", desc: "Always has a solution before a problem even happens." }
-    ]
-  },
+  // ── CORE 6 ──
   {
     id: "kafil",
     name: "Kafil",
-    nickname: "Anu",
+    nickname: "K..K",
     role: "The Creative Soul 🎨",
     category: "creators",
     avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
-    bio: "The aesthetic eye of the gang. Capturing candid laughs, curating squad playlists, and designing surprise birthday cakes.",
+    photo: r2Photo('kafil.jpg'),
+    bio: "The aesthetic eye and creative heartbeat of the gang. Capturing candid laughs, curating squad playlists, and designing surprise birthday celebrations.",
     quote: "Every memory with namma gang deserves its own soundtrack.",
     journeyMilestones: [
       { title: "Aesthetic Vibes", desc: "Transformed our regular hangout spots into pure cinematic frames." },
       { title: "Heartfelt Surprises", desc: "Crafted personalized keepsakes for every squad milestone." }
+    ]
+  },
+  {
+    id: "grace",
+    name: "Grace",
+    nickname: "Gracee",
+    role: "The Spark & Creative ✨",
+    category: "core",
+    photo: r2Photo('Gracee.jpg'),
+    bio: "The aesthetic eye and radiant spark of our gang. Always creating unforgettable memories, aesthetic photo moments, and squad joy.",
+    quote: "Every memory with namma gang deserves its own soundtrack. ❤️",
+    journeyMilestones: [
+      { title: "The First Spark", desc: "Co-started our earliest campus memories and cherished tea-time talks." },
+      { title: "Aesthetic Frames", desc: "Transformed regular hangout spots into pure cinematic frames." }
+    ]
+  },
+  {
+    id: "jafteen",
+    name: "Jaffreen",
+    nickname: "jaffuuuu",
+    role: "The Sweet Heart 💖",
+    category: "core",
+    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    photo: r2Photo('jaffreen.jpg'),
+    bio: "Pure warmth and genuine sweetness. Always checking in on everyone, sharing the sweetest smiles, and bringing endless harmony to our squad.",
+    quote: "Smile always, spread kindness everywhere, and love your squad unconditionally.",
+    journeyMilestones: [
+      { title: "Gentle Anchor", desc: "Brought genuine warmth and care to every single friend." },
+      { title: "Golden Smiles", desc: "Cheered up the whole gang with her gentle positivity." }
     ]
   },
   {
@@ -128,25 +77,73 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Chill Sloth 🦥",
     category: "vibe",
     avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+    photo: r2Photo('hanuu.jpg'),
     bio: "The undisputed chill master of the squad. Certified queen of cozy naps, relaxed vibes, and turning any stressful day into pure peace.",
-    quote: "Why stress when you can sleep? Good vibes and cozy dreams always. 😴✨",
+    quote: "Why stress when you can sleep? Good vibes and cozy dreams always.",
     journeyMilestones: [
       { title: "Peak Cozy Vibes", desc: "Master of effortless relaxation and turning chaos into calm." },
       { title: "Late Night Banter", desc: "Wakes up right on time for the best late-night laughs." }
     ]
   },
   {
-    id: "jaffreen",
-    name: "Jaffreen MV",
-    nickname: "jaffuuuu",
-    role: "The Sweet Heart 🌸",
+    id: "farish",
+    name: "Farish Sharif",
+    nickname: "fairs",
+    role: "The Mastermind 🧠",
     category: "core",
-    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
-    bio: "Pure warmth and genuine sweetness. Always checking in on everyone, sharing the sweetest smiles, and bringing endless harmony to our squad.",
-    quote: "Smile always, spread kindness everywhere, and love your squad unconditionally. 💖",
+    instagram: "https://www.instagram.com/fairsh_sharif",
+    photo: r2Photo('farish.jpg'),
+    bio: "The visionary planner behind every squad reunion and last-minute travel plan. Keeps everyone organized even in the midst of pure chaos.",
+    quote: "Plan A never works, that's why the alphabet has 25 more letters.",
     journeyMilestones: [
-      { title: "Gentle Anchor", desc: "Brought genuine warmth and care to every single friend." },
-      { title: "Golden Smiles", desc: "Cheered up the whole gang with her gentle positivity." }
+      { title: "The Master Plan", desc: "Coordinated the very first squad hill-station road trip." },
+      { title: "Reliable Support", desc: "Always has a solution before a problem even happens." }
+    ]
+  },
+  {
+    id: "divyaaa",
+    name: "Divyaaa",
+    nickname: "Twinkle Cheek",
+    role: "The Sunshine ☀️",
+    category: "core",
+    instagram: "https://www.instagram.com/divya_twinkle_cheek",
+    photo: r2Photo('Divyaa.jpg'),
+    bio: "Pure sunshine energy and an infectious smile. Turning every ordinary college afternoon into an unforgettable squad celebration.",
+    quote: "Smile big, laugh louder, treasure each day.",
+    journeyMilestones: [
+      { title: "Radiant Smiles", desc: "Lit up every hallway with infectious positivity." },
+      { title: "Squad Festivities", desc: "Made every birthday celebration an epic memory." },
+      { title: "Unfiltered Joy", desc: "The photographer behind our sweetest candid memories." }
+    ]
+  },
+
+  // ── SQUAD MATES ──
+  {
+    id: "heenuuu",
+    name: "Heenuuu",
+    nickname: "Heena",
+    role: "The Spark & Heart 💖",
+    category: "vibe",
+    photo: r2Photo('Heenuuu.jpg'),
+    bio: "The one who lights up every room she walks into. Bringing unconditional energy, hearty laughs, and unforgettable road trip moments.",
+    quote: "Life is too short not to laugh until our stomachs hurt. 😄✨",
+    journeyMilestones: [
+      { title: "The Highway Drive", desc: "Anchor of our most iconic road trips and unskippable music playlists." },
+      { title: "Unshakable Support", desc: "Celebrated shared wins and lifted everyone's spirits in every situation." }
+    ]
+  },
+  {
+    id: "puppy",
+    name: "Puppy",
+    nickname: "Pups",
+    role: "The Chill Vibe 🎯",
+    category: "vibe",
+    photo: r2Photo('Puppy.jpg'),
+    bio: "The undisputed chill vibe and loyal soul of the squad. Bringing warm laughter, candid captures, and pure comfort to the circle.",
+    quote: "Count the smiles, cherish the friendship, and love your squad unconditionally. 🫂♾️",
+    journeyMilestones: [
+      { title: "Peak Cozy Vibes", desc: "Master of effortless relaxation and turning chaos into calm." },
+      { title: "Squad Anchor", desc: "Never missed a chance to stand with every single friend." }
     ]
   },
   {
@@ -156,6 +153,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Energy Dynamo ⚡",
     category: "chaos",
     avatarGradient: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+    photo: r2Photo('affu.jpg'),
     bio: "The powerhouse of unstoppable energy. Whenever Afnan joins the room, laughter multiplies by 100x and spontaneous plans take off instantly.",
     quote: "Life is too short for boring days — let's bring the hype! 🔥",
     journeyMilestones: [
@@ -170,6 +168,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Silent Strength 🛡️",
     category: "brains",
     avatarGradient: "linear-gradient(135deg, #06b6d4 0%, #0284c7 100%)",
+    photo: r2Photo('meshak.jpg'),
     bio: "A reliable brother who always has your back. Calm in any crisis, fiercely loyal, and bringing unmatched warmth to our squad circle.",
     quote: "Actions speak louder than words, but namma friendship speaks for itself. 👊✨",
     journeyMilestones: [
@@ -178,12 +177,13 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "samual",
-    name: "Samual",
-    nickname: "samual",
+    id: "samuel",
+    name: "Samuel",
+    nickname: "samuel",
     role: "The Joyful Soul 🌟",
     category: "chaos",
     avatarGradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    photo: r2Photo('samuel.jpg'),
     bio: "Brings pure smiles and positive vibes everywhere. Turning any mundane study session or drive into an unforgettable laughter riot.",
     quote: "Count the memories, not the days. Let's make every second count! 😄🔥",
     journeyMilestones: [
@@ -198,6 +198,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Tech & Vibe Pilot 🚀",
     category: "creators",
     avatarGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    photo: null,
     bio: "The visionary brain and creator spirit. From building digital wonders to organizing memorable road trips, Maithuu makes big things happen.",
     quote: "Code can build apps, but loyalty builds forever friendships. 💻❤️",
     journeyMilestones: [
@@ -212,6 +213,7 @@ export const INITIAL_SQUAD_MEMBERS = [
     role: "The Radiant Sunshine 🌻",
     category: "core",
     avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    photo: r2Photo('harshuuu.jpg'),
     bio: "Spreading genuine kindness, joyful energy, and endless sparkle. The sister who listens with her whole heart and lights up our circle.",
     quote: "In a world of noise, true friends are the sweetest melody. 🌸💖",
     journeyMilestones: [
@@ -219,20 +221,21 @@ export const INITIAL_SQUAD_MEMBERS = [
       { title: "Endless Smiles", desc: "Lit up every squad celebration with contagious positivity." }
     ]
   },
-  {
-    id: "shyam",
-    name: "Shyam",
-    nickname: "Shyam",
-    role: "The Chill Anchor ⚡",
-    category: "vibe",
-    avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
-    bio: "Brings unbeatable positive energy, candid humor, and constant loyalty. Always ready for a good conversation, spontaneous drive, or late-night laugh.",
-    quote: "True friends make the good times better and the hard times easier. 🫂♾️",
-    journeyMilestones: [
-      { title: "True Companion", desc: "Always showing up with good vibes and unwavering support." },
-      { title: "Unfiltered Laughter", desc: "Co-creator of our most legendary inside jokes and stories." }
-    ]
-  }
+  //{
+  //  id: "shyam",
+  //  name: "Shyam",
+  //  nickname: "Shyam",
+  //  role: "The Chill Anchor ⚡",
+  //  category: "vibe",
+  //  avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
+  //  photo: null,
+  //  bio: "Brings unbeatable positive energy, candid humor, and constant loyalty. Always ready for a good conversation, spontaneous drive, or late-night laugh.",
+  //  quote: "True friends make the good times better and the hard times easier. 🫂♾️",
+  //  journeyMilestones: [
+  //    { title: "True Companion", desc: "Always showing up with good vibes and unwavering support." },
+  //    { title: "Unfiltered Laughter", desc: "Co-creator of our most legendary inside jokes and stories." }
+  //  ]
+  //}
 ];
 
 export const SQUAD_MEMBERS = INITIAL_SQUAD_MEMBERS;
@@ -294,7 +297,7 @@ export const saveSquadMember = (memberData) => {
     role: memberData.role?.trim() || "Squad Member 🌟",
     category: memberData.category || "vibe",
     instagram: memberData.instagram?.trim() || "",
-    photo: memberData.photo || "/photos/friend1.jpg",
+    photo: memberData.photo || r2Photo('Gracee.jpg'),
     bio: memberData.bio?.trim() || "Proud member of namma Natpe Thunai sanctuary.",
     quote: memberData.quote?.trim() || "Natpe Thunai forever and infinity.",
     journeyMilestones: memberData.journeyMilestones || [
@@ -338,7 +341,7 @@ const INITIAL_MEMORIES = [
     description: "The very first day our squad bonded over chai and shared goals at the canteen. Nobody knew back then that this ordinary gathering would turn into a lifelong bond.",
     date: "August 14",
     location: "Campus Common & Café",
-    mediaUrl: "/photos/friend1.jpg",
+    mediaUrl: r2Photo('Gracee.jpg'),
     mediaType: "image",
     people: ["Grace", "Puppy", "Heenuuu", "Divyaaa", "Kavin", "Sid"],
     category: "Milestone",
@@ -355,7 +358,7 @@ const INITIAL_MEMORIES = [
     description: "The semester that tested everyone, but midnight chai runs, high-volume music in Sid's car, and late-night calls kept our spirits unshakeable.",
     date: "April 22",
     location: "Midnight Highway Drive",
-    mediaUrl: "/photos/friend2.jpg",
+    mediaUrl: r2Photo('Divyaa.jpg'),
     mediaType: "image",
     people: ["Heenuuu", "Divyaaa", "Grace", "Sid", "Rohan", "Pooja"],
     category: "Adventures",
@@ -372,7 +375,7 @@ const INITIAL_MEMORIES = [
     description: "Celebrating shared wins, project submissions, and overcoming challenges together. Friendship proved to be our greatest sanctuary and strength.",
     date: "November 18",
     location: "Beachside Gathering",
-    mediaUrl: "/photos/friend3.jpg",
+    mediaUrl: r2Photo('Divyaa.jpg'),
     mediaType: "image",
     people: ["Divyaaa", "Puppy", "Grace", "Heenuuu", "Ananya", "Meera", "Arjun"],
     category: "Celebration",
@@ -389,7 +392,7 @@ const INITIAL_MEMORIES = [
     description: "Through every turn of life, busy careers, and different cities, the circle stands solid. More than friends — family by choice.",
     date: "Always & Forever",
     location: "Squad Sanctuary",
-    mediaUrl: "/photos/friend4.jpg",
+    mediaUrl: r2Photo('Gracee.jpg'),
     mediaType: "image",
     people: ["Puppy", "Grace", "Heenuuu", "Divyaaa", "Vikram", "Sneha", "Harini", "KK"],
     category: "Daily Laughs",
@@ -405,7 +408,7 @@ const INITIAL_POSTS = [
   {
     id: "post-manifesto",
     authorName: "Natpe Thunai Squad (15 Strong)",
-    authorPhoto: "/photos/friend1.jpg",
+    authorPhoto: r2Photo('Gracee.jpg'),
     content: "“First year la start aana namma 15-member gang, ippo varaikum ivlo strong ah irukum nu appo namma yaarume nenachiruka maatom. Serndhu sapta moments, cooking pannadhu, dance aadinadhu, movies, birthday bashes, random suthinadhu nu neraya memories! Sila neram 'pothum da, indha group ah vittudalam' nu feel pannirupom 😂 but still, yaarum yaaraiyum vittu kudukkala. Namma friendship perfect illa, aana romba real. ❤️ Endha situation vandhalum, ippadiye last varaikum strong ah irukanum! ❤️🫂♾️”",
     category: "Story",
     likes: 54,
@@ -419,7 +422,7 @@ const INITIAL_POSTS = [
   {
     id: "post-1",
     authorName: "Grace",
-    authorPhoto: "/photos/friend1.jpg",
+    authorPhoto: r2Photo('Gracee.jpg'),
     content: "Reminder that our 15-member grand reunion planning is on! Drop your favorite memories in the timeline so we can compile our complete memory reel.",
     category: "Announcement",
     likes: 19,
@@ -432,7 +435,7 @@ const INITIAL_POSTS = [
   {
     id: "post-2",
     authorName: "Divyaaa",
-    authorPhoto: "/photos/friend3.jpg",
+    authorPhoto: r2Photo('Divyaa.jpg'),
     content: "Going through our old memories right now... 15 of us have changed so much yet our banter is literally identical 😂💖",
     category: "Moment",
     likes: 24,
@@ -482,15 +485,20 @@ export const subscribeToMemories = (callback) => {
 
   try {
     const q = query(collection(db, 'natpe-thunai-memories'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q, (snapshot) => {
+    // Capture unsub first so the error handler can call it immediately to stop retries
+    let unsub;
+    unsub = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
         const firestoreMemories = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         setLocal(STORAGE_KEYS.MEMORIES, firestoreMemories);
         callback(firestoreMemories);
       }
     }, (error) => {
-      console.info("Using local memory storage:", error.message);
+      console.info("Using local memory storage (Firestore unavailable):", error.message);
+      // Unsubscribe immediately on error to stop Firebase from retrying endlessly
+      if (unsub) unsub();
     });
+    return unsub;
   } catch {
     return () => { };
   }
@@ -504,7 +512,7 @@ export const saveMemory = async (memory) => {
     description: memory.description || "",
     date: memory.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     location: memory.location || "Squad Circle",
-    mediaUrl: memory.mediaUrl || "/photos/friend1.jpg",
+    mediaUrl: memory.mediaUrl || r2Photo('Gracee.jpg'),
     mediaType: memory.mediaType || "image",
     people: memory.people && memory.people.length ? memory.people : ["The Squad "],
     category: memory.category || "Moment",
@@ -595,7 +603,7 @@ export const savePost = async (postData, user) => {
   const newPost = {
     id: `post-${Date.now()}`,
     authorName: user?.displayName || "Squad Member",
-    authorPhoto: user?.photoURL || "/photos/friend1.jpg",
+    authorPhoto: user?.photoURL || r2Photo('Gracee.jpg'),
     content: postData.content,
     mediaUrl: postData.mediaUrl || null,
     category: postData.category || "Moment",

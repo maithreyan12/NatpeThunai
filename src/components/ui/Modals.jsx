@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, MapPin } from 'lucide-react';
+import { r2Photo } from '../../services';
 import './Modals.css';
 
 // ── CREATE COMMUNITY POST MODAL ──
@@ -279,7 +280,7 @@ export function SignInModal({ isOpen, onClose, currentUser, onSignIn, onSignOut 
           <div className="auth-profile-view">
             <div className="auth-avatar-ring">
               <img 
-                src={currentUser.photoURL || '/photos/friend1.jpg'} 
+                src={currentUser.photoURL || r2Photo('Gracee.jpg')} 
                 alt={currentUser.displayName || 'Squad Member'} 
                 className="auth-profile-avatar"
                 referrerPolicy="no-referrer"

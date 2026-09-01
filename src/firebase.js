@@ -61,13 +61,20 @@ export const subscribeToMessages = (callback, messageLimit = 80) => {
     orderBy('createdAt', 'asc'),
     limit(messageLimit)
   );
-  return onSnapshot(q, (snapshot) => {
+  let unsub;
+  unsub = onSnapshot(q, (snapshot) => {
     const messages = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
     callback(messages);
+  }, (error) => {
+    console.info('Live chat unavailable (Firestore unreachable):', error.message);
+    // Stop Firebase from retrying endlessly on permission/network errors
+    if (unsub) unsub();
+    callback([]);
   });
+  return unsub;
 };
 
 export { auth, db };

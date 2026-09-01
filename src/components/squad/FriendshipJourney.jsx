@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { r2Photo } from '../../services';
 import './FriendshipJourney.css';
 
 const JOURNEY_MILESTONES = [
@@ -9,15 +10,15 @@ const JOURNEY_MILESTONES = [
     title: "The Canteen Dawn & First Spark",
     description: "Spontaneous canteen tea conversations, awkward classroom ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
     quote: "Sometimes the strangers you meet in the hallway become the family you cannot imagine life without.",
-    photo: "/photos/friend1.jpg",
+    photo: r2Photo('Gracee.jpg'),
     badge: "Year 1 • Genesis",
     colorKey: "lavender",
     gangCount: "Squad Circle",
     attendees: [
-      { name: "Grace", role: "The Spark ✨", photo: "/photos/friend1.jpg" },
-      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" },
-      { name: "Heenuuu", role: "The Heart 💖", photo: "/photos/friend2.jpg" },
-      { name: "Divyaaa", role: "The Sunshine ☀️", photo: "/photos/friend3.jpg" },
+      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
+      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') },
+      { name: "Heenuuu", role: "The Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
       { name: "Kavin", role: "Captain 🧠", initial: "KA" },
       { name: "Sid", role: "Road Legend 🚗", initial: "SI" }
     ],
@@ -29,17 +30,17 @@ const JOURNEY_MILESTONES = [
     title: "Midnight Drives & Exam Chaos",
     description: "Countless midnight highway drives, high-volume Tamil bangers in Sid's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
     quote: "We didn't realize we were making lifelong history; we just knew we were laughing together.",
-    photo: "/photos/friend2.jpg",
+    photo: r2Photo('Heenuuu.jpg'),
     badge: "Year 2 • Chaos & Memories",
     colorKey: "blue",
     gangCount: "Squad Circle",
     attendees: [
       { name: "Sid", role: "Driver 🚗", initial: "SI" },
       { name: "Rohan", role: "Music 🎵", initial: "RO" },
-      { name: "Heenuuu", role: "Heart 💖", photo: "/photos/friend2.jpg" },
+      { name: "Heenuuu", role: "Heart 💖", photo: r2Photo('Heenuuu.jpg') },
       { name: "Pooja", role: "Night Owl 🌙", initial: "PO" },
       { name: "Vikram", role: "Hype ⚡", initial: "VI" },
-      { name: "Grace", role: "The Spark ✨", photo: "/photos/friend1.jpg" }
+      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') }
     ],
     remainingCount: 9
   },
@@ -49,17 +50,17 @@ const JOURNEY_MILESTONES = [
     title: "The Unbreakable Bond & Milestones",
     description: "Through individual triumphs, tough semesters, career milestones, and quiet moments when someone just needed a listening ear — friends stood side by side.",
     quote: "True friends don't just celebrate your sunny days; they stand with you through every unexpected storm.",
-    photo: "/photos/friend3.jpg",
+    photo: r2Photo('Divyaa.jpg'),
     badge: "Year 3 • Lifelong Trust",
     colorKey: "pink",
     gangCount: "Squad Circle",
     attendees: [
-      { name: "Divyaaa", role: "Sunshine ☀️", photo: "/photos/friend3.jpg" },
+      { name: "Divyaaa", role: "Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
       { name: "Ananya", role: "Creator 🎨", initial: "AN" },
       { name: "Meera", role: "Peacekeeper 🕊️", initial: "ME" },
       { name: "Arjun", role: "Foodie 🍕", initial: "AR" },
       { name: "Sneha", role: "Chronicler 📸", initial: "SN" },
-      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" }
+      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') }
     ],
     remainingCount: 9
   },
@@ -69,15 +70,15 @@ const JOURNEY_MILESTONES = [
     title: "Eternal Natpe Thunai Sanctuary",
     description: "Our bond continues to deepen every single day. Distance or busy careers mean nothing; whenever we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",
     quote: "Namma friendship perfect illa, aana romba real. Squad strong for infinity. ❤️🫂♾️",
-    photo: "/photos/friend4.jpg",
+    photo: r2Photo('Puppy.jpg'),
     badge: "Year 4 & Forever",
     colorKey: "peach",
     gangCount: "Squad Family",
     attendees: [
-      { name: "Squad", role: "United Gang", photo: "/photos/friend1.jpg" },
-      { name: "Heenuuu", role: "Heart 💖", photo: "/photos/friend2.jpg" },
-      { name: "Divyaaa", role: "Sunshine ☀️", photo: "/photos/friend3.jpg" },
-      { name: "Puppy", role: "The Vibe 🎯", photo: "/photos/friend4.jpg" },
+      { name: "Squad", role: "United Gang", photo: r2Photo('Gracee.jpg') },
+      { name: "Heenuuu", role: "Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Divyaaa", role: "Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
+      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') },
       { name: "KK", role: "Party 🎉", initial: "KK" },
       { name: "Harini", role: "Anchor ⚓", initial: "HA" }
     ],
@@ -156,8 +157,7 @@ export default function FriendshipJourney() {
               <img 
                 src={currentMilestone.photo} 
                 alt={currentMilestone.title}
-                className="journey-milestone-img" 
-                key={currentMilestone.stepLabel}
+                className="journey-milestone-img"
               />
               <div className="journey-floating-year-badge">
                 <span>{currentMilestone.stepLabel}</span>

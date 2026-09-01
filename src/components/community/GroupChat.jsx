@@ -279,8 +279,8 @@ export default function GroupChat({ onOpenSignIn }) {
                   <Lock size={32} />
                 </div>
               </div>
-              <div className="floating-chat-bubble bubble-alpha">Squad Dashboard 🔒</div>
-              <div className="floating-chat-bubble bubble-beta">Members Only ✨</div>
+              <div className="floating-chat-bubble bubble-alpha">Squad Dashboard</div>
+              <div className="floating-chat-bubble bubble-beta">Members Only</div>
             </div>
 
             <span className="modal-badge-tag">AUTHENTICATION REQUIRED</span>

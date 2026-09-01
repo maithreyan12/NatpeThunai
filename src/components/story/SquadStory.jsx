@@ -48,7 +48,7 @@ export default function SquadStory() {
           <span>OUR HEARTFELT CHRONICLE</span>
         </div>
         <h2 className="section-title">
-          Namma “Natpe Thunai” Story ❤️🫂
+          Namma “Natpe Thunai” Story
         </h2>
         <p className="section-desc">
           “Namma friendship perfect illa, aana romba real.” An authentic record of our laughter, cooking, fights, and lifelong bond.

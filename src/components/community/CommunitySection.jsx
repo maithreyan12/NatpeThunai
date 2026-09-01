@@ -11,7 +11,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
-import { getStoredMembers } from '../../services';
+import { getStoredMembers, r2Photo } from '../../services';
 import './CommunitySection.css';
 
 export default function CommunitySection({ 
@@ -108,10 +108,10 @@ export default function CommunitySection({
                     <div className="post-header">
                       <div className="post-author-info">
                         <img 
-                          src={post.authorPhoto || "/photos/friend1.jpg"} 
+                          src={post.authorPhoto || r2Photo('Gracee.jpg')} 
                           alt={post.authorName} 
                           className="post-author-avatar"
-                          onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
+                          onError={(e) => { e.target.onerror = null; e.target.src = r2Photo('Gracee.jpg'); }}
                         />
                         <div className="post-author-meta">
                           <strong className="post-author-name">{post.authorName}</strong>

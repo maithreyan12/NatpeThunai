@@ -85,11 +85,12 @@
 }
 
 .brand-tamil-title {
-  font-size: 1.05rem;
+  font-family: var(--font-tamil);
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .brand-meta-year {

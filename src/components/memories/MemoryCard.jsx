@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { r2Photo } from '../../services';
 import { 
   MapPin, 
   Users, 
@@ -58,7 +59,7 @@ export default function MemoryCard({
             alt={memory.title} 
             className="card-media-img" 
             loading="lazy"
-            onError={(e) => { e.target.src = '/photos/friend1.jpg'; }}
+            onError={(e) => { e.target.onerror = null; e.target.src = r2Photo('Gracee.jpg'); }}
           />
         )}
         <button className="card-zoom-btn" title="View Fullscreen">

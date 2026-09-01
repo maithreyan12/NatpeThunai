@@ -3,11 +3,11 @@ import { X, UserPlus, Sparkles } from 'lucide-react';
 import '../ui/Modals.css';
 
 const CATEGORIES = [
-  { id: 'core', label: 'Core Squad 🌟' },
-  { id: 'chaos', label: 'Energy & Chaos ⚡' },
-  { id: 'vibe', label: 'Vibe & Chill 🌙' },
-  { id: 'brains', label: 'Brains & Anchor 🧠' },
-  { id: 'creators', label: 'Creative Souls 🎨' }
+  { id: 'core', label: 'Core Squad' },
+  { id: 'chaos', label: 'Energy & Chaos' },
+  { id: 'vibe', label: 'Vibe & Chill' },
+  { id: 'brains', label: 'Brains & Anchor' },
+  { id: 'creators', label: 'Creative Souls' }
 ];
 
 const AVATAR_GRADIENTS = [
@@ -153,7 +153,7 @@ export default function AddMemberModal({ isOpen, onClose, onSave, existingMember
             <input
               type="text"
               className="form-input"
-              placeholder="/photos/friend1.jpg or direct image link"
+              placeholder="https://r2.dev/photos/Gracee.jpg or direct image link"
               value={photo}
               onChange={(e) => setPhoto(e.target.value)}
             />

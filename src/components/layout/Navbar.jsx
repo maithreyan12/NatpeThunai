@@ -10,6 +10,7 @@ import {
   Heart 
 } from 'lucide-react';
 import { signInWithGoogle, logOut } from '../../firebase';
+import { r2Photo } from '../../services';
 import './Navbar.css';
 
 export default function Navbar({ 
@@ -81,7 +82,7 @@ export default function Navbar({
               className={`nav-item-btn ${activeSection === 'story' ? 'active' : ''}`}
               onClick={() => onNavigate('story')}
             >
-              Story ❤️
+              Story
             </button>
             <button 
               className={`nav-item-btn ${isSquadActive ? 'active' : ''}`}
@@ -93,13 +94,13 @@ export default function Navbar({
               className={`nav-item-btn ${isMemoriesActive ? 'active' : ''}`}
               onClick={() => onNavigate('timeline')}
             >
-              Album 📸
+              Album
             </button>
             <button 
               className={`nav-item-btn ${isChatActive ? 'active' : ''}`}
               onClick={() => onNavigate('chat')}
             >
-              Dashboard {currentUser ? '💬' : '🔒'}
+              Dashboard
             </button>
           </div>
 
@@ -123,7 +124,7 @@ export default function Navbar({
                   title="My Sanctuary Profile"
                 >
                   <img 
-                    src={currentUser.photoURL || '/photos/friend1.jpg'} 
+                    src={currentUser.photoURL || r2Photo('Gracee.jpg')} 
                     alt={currentUser.displayName || 'Member'} 
                     className="user-nav-avatar"
                     referrerPolicy="no-referrer"

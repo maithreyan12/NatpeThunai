@@ -19,11 +19,11 @@ import './SquadMembers.css';
 
 const VIBE_FILTERS = [
   { id: 'all', label: 'All Squad' },
-  { id: 'core', label: 'Core Squad 🌟' },
-  { id: 'chaos', label: 'Energy & Chaos ⚡' },
-  { id: 'vibe', label: 'Vibe & Chill 🌙' },
-  { id: 'brains', label: 'Brains & Anchor 🧠' },
-  { id: 'creators', label: 'Creative Souls 🎨' }
+  { id: 'core', label: 'Core Squad' },
+  { id: 'chaos', label: 'Energy & Chaos' },
+  { id: 'vibe', label: 'Vibe & Chill' },
+  { id: 'brains', label: 'Brains & Anchor' },
+  { id: 'creators', label: 'Creative Souls' }
 ];
 
 /* ─── 3D Flip Card (Photo front / Bio back) ─── */
@@ -68,9 +68,15 @@ function MemberFlipCard({ member, currentUser, onSelectMember, onFilterByMember,
                   alt={member.name}
                   className="flip-front-avatar-img"
                   onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                    e.target.parentElement.classList.add('fallback-gradient');
+                    const currentSrc = e.target.src;
+                    if (currentSrc.includes('r2.dev') || currentSrc.includes('http')) {
+                      const filename = currentSrc.split('/').pop();
+                      e.target.src = `/photos/${filename}`;
+                    } else {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.classList.add('fallback-gradient');
+                    }
                   }}
                 />
               ) : (
