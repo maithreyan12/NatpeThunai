@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   BookOpen,
   X,
-  Heart
+  Heart,
+  Sparkles
 } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './SquadMembers.css';
