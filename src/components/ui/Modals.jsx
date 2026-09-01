@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin } from 'lucide-react';
 import { r2Photo } from '../../services';
 import './Modals.css';
@@ -240,7 +240,28 @@ export function SignInModal({ isOpen, onClose, currentUser, onSignIn, onSignOut 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Reset error every time modal opens/closes
+  useEffect(() => {
+    if (!isOpen) setError(null);
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  // Translate raw Firebase/browser errors into friendly messages
+  const getFriendlyError = (err) => {
+    const msg = (err?.message || err?.code || '').toLowerCase();
+    if (msg.includes('popup-closed') || msg.includes('cancelled') || msg.includes('closed-by-user'))
+      return null; // User just closed popup — not an error worth showing
+    if (msg.includes('database') || msg.includes('indexeddb') || msg.includes('closing'))
+      return 'Sign-in was interrupted by your browser. Please try again.';
+    if (msg.includes('network') || msg.includes('offline'))
+      return 'No internet connection. Please check your network and try again.';
+    if (msg.includes('domain') || msg.includes('unauthorized'))
+      return 'This Google account is not part of our squad. Use your squad Google account.';
+    if (msg.includes('too-many-requests') || msg.includes('quota'))
+      return 'Too many attempts. Please wait a moment and try again.';
+    return 'Sign in failed. Please try again.';
+  };
 
   const handleGoogleClick = async () => {
     try {
@@ -250,7 +271,8 @@ export function SignInModal({ isOpen, onClose, currentUser, onSignIn, onSignOut 
       onClose();
     } catch (err) {
       console.error("Sign in failed:", err);
-      setError(err.message || "Sign in was interrupted or closed. Please try again.");
+      const friendly = getFriendlyError(err);
+      if (friendly) setError(friendly);
     } finally {
       setLoading(false);
     }
