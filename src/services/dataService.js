@@ -192,6 +192,21 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
+    id: "harshitha",
+    name: "Harshitha",
+    nickname: "harshuuuu",
+    role: "The Radiant Sunshine 🌻",
+    category: "core",
+    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    photo: r2Photo('harshuuu.jpg'),
+    bio: "Spreading genuine kindness, joyful energy, and endless sparkle. The sister who listens with her whole heart and lights up our circle.",
+    quote: "In a world of noise, true friends are the sweetest melody. 🌸💖",
+    journeyMilestones: [
+      { title: "Heart of Gold", desc: "Always thoughtful, compassionate, and cheering on every friend." },
+      { title: "Endless Smiles", desc: "Lit up every squad celebration with contagious positivity." }
+    ]
+  },
+  {
     id: "maithreyan",
     name: "Maithreyan",
     nickname: "maithuu",
@@ -207,35 +222,20 @@ export const INITIAL_SQUAD_MEMBERS = [
     ]
   },
   {
-    id: "harshitha",
-    name: "Harshitha",
-    nickname: "harshuuuu",
-    role: "The Radiant Sunshine 🌻",
+    id: "gopika",
+    name: "Gopika",
+    nickname: "gopu",
+    role: "The Graceful Heart 🌸",
     category: "core",
-    avatarGradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
-    photo: r2Photo('harshuuu.jpg'),
-    bio: "Spreading genuine kindness, joyful energy, and endless sparkle. The sister who listens with her whole heart and lights up our circle.",
-    quote: "In a world of noise, true friends are the sweetest melody. 🌸💖",
+    avatarGradient: "linear-gradient(135deg, #f472b6 0%, #a855f7 100%)",
+    photo: null,
+    bio: "The gentle presence, radiant smile, and sweet soul of our sanctuary. Bringing unconditional warmth, calm, and eternal joy to our circle.",
+    quote: "Natpe Thunai forever and infinity. 🌸✨",
     journeyMilestones: [
-      { title: "Heart of Gold", desc: "Always thoughtful, compassionate, and cheering on every friend." },
-      { title: "Endless Smiles", desc: "Lit up every squad celebration with contagious positivity." }
+      { title: "Joined the Gang", desc: "Added her unique energy, warmth, and grace to our lifelong bond." },
+      { title: "Cherished Smiles", desc: "Bringing pure calm, kindness, and radiant positivity to the squad." }
     ]
-  },
-  //{
-  //  id: "shyam",
-  //  name: "Shyam",
-  //  nickname: "Shyam",
-  //  role: "The Chill Anchor ⚡",
-  //  category: "vibe",
-  //  avatarGradient: "linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%)",
-  //  photo: null,
-  //  bio: "Brings unbeatable positive energy, candid humor, and constant loyalty. Always ready for a good conversation, spontaneous drive, or late-night laugh.",
-  //  quote: "True friends make the good times better and the hard times easier. 🫂♾️",
-  //  journeyMilestones: [
-  //    { title: "True Companion", desc: "Always showing up with good vibes and unwavering support." },
-  //    { title: "Unfiltered Laughter", desc: "Co-creator of our most legendary inside jokes and stories." }
-  //  ]
-  //}
+  }
 ];
 
 export const SQUAD_MEMBERS = INITIAL_SQUAD_MEMBERS;
@@ -264,12 +264,22 @@ const setLocal = (key, data) => {
 // ═══════════════════════════════════════════════════════════════════
 
 const OLD_PLACEHOLDER_IDS = new Set(["siddharth", "pooja", "rohan", "meera", "arjun", "sneha", "vikram", "harini", "karthik"]);
+const DUO_IDS = ["maithreyan", "gopika"];
+
+// Helper to keep Duo at the very end
+const arrangeWithDuoAtEnd = (membersList) => {
+  const isDuo = (m) => DUO_IDS.includes(m.id?.toLowerCase?.() || '') || DUO_IDS.includes(m.name?.toLowerCase?.() || '');
+  const mainList = membersList.filter(m => !isDuo(m));
+  const duoMembers = DUO_IDS.map(did => membersList.find(m => m.id?.toLowerCase?.() === did || m.name?.toLowerCase?.() === did)).filter(Boolean);
+  return [...mainList, ...duoMembers];
+};
 
 export const getStoredMembers = () => {
   const local = getLocal(STORAGE_KEYS.MEMBERS, null);
   if (!local || !Array.isArray(local) || local.length === 0) {
-    setLocal(STORAGE_KEYS.MEMBERS, INITIAL_SQUAD_MEMBERS);
-    return INITIAL_SQUAD_MEMBERS;
+    const organized = arrangeWithDuoAtEnd(INITIAL_SQUAD_MEMBERS);
+    setLocal(STORAGE_KEYS.MEMBERS, organized);
+    return organized;
   }
 
   // Merge code-defined squad roster (updating photos/fields from code) with any custom entries
@@ -283,7 +293,8 @@ export const getStoredMembers = () => {
     !OLD_PLACEHOLDER_IDS.has(m.id) &&
     !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim())
   );
-  const fullList = [...synced, ...customMembers];
+  
+  const fullList = arrangeWithDuoAtEnd([...synced, ...customMembers]);
   setLocal(STORAGE_KEYS.MEMBERS, fullList);
   return fullList;
 };
@@ -305,7 +316,7 @@ export const saveSquadMember = (memberData) => {
     ]
   };
 
-  const updated = [newMember, ...existing];
+  const updated = arrangeWithDuoAtEnd([newMember, ...existing]);
   setLocal(STORAGE_KEYS.MEMBERS, updated);
   return updated;
 };
@@ -318,15 +329,17 @@ export const updateSquadMember = (memberId, updatedFields) => {
     }
     return m;
   });
-  setLocal(STORAGE_KEYS.MEMBERS, updated);
-  return updated;
+  const arranged = arrangeWithDuoAtEnd(updated);
+  setLocal(STORAGE_KEYS.MEMBERS, arranged);
+  return arranged;
 };
 
 export const deleteSquadMember = (memberId) => {
   const existing = getStoredMembers();
   const updated = existing.filter(m => m.id !== memberId);
-  setLocal(STORAGE_KEYS.MEMBERS, updated);
-  return updated;
+  const arranged = arrangeWithDuoAtEnd(updated);
+  setLocal(STORAGE_KEYS.MEMBERS, arranged);
+  return arranged;
 };
 
 // ═══════════════════════════════════════════════════════════════════

@@ -254,6 +254,12 @@ export default function SquadMembers({
     return matchesCategory && matchesSearch;
   });
 
+  const DUO_IDS = ['maithreyan', 'gopika'];
+  const isDuoMember = (m) => DUO_IDS.includes(m.id?.toLowerCase?.() || '') || DUO_IDS.includes(m.name?.toLowerCase?.() || '');
+
+  const mainSquad = filteredMembers.filter(m => !isDuoMember(m));
+  const duoSquad = filteredMembers.filter(m => isDuoMember(m));
+
   return (
     <section id="members" className="squad-community-section">
       <div className="section-header">
@@ -316,7 +322,7 @@ export default function SquadMembers({
 
             {currentUser && onOpenAddMember && (
               <button 
-                type="button"
+                type="button" 
                 className="btn-secondary add-member-btn"
                 onClick={onOpenAddMember}
               >
@@ -365,74 +371,109 @@ export default function SquadMembers({
           </button>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="flip-cards-grid">
-          {filteredMembers.map((member) => (
-            <MemberFlipCard
-              key={member.id}
-              member={member}
-              currentUser={currentUser}
-              onSelectMember={onSelectMember}
-              onFilterByMember={onFilterByMember}
-              onEditMember={onEditMember}
-            />
-          ))}
+        <div className="squad-grid-container">
+          {mainSquad.length > 0 && (
+            <div className="flip-cards-grid">
+              {mainSquad.map((member) => (
+                <MemberFlipCard
+                  key={member.id}
+                  member={member}
+                  currentUser={currentUser}
+                  onSelectMember={onSelectMember}
+                  onFilterByMember={onFilterByMember}
+                  onEditMember={onEditMember}
+                />
+              ))}
+            </div>
+          )}
+
+          {duoSquad.length > 0 && (
+            <div className="squad-duo-section">
+              <div className="squad-duo-header">
+                <span className="squad-duo-line" />
+                <div className="squad-duo-badge">
+                  <Sparkles size={14} className="duo-sparkle" />
+                  <span>The Duo • Maithreyan &amp; Gopika</span>
+                  <Sparkles size={14} className="duo-sparkle" />
+                </div>
+                <span className="squad-duo-line" />
+              </div>
+
+              <div className="squad-duo-grid">
+                {duoSquad.map((member) => (
+                  <MemberFlipCard
+                    key={member.id}
+                    member={member}
+                    currentUser={currentUser}
+                    onSelectMember={onSelectMember}
+                    onFilterByMember={onFilterByMember}
+                    onEditMember={onEditMember}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* Compact Roster View */
         <div className="squad-compact-roster">
-          {filteredMembers.map((member) => (
-            <div 
-              key={member.id} 
-              className="roster-row-card interactive-slab"
-              onClick={() => onSelectMember(member)}
-            >
-              <div className="roster-avatar-box">
-                {member.photo ? (
-                  <img 
-                    src={member.photo} 
-                    alt={member.name} 
-                    className="roster-avatar-img"
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div 
-                    className="roster-avatar-initials"
-                    style={{ background: member.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
-                  >
-                    {member.name.slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-              </div>
-
-              <div className="roster-info-col">
-                <div className="roster-name-line">
-                  <h4 className="roster-member-name">{member.name}</h4>
-                  <span className="roster-nickname">"{member.nickname || member.name}"</span>
-                  <span className="roster-role-chip">{member.role}</span>
+          {filteredMembers.map((member) => {
+            const isDuo = isDuoMember(member);
+            return (
+              <div 
+                key={member.id} 
+                className={`roster-row-card interactive-slab ${isDuo ? 'roster-duo-card' : ''}`}
+                onClick={() => onSelectMember(member)}
+              >
+                <div className="roster-avatar-box">
+                  {member.photo ? (
+                    <img 
+                      src={member.photo} 
+                      alt={member.name} 
+                      className="roster-avatar-img"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div 
+                      className="roster-avatar-initials"
+                      style={{ background: member.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
+                    >
+                      {member.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                 </div>
-                <p className="roster-bio-preview">{member.bio}</p>
-              </div>
 
-              <div className="roster-actions-col">
-                <button 
-                  type="button" 
-                  className="btn-secondary roster-btn"
-                  onClick={(e) => { e.stopPropagation(); if (onFilterByMember) onFilterByMember(member.name); }}
-                >
-                  <Camera size={13} />
-                  <span>Memories</span>
-                </button>
-                <button 
-                  type="button" 
-                  className="btn-primary roster-btn"
-                  onClick={(e) => { e.stopPropagation(); onSelectMember(member); }}
-                >
-                  <BookOpen size={13} />
-                  <span>Profile</span>
-                </button>
+                <div className="roster-info-col">
+                  <div className="roster-name-line">
+                    <h4 className="roster-member-name">{member.name}</h4>
+                    <span className="roster-nickname">"{member.nickname || member.name}"</span>
+                    <span className="roster-role-chip">{member.role}</span>
+                    {isDuo && <span className="roster-duo-chip">The Duo 💫</span>}
+                  </div>
+                  <p className="roster-bio-preview">{member.bio}</p>
+                </div>
+
+                <div className="roster-actions-col">
+                  <button 
+                    type="button" 
+                    className="btn-secondary roster-btn"
+                    onClick={(e) => { e.stopPropagation(); if (onFilterByMember) onFilterByMember(member.name); }}
+                  >
+                    <Camera size={13} />
+                    <span>Memories</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-primary roster-btn"
+                    onClick={(e) => { e.stopPropagation(); onSelectMember(member); }}
+                  >
+                    <BookOpen size={13} />
+                    <span>Profile</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>
