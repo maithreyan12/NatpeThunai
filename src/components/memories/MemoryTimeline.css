@@ -10,6 +10,38 @@
   position: relative;
 }
 
+/* ── 3D Infinite Spiral Memory Vortex: Full Screen / Borderless ── */
+.memory-spiral-fullscreen-stage {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  height: 640px;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin-top: 10px;
+  margin-bottom: 42px;
+}
+
+@media (max-width: 768px) {
+  .memory-spiral-fullscreen-stage {
+    height: clamp(540px, 75vh, 720px);
+    margin-top: 8px;
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .memory-spiral-fullscreen-stage {
+    height: clamp(560px, 78vh, 750px);
+    margin-top: 4px;
+    margin-bottom: 28px;
+  }
+}
+
 /* ── Filter Bar ── */
 .timeline-filter-bar {
   display: flex;

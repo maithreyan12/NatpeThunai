@@ -18,7 +18,7 @@ import { r2Photo } from './r2Assets';
 
 const STORAGE_KEYS = {
   MEMBERS: 'natpethunai_members_v9',
-  MEMORIES: 'natpethunai_memories_v2',
+  MEMORIES: 'yache_memories_v2',
   POSTS: 'natpethunai_posts_v2',
   EVENTS: 'natpethunai_events_v2'
 };

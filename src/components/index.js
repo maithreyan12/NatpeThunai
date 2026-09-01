@@ -29,6 +29,7 @@ export { default as GroupChat } from './community/GroupChat';
 
 // 7. Modals & UI Components
 export { default as InstagramIcon } from './ui/InstagramIcon';
+export { default as InfiniteSpiral } from './ui/InfiniteSpiral';
 export { 
   CreatePostModal, 
   AddEventModal, 
