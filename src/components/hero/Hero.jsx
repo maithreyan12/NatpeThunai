@@ -1,7 +1,7 @@
 import React from 'react';
-import { 
-  Calendar, 
-  Film, 
+import {
+  Calendar,
+  Film,
   Heart,
   Users,
   Sparkles,
@@ -11,9 +11,9 @@ import {
 import './Hero.css';
 import { r2Photo } from '../../services';
 
-export default function Hero({ 
-  onExploreTimeline, 
-  onWatchReel, 
+export default function Hero({
+  onExploreTimeline,
+  onWatchReel,
   onReadStory,
   onMeetSquad,
   _totalMembers = 15
@@ -52,32 +52,32 @@ export default function Hero({
 
         {/* Calibrated Button System */}
         <div className="hero-actions-dock">
-          <button 
-            className="btn-primary hero-btn-main" 
+          <button
+            className="btn-primary hero-btn-main"
             onClick={onReadStory}
           >
             <Heart size={16} fill="white" />
             <span>Read Namma Story</span>
           </button>
 
-          <button 
-            className="btn-secondary hero-btn-sub" 
+          <button
+            className="btn-secondary hero-btn-sub"
             onClick={onMeetSquad || onExploreTimeline}
           >
             <Users size={16} />
             <span>Meet The Squad</span>
           </button>
 
-          <button 
-            className="btn-outline hero-btn-ghost" 
+          <button
+            className="btn-outline hero-btn-ghost"
             onClick={onExploreTimeline}
           >
             <Calendar size={16} />
             <span>Memory Timeline</span>
           </button>
 
-          <button 
-            className="btn-outline hero-btn-ghost" 
+          <button
+            className="btn-outline hero-btn-ghost"
             onClick={onWatchReel}
           >
             <Film size={16} />
@@ -104,7 +104,7 @@ export default function Hero({
               <Sparkles size={18} />
             </div>
             <div className="stat-text-group">
-              <span className="stat-number">100+ Stories</span>
+              <span className="stat-number">1000+ Stories</span>
               <span className="stat-desc">Shared Laughs & Banter</span>
             </div>
           </div>
@@ -140,10 +140,10 @@ export default function Hero({
           {/* Member 1: Kafil */}
           <div className="polaroid-card card-rotate-left" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('kafil.jpg')} 
-                alt="Kafil" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('kafil.jpg')}
+                alt="Kafil"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 8%' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -161,10 +161,10 @@ export default function Hero({
           {/* Member 2: Grace */}
           <div className="polaroid-card card-elevated" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('Gracee.jpg')} 
-                alt="Grace" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('Gracee.jpg')}
+                alt="Grace"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 15%' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -182,10 +182,10 @@ export default function Hero({
           {/* Member 3: Jaffreen */}
           <div className="polaroid-card card-rotate-right" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('jaffreen.jpg')} 
-                alt="Jaffreen" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('jaffreen.jpg')}
+                alt="Jaffreen"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 3%' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -204,10 +204,10 @@ export default function Hero({
           {/* Member 4: Haniya */}
           <div className="polaroid-card card-rotate-left" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('hanuu.jpg')} 
-                alt="Haniya" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('hanuu.jpg')}
+                alt="Haniya"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 15%' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -225,10 +225,10 @@ export default function Hero({
           {/* Member 5: Farish Sharif */}
           <div className="polaroid-card card-elevated" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('farish.jpg')} 
-                alt="Farish" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('farish.jpg')}
+                alt="Farish"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 6%' }}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -246,10 +246,10 @@ export default function Hero({
           {/* Member 6: Divya */}
           <div className="polaroid-card card-rotate-far-right" onClick={onMeetSquad}>
             <div className="polaroid-photo-frame">
-              <img 
-                src={r2Photo('Divyaa.jpg')} 
-                alt="Divya" 
-                className="polaroid-img" 
+              <img
+                src={r2Photo('Divyaa.jpg')}
+                alt="Divya"
+                className="polaroid-img"
                 style={{ objectPosition: 'center 10%' }}
                 onError={(e) => {
                   e.target.onerror = null;
