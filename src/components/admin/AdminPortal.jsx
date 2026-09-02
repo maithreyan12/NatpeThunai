@@ -5,11 +5,12 @@ import {
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera
 } from 'lucide-react';
 import {
-  getStoredMembers, saveSquadMember, updateSquadMember, deleteSquadMember,
-  getStoredMemories, saveMemory,
-  getStoredPosts, savePost,
-  getStoredEvents, saveEvent
-} from '../../services';
+  subscribeToMembersR2, saveMemberR2, deleteMemberR2,
+  subscribeToMemoriesR2, saveMemoryR2, deleteMemoryR2,
+  subscribeToPostsR2, savePostR2, deletePostR2,
+  subscribeToEventsR2, saveEventR2, deleteEventR2,
+  bootR2Database,
+} from '../../services/r2Database';
 import { signInWithGoogle, checkRedirectResult, logOut } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
@@ -156,16 +157,23 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
-  // Load all live data
-  const loadData = () => {
-    setMembers(getStoredMembers());
-    setMemories(getStoredMemories());
-    setPosts(getStoredPosts());
-    setEvents(getStoredEvents());
-  };
-
+  // ── Live R2 subscriptions — push updates to this component AND public website ──
   useEffect(() => {
-    loadData();
+    // Boot: seed R2 if first time
+    bootR2Database().catch(() => {});
+
+    // Subscribe to live data from R2 CDN
+    const unsubMembers   = subscribeToMembersR2(setMembers);
+    const unsubMemories  = subscribeToMemoriesR2(setMemories);
+    const unsubPosts     = subscribeToPostsR2(setPosts);
+    const unsubEvents    = subscribeToEventsR2(setEvents);
+
+    return () => {
+      unsubMembers();
+      unsubMemories();
+      unsubPosts();
+      unsubEvents();
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
@@ -236,26 +244,29 @@ export default function AdminPortal({ onExit, currentUser }) {
     setIsMemberModalOpen(true);
   };
 
-  const handleSaveMember = (e) => {
+  const handleSaveMember = async (e) => {
     e.preventDefault();
     if (!memberForm.name.trim()) return;
-
-    if (editingMember) {
-      updateSquadMember(editingMember.id, memberForm);
-      triggerToast(`Updated ${memberForm.name} ✅`);
-    } else {
-      saveSquadMember(memberForm);
-      triggerToast(`Added ${memberForm.name} to Squad! 🎉`);
-    }
     setIsMemberModalOpen(false);
-    loadData();
+    try {
+      const data = editingMember
+        ? { ...editingMember, ...memberForm }
+        : memberForm;
+      await saveMemberR2(data);
+      triggerToast(editingMember ? `Updated ${memberForm.name} ✅` : `Added ${memberForm.name} to Squad! 🎉`);
+    } catch (err) {
+      triggerToast(`Save failed: ${err.message}`);
+    }
   };
 
-  const handleDeleteMember = (id, name) => {
-    if (window.confirm(`Are you sure you want to remove ${name} from squad list?`)) {
-      deleteSquadMember(id);
-      triggerToast(`Removed ${name}`);
-      loadData();
+  const handleDeleteMember = async (id, name) => {
+    if (window.confirm(`Remove ${name} from the squad list?`)) {
+      try {
+        await deleteMemberR2(id);
+        triggerToast(`Removed ${name}`);
+      } catch (err) {
+        triggerToast(`Delete failed: ${err.message}`);
+      }
     }
   };
 
@@ -263,40 +274,42 @@ export default function AdminPortal({ onExit, currentUser }) {
   const handleSaveMemory = async (e) => {
     e.preventDefault();
     if (!memoryForm.title.trim() || !memoryForm.description.trim()) return;
-
-    const peopleList = memoryForm.people ? memoryForm.people.split(',').map(s => s.trim()).filter(Boolean) : ['Squad'];
-    await saveMemory({
-      ...memoryForm,
-      people: peopleList,
-      mediaType: 'image',
-      reactions: { "❤️": 10, "✨": 5, "🫂": 8 }
-    });
     setIsMemoryModalOpen(false);
-    setMemoryForm({ title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: '' });
-    triggerToast('New memory chapter published! 📸');
-    loadData();
+    try {
+      await saveMemoryR2(memoryForm);
+      setMemoryForm({ title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: '' });
+      triggerToast('New memory chapter published to R2! 📸');
+    } catch (err) {
+      triggerToast(`Memory save failed: ${err.message}`);
+    }
   };
 
   // Post CRUD
   const handleSavePost = async (e) => {
     e.preventDefault();
     if (!postForm.content.trim()) return;
-    await savePost(postForm, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
     setIsPostModalOpen(false);
-    setPostForm({ authorName: 'Admin Announcement', content: '', category: 'Announcement' });
-    triggerToast('Post published to squad community! 📣');
-    loadData();
+    try {
+      await savePostR2(postForm, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
+      setPostForm({ authorName: 'Admin Announcement', content: '', category: 'Announcement' });
+      triggerToast('Post published live to squad! 📣');
+    } catch (err) {
+      triggerToast(`Post failed: ${err.message}`);
+    }
   };
 
   // Event CRUD
   const handleSaveEvent = async (e) => {
     e.preventDefault();
     if (!eventForm.title.trim() || !eventForm.date) return;
-    await saveEvent(eventForm);
     setIsEventModalOpen(false);
-    setEventForm({ title: '', date: '', time: '', location: '', description: '' });
-    triggerToast(`Event "${eventForm.title}" created! 🗓️`);
-    loadData();
+    try {
+      await saveEventR2(eventForm);
+      setEventForm({ title: '', date: '', time: '', location: '', description: '' });
+      triggerToast(`Event "${eventForm.title}" live on website! 🗓️`);
+    } catch (err) {
+      triggerToast(`Event save failed: ${err.message}`);
+    }
   };
 
   // R2 Direct File Upload

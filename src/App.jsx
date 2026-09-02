@@ -18,22 +18,17 @@ import {
   SignInModal,
   AdminPortal
 } from './components';
-import { 
-  getStoredMembers,
-  saveSquadMember,
-  updateSquadMember,
-  subscribeToMemories, 
-  getStoredMemories,
-  saveMemory,
-  reactToMemory, 
-  addCommentToMemory,
-  getStoredPosts,
-  savePost,
-  likePost,
-  getStoredEvents,
-  saveEvent,
-  toggleEventRsvp 
-} from './services';
+import {
+  subscribeToMembersR2,
+  subscribeToMemoriesR2,
+  subscribeToPostsR2,
+  subscribeToEventsR2,
+  saveMemoryR2,
+  savePostR2,
+  saveEventR2,
+  bootR2Database,
+} from './services/r2Database';
+import { reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
 import { onAuthChange, signInWithGoogle, logOut } from './firebase';
 import './App.css';
 
@@ -50,11 +45,11 @@ export default function App() {
       (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin');
   });
 
-  // Data States
-  const [members, setMembers] = useState(getStoredMembers());
+  // Data States — start with empty arrays, R2 will populate them live
+  const [members, setMembers]   = useState([]);
   const [memories, setMemories] = useState([]);
-  const [posts, setPosts] = useState(getStoredPosts());
-  const [events, setEvents] = useState(getStoredEvents());
+  const [posts, setPosts]       = useState([]);
+  const [events, setEvents]     = useState([]);
 
   // Filter States
   const [activeMemberFilter, setActiveMemberFilter] = useState('All');
@@ -133,12 +128,19 @@ export default function App() {
     setIsAdminRoute(false);
   };
 
-  // Listen to real-time Memories
+  // ── Live R2 data subscriptions — public website always shows latest admin data ──
   useEffect(() => {
-    const unsub = subscribeToMemories(liveMemories => {
-      setMemories(liveMemories);
-    });
-    return () => unsub();
+    bootR2Database().catch(() => {});
+    const unsubMembers   = subscribeToMembersR2(setMembers);
+    const unsubMemories  = subscribeToMemoriesR2(setMemories);
+    const unsubPosts     = subscribeToPostsR2(setPosts);
+    const unsubEvents    = subscribeToEventsR2(setEvents);
+    return () => {
+      unsubMembers();
+      unsubMemories();
+      unsubPosts();
+      unsubEvents();
+    };
   }, []);
 
   // Scroll to section helper
@@ -179,15 +181,12 @@ export default function App() {
   }, []);
 
   // Member Management Handlers
-  const handleSaveMember = (memberData) => {
-    if (editingMember) {
-      const updated = updateSquadMember(editingMember.id, memberData);
-      setMembers(updated);
-      showToast(`${memberData.name}'s profile updated! ✨`);
-    } else {
-      const updated = saveSquadMember(memberData);
-      setMembers(updated);
-      showToast(`Added ${memberData.name} to the gang! 🎉`);
+  const handleSaveMember = async (memberData) => {
+    try {
+      await saveMemberR2(editingMember ? { ...editingMember, ...memberData } : memberData);
+      showToast(editingMember ? `${memberData.name}'s profile updated! ✨` : `Added ${memberData.name} to the gang! 🎉`);
+    } catch (err) {
+      showToast(`Could not save member: ${err.message}`);
     }
     setEditingMember(null);
   };
@@ -212,10 +211,8 @@ export default function App() {
 
   const handleUploadPhotos = async (uploadedMemories) => {
     for (const mem of uploadedMemories) {
-      await saveMemory(mem);
+      await saveMemoryR2(mem);
     }
-    const updated = getStoredMemories();
-    setMemories(updated);
     showToast(`✨ ${uploadedMemories.length} ${uploadedMemories.length === 1 ? 'photo' : 'photos'} added to your Squad Album!`);
   };
 
@@ -228,8 +225,7 @@ export default function App() {
         showToast("Please sign in with Google to post.");
         return;
       }
-      const updated = await savePost(postData, activeUser);
-      setPosts(updated);
+      await savePostR2(postData, activeUser);
       showToast("Shared to squad community! 📣");
     } catch (err) {
       showToast(err.message || "Could not publish post.");
@@ -242,10 +238,13 @@ export default function App() {
   };
 
   // Event Handlers
-  const handleSaveEvent = (eventData) => {
-    const updated = saveEvent(eventData);
-    setEvents(updated);
-    showToast(`Event "${eventData.title}" scheduled! 🗓️`);
+  const handleSaveEvent = async (eventData) => {
+    try {
+      await saveEventR2(eventData);
+      showToast(`Event "${eventData.title}" scheduled! 🗓️`);
+    } catch (err) {
+      showToast(`Could not create event: ${err.message}`);
+    }
   };
 
   const handleToggleRsvp = (eventId) => {
