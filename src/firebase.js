@@ -1,14 +1,4 @@
 // Firebase Configuration for நட்பே துணை
-// ⚠️ IMPORTANT: Replace the config below with YOUR Firebase project credentials.
-//
-// HOW TO SET UP:
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project (or use existing)
-// 3. Enable Authentication → Sign-in method → Google
-// 4. Create a Firestore Database (start in test mode)
-// 5. Go to Project Settings → Your apps → Add web app
-// 6. Copy the firebaseConfig object and paste it below
-
 import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
@@ -65,32 +55,26 @@ googleProvider.setCustomParameters({
 });
 
 // Check redirect result on app load if redirected
-getRedirectResult(auth).catch(() => {});
+export const checkRedirectResult = () => getRedirectResult(auth);
 
 // Auth functions
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
-    return result.user;
+    return result;
   } catch (err) {
     console.warn("Sign-in popup error:", err);
-    // User closed popup
     if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       throw err;
     }
-    // If popup was blocked or browser threw internal/indexeddb error, fallback to redirect
     if (
       err.code === 'auth/popup-blocked' || 
       err.code === 'auth/internal-error' || 
       err.message?.toLowerCase().includes('indexeddb') || 
       err.message?.toLowerCase().includes('database')
     ) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-      } catch (redirErr) {
-        throw redirErr;
-      }
+      await signInWithRedirect(auth, googleProvider);
+      return null;
     }
     throw err;
   }
@@ -126,7 +110,6 @@ export const subscribeToMessages = (callback, messageLimit = 80) => {
     callback(messages);
   }, (error) => {
     console.info('Live chat unavailable (Firestore unreachable):', error.message);
-    // Stop Firebase from retrying endlessly on permission/network errors
     if (unsub) unsub();
     callback([]);
   });

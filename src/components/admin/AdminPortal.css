@@ -94,6 +94,48 @@
   cursor: not-allowed;
 }
 
+.admin-secondary-auth-toggle {
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: color 0.2s ease;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-secondary-auth-toggle:hover {
+  color: #c7d2fe;
+}
+
+.admin-backup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.admin-backup-input {
+  width: 100%;
+  background: rgba(39, 39, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-backup-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  background: rgba(39, 39, 42, 0.95);
+}
+
 /* User Pill in Admin Header */
 .admin-user-pill {
   display: flex;

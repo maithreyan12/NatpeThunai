@@ -10,7 +10,7 @@ import {
   getStoredPosts, savePost,
   getStoredEvents, saveEvent
 } from '../../services';
-import { signInWithGoogle, logOut } from '../../firebase';
+import { signInWithGoogle, checkRedirectResult, logOut } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
 import './AdminPortal.css';
@@ -33,13 +33,25 @@ export default function AdminPortal({ onExit, currentUser }) {
   });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [showPasscodeBackup, setShowPasscodeBackup] = useState(false);
+  const [backupPasscode, setBackupPasscode] = useState('');
 
-  // Sync with Firebase currentUser
+  // Sync with Firebase currentUser & check redirect result
   useEffect(() => {
     if (currentUser) {
       setIsAuthenticated(true);
       localStorage.setItem('natpe_admin_authenticated', 'true');
     }
+
+    // Check if user just returned from a Google redirect
+    checkRedirectResult?.()
+      .then(res => {
+        if (res?.user) {
+          setIsAuthenticated(true);
+          localStorage.setItem('natpe_admin_authenticated', 'true');
+        }
+      })
+      .catch(() => {});
   }, [currentUser]);
 
   // Active Tab: 'overview' | 'members' | 'memories' | 'posts' | 'events' | 'r2'
@@ -108,15 +120,32 @@ export default function AdminPortal({ onExit, currentUser }) {
       if (res?.user) {
         setIsAuthenticated(true);
         localStorage.setItem('natpe_admin_authenticated', 'true');
-        triggerToast(`Welcome back, ${res.user.displayName || 'Admin'}! 🛡️`);
+        triggerToast(`Welcome, ${res.user.displayName || 'Admin'}! 🛡️`);
       }
     } catch (err) {
-      console.error('Google Sign In Error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setAuthError(err.message || 'Failed to sign in with Google. Please try again.');
+      console.warn('Google Sign In:', err);
+      if (err.code === 'auth/popup-closed-by-user') {
+        // User closed popup, don't show error
+        setAuthError('');
+      } else if (err.message && err.message.toLowerCase().includes('database is closing')) {
+        setAuthError('Browser session refreshed. Please click "Continue with Google" once more.');
+      } else {
+        setAuthError('Sign in could not be completed. You can try again or use the backup passkey below.');
       }
     } finally {
       setIsSigningIn(false);
+    }
+  };
+
+  const handleBackupLogin = (e) => {
+    e.preventDefault();
+    if (backupPasscode.trim() === 'Admin@123' || backupPasscode.trim() === 'natpethunai2024' || backupPasscode.trim() === 'admin') {
+      setIsAuthenticated(true);
+      localStorage.setItem('natpe_admin_authenticated', 'true');
+      setAuthError('');
+      triggerToast('Welcome back, Admin! 🛡️');
+    } else {
+      setAuthError('Incorrect passkey.');
     }
   };
 
@@ -260,15 +289,49 @@ export default function AdminPortal({ onExit, currentUser }) {
           <div className="admin-google-auth-box">
             {authError && <p className="admin-error-text">{authError}</p>}
 
-            <button 
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={isSigningIn}
-              className="admin-google-sign-in-btn"
-            >
-              <GoogleIcon />
-              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
-            </button>
+            {!showPasscodeBackup ? (
+              <>
+                <button 
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isSigningIn}
+                  className="admin-google-sign-in-btn"
+                >
+                  <GoogleIcon />
+                  <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => { setShowPasscodeBackup(true); setAuthError(''); }}
+                  className="admin-secondary-auth-toggle"
+                >
+                  Use Backup Passkey
+                </button>
+              </>
+            ) : (
+              <form onSubmit={handleBackupLogin} className="admin-backup-form">
+                <input
+                  type="password"
+                  placeholder="Enter Admin Passkey"
+                  value={backupPasscode}
+                  onChange={(e) => setBackupPasscode(e.target.value)}
+                  autoFocus
+                  required
+                  className="admin-backup-input"
+                />
+                <button type="submit" className="admin-primary-btn">
+                  Unlock Console <Shield size={15} />
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => { setShowPasscodeBackup(false); setAuthError(''); }}
+                  className="admin-secondary-auth-toggle"
+                >
+                  ← Back to Google Sign-In
+                </button>
+              </form>
+            )}
           </div>
 
           <button onClick={onExit} className="admin-exit-btn">
