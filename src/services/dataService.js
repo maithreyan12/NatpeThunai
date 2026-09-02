@@ -282,10 +282,15 @@ export const getStoredMembers = () => {
     return organized;
   }
 
-  // Merge code-defined squad roster (updating photos/fields from code) with any custom entries
+  // Merge code-defined squad roster with user edits (user edits ALWAYS win)
   const synced = INITIAL_SQUAD_MEMBERS.map(initialMember => {
     const existing = local.find(m => m.id === initialMember.id || m.name?.toLowerCase().trim() === initialMember.name?.toLowerCase().trim());
-    return existing ? { ...existing, ...initialMember, photo: initialMember.photo || existing.photo } : initialMember;
+    if (!existing) return initialMember;
+    return {
+      ...initialMember,
+      ...existing,
+      photo: existing.photo !== undefined ? existing.photo : initialMember.photo
+    };
   });
 
   // Keep any user-added custom members from UI (excluding old placeholder names)

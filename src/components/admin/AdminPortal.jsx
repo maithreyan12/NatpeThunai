@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
-  CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles
+  CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera
 } from 'lucide-react';
 import {
   getStoredMembers, saveSquadMember, updateSquadMember, deleteSquadMember,
@@ -91,6 +91,8 @@ export default function AdminPortal({ onExit, currentUser }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const [recentUploads, setRecentUploads] = useState([]);
+  const [memberPhotoUploading, setMemberPhotoUploading] = useState(false);
+  const [memoryPhotoUploading, setMemoryPhotoUploading] = useState(false);
 
   // Toast
   const [toast, setToast] = useState('');
@@ -98,6 +100,60 @@ export default function AdminPortal({ onExit, currentUser }) {
   const triggerToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3500);
+  };
+
+  // Direct Photo File Upload for Member
+  const handleMemberPhotoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show instant preview
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setMemberForm(prev => ({ ...prev, photo: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+
+    setMemberPhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'members');
+      if (result?.publicUrl) {
+        setMemberForm(prev => ({ ...prev, photo: result.publicUrl }));
+        triggerToast(`Photo uploaded to Cloudflare R2! ☁️`);
+      }
+    } catch (err) {
+      console.warn("R2 Upload warning (using local preview):", err);
+      triggerToast(`Photo selected (saved to sanctuary data)`);
+    } finally {
+      setMemberPhotoUploading(false);
+    }
+  };
+
+  // Direct Photo File Upload for Memory
+  const handleMemoryPhotoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show instant preview
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setMemoryForm(prev => ({ ...prev, mediaUrl: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+
+    setMemoryPhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'memories');
+      if (result?.publicUrl) {
+        setMemoryForm(prev => ({ ...prev, mediaUrl: result.publicUrl }));
+        triggerToast(`Memory photo uploaded to R2! ☁️`);
+      }
+    } catch (err) {
+      console.warn("R2 Upload warning:", err);
+      triggerToast(`Photo selected for memory chapter`);
+    } finally {
+      setMemoryPhotoUploading(false);
+    }
   };
 
   // Load all live data
@@ -751,14 +807,44 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
-              <div className="admin-input-group">
-                <label>Photo URL (R2 CDN or Web URL)</label>
-                <input
-                  type="text"
-                  value={memberForm.photo}
-                  onChange={(e) => setMemberForm({ ...memberForm, photo: e.target.value })}
-                  placeholder={`${R2_BASE}/photos/name.jpg`}
-                />
+              {/* Member Photo Upload & Live Preview */}
+              <div className="admin-photo-upload-section">
+                <label className="admin-field-label">Member Photo</label>
+                <div className="admin-photo-picker-row">
+                  <div className="admin-photo-preview-box">
+                    {memberForm.photo ? (
+                      <img src={memberForm.photo} alt="Preview" className="admin-photo-preview-img" />
+                    ) : (
+                      <div className="admin-photo-preview-placeholder">
+                        <Users size={28} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-photo-picker-controls">
+                    <label className="admin-file-pick-btn">
+                      <Camera size={16} />
+                      <span>{memberPhotoUploading ? 'Uploading to R2...' : 'Choose Photo File'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleMemberPhotoFile}
+                        disabled={memberPhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span className="admin-photo-hint">Select a photo from your phone/device or paste URL below</span>
+                  </div>
+                </div>
+
+                <div className="admin-input-group" style={{ marginTop: '10px' }}>
+                  <input
+                    type="text"
+                    value={memberForm.photo}
+                    onChange={(e) => setMemberForm({ ...memberForm, photo: e.target.value })}
+                    placeholder={`e.g. ${R2_BASE}/photos/name.jpg`}
+                  />
+                </div>
               </div>
 
               <div className="admin-input-group">
@@ -832,14 +918,44 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
-              <div className="admin-input-group">
-                <label>Photo / Media URL</label>
-                <input
-                  type="text"
-                  value={memoryForm.mediaUrl}
-                  onChange={(e) => setMemoryForm({ ...memoryForm, mediaUrl: e.target.value })}
-                  placeholder={`${R2_BASE}/photos/...`}
-                />
+              {/* Memory Chapter Photo Upload & Preview */}
+              <div className="admin-photo-upload-section">
+                <label className="admin-field-label">Chapter Cover Photo</label>
+                <div className="admin-photo-picker-row">
+                  <div className="admin-photo-preview-box memory-preview">
+                    {memoryForm.mediaUrl ? (
+                      <img src={memoryForm.mediaUrl} alt="Preview" className="admin-photo-preview-img" />
+                    ) : (
+                      <div className="admin-photo-preview-placeholder">
+                        <ImageIcon size={28} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-photo-picker-controls">
+                    <label className="admin-file-pick-btn">
+                      <Camera size={16} />
+                      <span>{memoryPhotoUploading ? 'Uploading to R2...' : 'Choose Chapter Photo'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*,video/*" 
+                        onChange={handleMemoryPhotoFile}
+                        disabled={memoryPhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span className="admin-photo-hint">Select a photo from device or paste CDN URL below</span>
+                  </div>
+                </div>
+
+                <div className="admin-input-group" style={{ marginTop: '10px' }}>
+                  <input
+                    type="text"
+                    value={memoryForm.mediaUrl}
+                    onChange={(e) => setMemoryForm({ ...memoryForm, mediaUrl: e.target.value })}
+                    placeholder={`e.g. ${R2_BASE}/photos/...`}
+                  />
+                </div>
               </div>
 
               <div className="admin-input-group">
