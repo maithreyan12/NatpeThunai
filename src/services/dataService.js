@@ -356,29 +356,29 @@ const INITIAL_MEMORIES = [
     location: "Campus Common & Café",
     mediaUrl: r2Photo('Gracee.jpg'),
     mediaType: "image",
-    people: ["Grace", "Puppy", "Heenuuu", "Divyaaa", "Kavin", "Sid"],
+    people: ["Grace", "Puppy", "Heenuuu", "Divyaaa", "Farish", "Kafil"],
     category: "Milestone",
     reactions: { "❤️": 28, "✨": 18, "🫂": 25, "😂": 12 },
     comments: [
       { id: "c1", author: "Grace", text: "I still remember how we couldn't stop laughing at that silly joke!", time: "August" },
-      { id: "c2", author: "Sid", text: "That tea was 5 rupees but the memories are priceless ❤️", time: "August" }
+      { id: "c2", author: "Farish", text: "That tea was 5 rupees but the memories are priceless ❤️", time: "August" }
     ]
   },
   {
     id: "mem-02",
     year: "Chapter 2",
     title: "Late Night Talks & Spontaneous Highway Trips",
-    description: "The semester that tested everyone, but midnight chai runs, high-volume music in Sid's car, and late-night calls kept our spirits unshakeable.",
+    description: "The semester that tested everyone, but midnight chai runs, high-volume music in Farish's car, and late-night calls kept our spirits unshakeable.",
     date: "April 22",
     location: "Midnight Highway Drive",
     mediaUrl: r2Photo('Divyaa.jpg'),
     mediaType: "image",
-    people: ["Heenuuu", "Divyaaa", "Grace", "Sid", "Rohan", "Pooja"],
+    people: ["Heenuuu", "Divyaaa", "Grace", "Farish", "Samuel", "Afnaaan"],
     category: "Adventures",
     reactions: { "❤️": 35, "✨": 21, "🫂": 29, "😂": 16 },
     comments: [
       { id: "c3", author: "Heenuuu", text: "Best memory of second year hands down!", time: "April" },
-      { id: "c4", author: "Rohan", text: "And that playlist is still unskippable 🔥", time: "April" }
+      { id: "c4", author: "Samuel", text: "And that playlist is still unskippable 🔥", time: "April" }
     ]
   },
   {
@@ -390,12 +390,12 @@ const INITIAL_MEMORIES = [
     location: "Beachside Gathering",
     mediaUrl: r2Photo('Divyaa.jpg'),
     mediaType: "image",
-    people: ["Divyaaa", "Puppy", "Grace", "Heenuuu", "Ananya", "Meera", "Arjun"],
+    people: ["Divyaaa", "Puppy", "Grace", "Heenuuu", "Haniya", "Jaffreen", "Harshitha"],
     category: "Celebration",
     reactions: { "❤️": 42, "✨": 30, "🫂": 38, "😂": 14 },
     comments: [
       { id: "c5", author: "Divyaaa", text: "Look at all our genuine smiles here!", time: "November" },
-      { id: "c6", author: "Ananya", text: "We took over 200 candid photos that evening!", time: "November" }
+      { id: "c6", author: "Haniya", text: "We took over 200 candid photos that evening!", time: "November" }
     ]
   },
   {
@@ -407,12 +407,12 @@ const INITIAL_MEMORIES = [
     location: "Squad Sanctuary",
     mediaUrl: r2Photo('Gracee.jpg'),
     mediaType: "image",
-    people: ["Puppy", "Grace", "Heenuuu", "Divyaaa", "Vikram", "Sneha", "Harini", "KK"],
+    people: ["Puppy", "Grace", "Heenuuu", "Divyaaa", "Farish", "Meshak", "Maithreyan", "Gopika"],
     category: "Daily Laughs",
     reactions: { "❤️": 58, "✨": 45, "🫂": 50, "😂": 27 },
     comments: [
       { id: "c7", author: "Puppy", text: "Natpe Thunai forever. Always and infinity.", time: "Recent" },
-      { id: "c8", author: "KK", text: "15 members and infinite memories to go ♾️❤️", time: "Recent" }
+      { id: "c8", author: "Kafil", text: "15 members and infinite memories to go ♾️❤️", time: "Recent" }
     ]
   }
 ];
@@ -429,7 +429,7 @@ const INITIAL_POSTS = [
     comments: [
       { id: "cm1", author: "Puppy", text: "100% true! Natpe Thunai forever ♾️" },
       { id: "cm2", author: "Heenuuu", text: "Namma friendship eppavum special dhan 💖" },
-      { id: "cm3", author: "Kavin", text: "Proud of all 15 of us! Next trip planning soon!" }
+      { id: "cm3", author: "Farish", text: "Proud of all of us! Next trip planning soon!" }
     ]
   },
   {
@@ -442,19 +442,19 @@ const INITIAL_POSTS = [
     createdAt: "2 days ago",
     comments: [
       { id: "pc1", author: "Puppy", text: "Already looking forward to it!" },
-      { id: "pc2", author: "Sid", text: "Car is serviced and ready to roll 🚗" }
+      { id: "pc2", author: "Samuel", text: "Car is serviced and ready to roll 🚗" }
     ]
   },
   {
     id: "post-2",
     authorName: "Divyaaa",
     authorPhoto: r2Photo('Divyaa.jpg'),
-    content: "Going through our old memories right now... 15 of us have changed so much yet our banter is literally identical 😂💖",
+    content: "Going through our old memories right now... All of us have changed so much yet our banter is literally identical 😂💖",
     category: "Moment",
     likes: 24,
     createdAt: "5 days ago",
     comments: [
-      { id: "pc3", author: "Sneha", text: "I still have the photos from day 1!" }
+      { id: "pc3", author: "Jaffreen", text: "I still have the photos from day 1!" }
     ]
   }
 ];
@@ -613,10 +613,16 @@ export const getStoredPosts = () => {
 };
 
 export const savePost = async (postData, user) => {
+  if (!user) {
+    throw new Error("Google authentication required to publish posts.");
+  }
+
   const newPost = {
     id: `post-${Date.now()}`,
-    authorName: user?.displayName || "Squad Member",
-    authorPhoto: user?.photoURL || r2Photo('Gracee.jpg'),
+    authorName: user.displayName || "Squad Member",
+    authorPhoto: user.photoURL || r2Photo('Gracee.jpg'),
+    authorUid: user.uid || null,
+    authorEmail: user.email || null,
     content: postData.content,
     mediaUrl: postData.mediaUrl || null,
     category: postData.category || "Moment",

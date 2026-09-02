@@ -23,10 +23,19 @@ export default function CommunitySection({
   onOpenAddEvent,
   onSelectMember,
   members,
-  _currentUser 
+  currentUser,
+  onOpenSignIn
 }) {
   const [activeTab, setActiveTab] = useState('posts'); // 'posts' | 'events' | 'members'
   const squadList = members && members.length > 0 ? members : getStoredMembers();
+
+  const handleCreatePostClick = () => {
+    if (!currentUser && onOpenSignIn) {
+      onOpenSignIn();
+      return;
+    }
+    onOpenCreatePost();
+  };
 
   return (
     <section id="community" className="community-hub-section">
@@ -85,7 +94,7 @@ export default function CommunitySection({
           <div className="community-tab-pane">
             <div className="tab-action-bar">
               <span className="pane-subtitle">Shared reflections, announcements, and plans</span>
-              <button className="btn-primary btn-sm" onClick={onOpenCreatePost}>
+              <button className="btn-primary btn-sm" onClick={handleCreatePostClick}>
                 <Plus size={15} />
                 <span>Create Post</span>
               </button>

@@ -221,9 +221,19 @@ export default function App() {
 
   // Community Post Handlers
   const handleSavePost = async (postData, user) => {
-    const updated = await savePost(postData, user);
-    setPosts(updated);
-    showToast("Shared to squad community! 📣");
+    try {
+      const activeUser = user || currentUser;
+      if (!activeUser) {
+        setIsSignInOpen(true);
+        showToast("Please sign in with Google to post.");
+        return;
+      }
+      const updated = await savePost(postData, activeUser);
+      setPosts(updated);
+      showToast("Shared to squad community! 📣");
+    } catch (err) {
+      showToast(err.message || "Could not publish post.");
+    }
   };
 
   const handleLikePost = (postId) => {
@@ -334,6 +344,7 @@ export default function App() {
           onSelectMember={(member) => setSelectedFriend(member)}
           members={members}
           currentUser={currentUser}
+          onOpenSignIn={() => setIsSignInOpen(true)}
         />
 
         {/* 8. Live Group Chat & AI Story Enclave */}

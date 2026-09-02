@@ -16,33 +16,33 @@ const JOURNEY_MILESTONES = [
     gangCount: "Squad Circle",
     attendees: [
       { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
-      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') },
-      { name: "Heenuuu", role: "The Heart 💖", photo: r2Photo('Heenuuu.jpg') },
-      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
-      { name: "Kavin", role: "Captain 🧠", initial: "KA" },
-      { name: "Sid", role: "Road Legend 🚗", initial: "SI" }
+      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') },
+      { name: "Kafil", role: "The Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
+      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
+      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') }
     ],
-    remainingCount: 9
+    remainingCount: 8
   },
   {
     stepLabel: "Chapter 2",
     tagline: "Full tank, loud music, zero sleep",
     title: "Midnight Drives & Exam Chaos",
-    description: "Countless midnight highway drives, high-volume Tamil bangers in Sid's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
+    description: "Countless midnight highway drives, high-volume Tamil bangers in Farish's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
     quote: "We didn't realize we were making lifelong history; we just knew we were laughing together.",
     photo: r2Photo('Heenuuu.jpg'),
     badge: "Year 2 • Chaos & Memories",
     colorKey: "blue",
     gangCount: "Squad Circle",
     attendees: [
-      { name: "Sid", role: "Driver 🚗", initial: "SI" },
-      { name: "Rohan", role: "Music 🎵", initial: "RO" },
-      { name: "Heenuuu", role: "Heart 💖", photo: r2Photo('Heenuuu.jpg') },
-      { name: "Pooja", role: "Night Owl 🌙", initial: "PO" },
-      { name: "Vikram", role: "Hype ⚡", initial: "VI" },
-      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') }
+      { name: "Heenuuu", role: "The Spark & Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Samuel", role: "The Joyful Soul 🌟", photo: r2Photo('samuel.jpg') },
+      { name: "Afnaaan", role: "The Energy Dynamo ⚡", photo: r2Photo('affu.jpg') },
+      { name: "Meshak", role: "Silent Strength 🛡️", photo: r2Photo('meshak.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') },
+      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') }
     ],
-    remainingCount: 9
+    remainingCount: 8
   },
   {
     stepLabel: "Chapter 3",
@@ -55,14 +55,14 @@ const JOURNEY_MILESTONES = [
     colorKey: "pink",
     gangCount: "Squad Circle",
     attendees: [
-      { name: "Divyaaa", role: "Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
-      { name: "Ananya", role: "Creator 🎨", initial: "AN" },
-      { name: "Meera", role: "Peacekeeper 🕊️", initial: "ME" },
-      { name: "Arjun", role: "Foodie 🍕", initial: "AR" },
-      { name: "Sneha", role: "Chronicler 📸", initial: "SN" },
-      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') }
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
+      { name: "Harshitha", role: "Radiant Sunshine 🌻", photo: r2Photo('harshuuu.jpg') },
+      { name: "Maithreyan", role: "Tech & Vibe Pilot 🚀", initial: "MA" },
+      { name: "Gopika", role: "Graceful Heart 🌸", initial: "GO" },
+      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
     ],
-    remainingCount: 9
+    remainingCount: 8
   },
   {
     stepLabel: "Chapter 4",
@@ -75,14 +75,14 @@ const JOURNEY_MILESTONES = [
     colorKey: "peach",
     gangCount: "Squad Family",
     attendees: [
-      { name: "Squad", role: "United Gang", photo: r2Photo('Gracee.jpg') },
-      { name: "Heenuuu", role: "Heart 💖", photo: r2Photo('Heenuuu.jpg') },
-      { name: "Divyaaa", role: "Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
-      { name: "Puppy", role: "The Vibe 🎯", photo: r2Photo('Puppy.jpg') },
-      { name: "KK", role: "Party 🎉", initial: "KK" },
-      { name: "Harini", role: "Anchor ⚓", initial: "HA" }
+      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
+      { name: "Heenuuu", role: "The Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Kafil", role: "Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
+      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
     ],
-    remainingCount: 9
+    remainingCount: 8
   }
 ];
 
