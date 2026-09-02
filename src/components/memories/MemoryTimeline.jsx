@@ -143,8 +143,20 @@ export default function MemoryTimeline({
     return matchesCategory && matchesMember && matchesSearch;
   });
 
-  // Prepare dynamic spiral items from cloud R2 photos & memory entries (web-safe formats only)
+  // Prepare dynamic spiral items with exact requested order: Maithreyan -> Gopika -> Squad Girls -> Squad Boys -> Memories
   const spiralItems = useMemo(() => {
+    const memberMap = new Map();
+    (members || []).forEach(m => {
+      if (m?.id) memberMap.set(m.id.toLowerCase(), m);
+      if (m?.name) memberMap.set(m.name.toLowerCase(), m);
+    });
+
+    const getPhoto = (id, fallbackR2) => {
+      const found = memberMap.get(id.toLowerCase());
+      if (found && found.photo) return found.photo;
+      return fallbackR2 ? r2Photo(fallbackR2) : `/photos/${fallbackR2}`;
+    };
+
     const isWebImage = (url) => {
       if (!url || typeof url !== 'string') return false;
       const cleanUrl = url.split('?')[0].toLowerCase();
@@ -163,21 +175,40 @@ export default function MemoryTimeline({
         fallbackSrc: '/photos/farish.jpg'
       }));
 
-    const memberPhotos = [
-      { id: 'kafil', src: r2Photo('kafil.jpg'), fallbackSrc: '/photos/kafil.jpg', alt: 'Kafil..KK' },
-      { id: 'grace', src: r2Photo('Gracee.jpg'), fallbackSrc: '/photos/Gracee.jpg', alt: 'Grace' },
-      { id: 'jaffreen', src: r2Photo('jaffreen.jpg'), fallbackSrc: '/photos/jaffreen.jpg', alt: 'Jaffreen' },
-      { id: 'haniya', src: r2Photo('hanuu.jpg'), fallbackSrc: '/photos/hanuu.jpg', alt: 'Haniya' },
-      { id: 'farish', src: r2Photo('farish.jpg'), fallbackSrc: '/photos/farish.jpg', alt: 'Farish Sharif' },
-      { id: 'divyaa', src: r2Photo('Divyaa.jpg'), fallbackSrc: '/photos/Divyaa.jpg', alt: 'Divyaa' },
-      { id: 'samuel', src: r2Photo('samuel.jpg'), fallbackSrc: '/photos/samuel.jpg', alt: 'Samuel' },
-      { id: 'meshak', src: r2Photo('meshak.jpg'), fallbackSrc: '/photos/meshak.jpg', alt: 'Meshak' },
-      { id: 'afnan', src: r2Photo('affu.jpg'), fallbackSrc: '/photos/affu.jpg', alt: 'Afnan' },
-      { id: 'harshitha', src: r2Photo('harshuuu.jpg'), fallbackSrc: '/photos/harshuuu.jpg', alt: 'Harshitha' }
+    // Ordered strictly: Maithreyan first -> Gopika next -> Squad Girls -> Squad Boys
+    const orderedMemberPhotos = [
+      // 1. Maithreyan (Up first)
+      { 
+        id: 'maithreyan', 
+        src: getPhoto('maithreyan', null) || 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg', 
+        fallbackSrc: 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg', 
+        alt: 'Maithreyan' 
+      },
+      // 2. Gopika (Next)
+      { 
+        id: 'gopika', 
+        src: getPhoto('gopika', null) || r2Photo('Gracee.jpg'), 
+        fallbackSrc: '/photos/Gracee.jpg', 
+        alt: 'Gopika' 
+      },
+      // 3. Squad Girls
+      { id: 'grace', src: getPhoto('grace', 'Gracee.jpg'), fallbackSrc: '/photos/Gracee.jpg', alt: 'Grace' },
+      { id: 'divyaaa', src: getPhoto('divyaaa', 'Divyaa.jpg'), fallbackSrc: '/photos/Divyaa.jpg', alt: 'Divyaaa' },
+      { id: 'jaffreen', src: getPhoto('jaffreen', 'jaffreen.jpg'), fallbackSrc: '/photos/jaffreen.jpg', alt: 'Jaffreen' },
+      { id: 'haniya', src: getPhoto('haniya', 'hanuu.jpg'), fallbackSrc: '/photos/hanuu.jpg', alt: 'Haniya' },
+      { id: 'harshitha', src: getPhoto('harshitha', 'harshuuu.jpg'), fallbackSrc: '/photos/harshuuu.jpg', alt: 'Harshitha' },
+      { id: 'heenuuu', src: getPhoto('heenuuu', 'Heenuuu.jpg'), fallbackSrc: '/photos/Heenuuu.jpg', alt: 'Heenuuu' },
+      { id: 'puppy', src: getPhoto('puppy', 'Puppy.jpg'), fallbackSrc: '/photos/Puppy.jpg', alt: 'Puppy' },
+      { id: 'afnaan', src: getPhoto('afnaan', 'affu.jpg'), fallbackSrc: '/photos/affu.jpg', alt: 'Afnaaan' },
+      // 4. Squad Boys
+      { id: 'farish', src: getPhoto('farish', 'farish.jpg'), fallbackSrc: '/photos/farish.jpg', alt: 'Farish Sharif' },
+      { id: 'samuel', src: getPhoto('samuel', 'samuel.jpg'), fallbackSrc: '/photos/samuel.jpg', alt: 'Samuel' },
+      { id: 'meshak', src: getPhoto('meshak', 'meshak.jpg'), fallbackSrc: '/photos/meshak.jpg', alt: 'Meshak' },
+      { id: 'kafil', src: getPhoto('kafil', 'kafil.jpg'), fallbackSrc: '/photos/kafil.jpg', alt: 'Kafil' }
     ];
 
-    return [...memberPhotos, ...memoryPhotos];
-  }, [memories]);
+    return [...orderedMemberPhotos, ...memoryPhotos];
+  }, [memories, members]);
 
   return (
     <section id="timeline" className="timeline-section">
@@ -200,22 +231,22 @@ export default function MemoryTimeline({
           items={spiralItems}
           animationMode="all"
           speed={0.55}
-          radius={205}
-          cardWidth={148}
-          cardHeight={112}
-          verticalSpacing={68}
-          perspective={840}
-          cardRadius={16}
-          centerScale={1.34}
-          edgeBlur={5.5}
-          cardsPerTurn={6}
+          radius={225}
+          cardWidth={140}
+          cardHeight={175}
+          verticalSpacing={75}
+          perspective={860}
+          cardRadius={18}
+          centerScale={1.3}
+          edgeBlur={5}
+          cardsPerTurn={7}
           pauseOnHover
           direction="up"
           rotation={0}
           cardTilt={0}
           edgeFade={0.75}
           imageFit="cover"
-          grayscale={0.05}
+          grayscale={0}
           onItemClick={(item) => onOpenLightbox && onOpenLightbox(item.src)}
         />
       </div>
