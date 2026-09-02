@@ -43,7 +43,7 @@ export default function Hero({
             {/* Decorative ink swash above */}
             <div className="hero-ink-swash" aria-hidden="true">
               <svg viewBox="0 0 320 55" fill="none" xmlns="http://www.w3.org/2000/svg" className="ink-swash-svg">
-                <path d="M20 45 Q80 8 160 20 Q240 32 300 10" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" fill="none" className="ink-path-main"/>
+                <path d="M20 45 Q80 8 160 20 Q240 32 300 10" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" fill="none" className="ink-path-main" />
               </svg>
             </div>
 
@@ -59,67 +59,8 @@ export default function Hero({
             {/* Decorative tail swash below */}
             <div className="hero-ink-swash hero-ink-swash-bottom" aria-hidden="true">
               <svg viewBox="0 0 280 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="ink-swash-svg ink-swash-bottom-svg">
-                <path d="M10 10 Q80 30 180 18 Q240 10 270 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" className="ink-path-main"/>
+                <path d="M10 10 Q80 30 180 18 Q240 10 270 28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" className="ink-path-main" />
               </svg>
-            </div>
-          </div>
-
-          <h2 className="hero-subtitle">
-            Our memories. Our moments. Our unbreakable bond.
-          </h2>
-        </div>
-
-        {/* Emotional Supporting Text */}
-        <p className="hero-supporting-copy">
-          From first-year canteen tea and midnight highway drives to shared exam panic and lifelong celebrations.
-          A timeless digital home for our squad.
-        </p>
-
-        {/* Dynamic Squad Statistics Strip */}
-        <div className="hero-stats-strip">
-          <div className="hero-stat-card">
-            <div className="stat-icon-wrapper">
-              <Users size={18} />
-            </div>
-            <div className="stat-text-group">
-              <span className="stat-number">Lifelong Gang</span>
-              <span className="stat-desc">One Unbreakable Circle</span>
-            </div>
-          </div>
-
-          <div className="hero-stat-divider" />
-
-          <div className="hero-stat-card">
-            <div className="stat-icon-wrapper">
-              <Sparkles size={18} />
-            </div>
-            <div className="stat-text-group">
-              <span className="stat-number">1000+ Stories</span>
-              <span className="stat-desc">Shared Laughs & Banter</span>
-            </div>
-          </div>
-
-          <div className="hero-stat-divider" />
-
-          <div className="hero-stat-card">
-            <div className="stat-icon-wrapper">
-              <Compass size={18} />
-            </div>
-            <div className="stat-text-group">
-              <span className="stat-number">Countless Drives</span>
-              <span className="stat-desc">Road Trips & Hangouts</span>
-            </div>
-          </div>
-
-          <div className="hero-stat-divider" />
-
-          <div className="hero-stat-card">
-            <div className="stat-icon-wrapper">
-              <Flame size={18} />
-            </div>
-            <div className="stat-text-group">
-              <span className="stat-number">Infinite ♾️</span>
-              <span className="stat-desc">Natpe Thunai Forever</span>
             </div>
           </div>
         </div>
@@ -277,26 +218,63 @@ export default function Hero({
           </div>
         </div>
 
-        {/* Interactive Era Timeline Milestones Bar */}
-        <div className="hero-timeline-strip">
-          <div className="milestone-chip">
-            <span className="milestone-year">Year 1</span>
-            <span className="milestone-label">The First Spark</span>
+        {/* Subtitle & Emotional Supporting Text */}
+        <div className="hero-bottom-text-group">
+          <h2 className="hero-subtitle">
+            Our memories. Our moments. Our unbreakable bond.
+          </h2>
+          <p className="hero-supporting-copy">
+            From first-year canteen tea and midnight highway drives to shared exam panic and lifelong celebrations.
+            A timeless digital home for our squad.
+          </p>
+        </div>
+
+        {/* Dynamic Squad Statistics Strip */}
+        <div className="hero-stats-strip">
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Users size={18} />
+            </div>
+            <div className="stat-text-group">
+              <span className="stat-number">Lifelong Gang</span>
+              <span className="stat-desc">One Unbreakable Circle</span>
+            </div>
           </div>
-          <div className="milestone-divider" />
-          <div className="milestone-chip">
-            <span className="milestone-year">Year 2</span>
-            <span className="milestone-label">Adventures & Chaos</span>
+
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Sparkles size={18} />
+            </div>
+            <div className="stat-text-group">
+              <span className="stat-number">1000+ Stories</span>
+              <span className="stat-desc">Shared Laughs & Banter</span>
+            </div>
           </div>
-          <div className="milestone-divider" />
-          <div className="milestone-chip">
-            <span className="milestone-year">Year 3</span>
-            <span className="milestone-label">Deepened Anchor</span>
+
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Compass size={18} />
+            </div>
+            <div className="stat-text-group">
+              <span className="stat-number">Countless Drives</span>
+              <span className="stat-desc">Road Trips & Hangouts</span>
+            </div>
           </div>
-          <div className="milestone-divider" />
-          <div className="milestone-chip active">
-            <span className="milestone-year">Forever</span>
-            <span className="milestone-label">Squad Sanctuary</span>
+
+          <div className="hero-stat-divider" />
+
+          <div className="hero-stat-card">
+            <div className="stat-icon-wrapper">
+              <Flame size={18} />
+            </div>
+            <div className="stat-text-group">
+              <span className="stat-number">Infinite ♾️</span>
+              <span className="stat-desc">Natpe Thunai Forever</span>
+            </div>
           </div>
         </div>
       </div>
