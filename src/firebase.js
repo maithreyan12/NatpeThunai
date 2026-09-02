@@ -54,15 +54,48 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
+export const AUTHORIZED_ADMIN_EMAIL = 'maithreyan2006@gmail.com';
+
+export const isAuthorizedAdmin = (user) => {
+  return Boolean(user && user.email && user.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
+};
+
 // Check redirect result on app load if redirected
-export const checkRedirectResult = () => getRedirectResult(auth);
+export const checkRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result?.user) {
+      if (!isAuthorizedAdmin(result.user)) {
+        await signOut(auth);
+        const err = new Error("Access Denied: Only the administrator is permitted to log in.");
+        err.code = "auth/unauthorized-account";
+        throw err;
+      }
+    }
+    return result;
+  } catch (err) {
+    if (err.code === "auth/unauthorized-account") throw err;
+    return null;
+  }
+};
 
 // Auth functions
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+    if (result?.user) {
+      if (!isAuthorizedAdmin(result.user)) {
+        await signOut(auth);
+        const err = new Error("Access Denied: Only the administrator is permitted to log in.");
+        err.code = "auth/unauthorized-account";
+        throw err;
+      }
+    }
     return result;
   } catch (err) {
+    if (err.code === "auth/unauthorized-account") {
+      throw err;
+    }
     console.warn("Sign-in popup error:", err);
     if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       throw err;
@@ -81,7 +114,21 @@ export const signInWithGoogle = async () => {
 };
 
 export const logOut = () => signOut(auth);
-export const onAuthChange = (callback) => onAuthStateChanged(auth, callback);
+
+export const onAuthChange = (callback) => {
+  return onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      if (!isAuthorizedAdmin(user)) {
+        try {
+          await signOut(auth);
+        } catch {}
+        callback(null);
+        return;
+      }
+    }
+    callback(user);
+  });
+};
 
 // Chat functions
 export const sendMessage = async (text, user) => {

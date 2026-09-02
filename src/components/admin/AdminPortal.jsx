@@ -11,7 +11,7 @@ import {
   subscribeToEventsR2, saveEventR2, deleteEventR2,
   bootR2Database,
 } from '../../services/r2Database';
-import { signInWithGoogle, checkRedirectResult, logOut } from '../../firebase';
+import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
 import './AdminPortal.css';
@@ -26,13 +26,6 @@ function GoogleIcon() {
     </svg>
   );
 }
-
-// Authorized Admin Email (kept hidden from UI)
-const AUTHORIZED_ADMIN_EMAIL = 'maithreyan2006@gmail.com';
-
-const isAuthorizedAdmin = (user) => {
-  return Boolean(user && user.email && user.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL);
-};
 
 export default function AdminPortal({ onExit, currentUser }) {
   // Auth state — only unlocked if currentUser is the authorized admin
