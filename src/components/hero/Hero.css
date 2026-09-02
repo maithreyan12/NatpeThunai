@@ -3,6 +3,7 @@
 /* ═══════════════════════════════════════════════════════════════════ */
 
 .hero-community-section {
+  width: 100%;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -16,56 +17,61 @@
 }
 
 
-/* ── Smoky Cinematic Background Motion Orbs ── */
+/* ── Smoky Cinematic Background Motion Orbs (Full Screen Canvas) ── */
 .hero-smoke-bg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
 
 .smoke-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
+  filter: blur(85px);
   opacity: 0;
   will-change: transform, opacity;
+  pointer-events: none;
 }
 
 .smoke-orb-1 {
-  width: 500px;
-  height: 500px;
-  top: -10%;
-  left: -15%;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.35) 0%, rgba(196, 181, 253, 0.18) 50%, transparent 80%);
+  width: clamp(450px, 45vw, 750px);
+  height: clamp(450px, 45vw, 750px);
+  top: -8%;
+  left: -4%;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.35) 0%, rgba(196, 181, 253, 0.16) 45%, transparent 75%);
   animation: smokeFloat1 14s ease-in-out infinite;
 }
 
 .smoke-orb-2 {
-  width: 600px;
-  height: 400px;
-  top: 20%;
-  right: -20%;
-  background: radial-gradient(circle, rgba(244, 114, 182, 0.28) 0%, rgba(251, 191, 220, 0.15) 50%, transparent 80%);
+  width: clamp(480px, 50vw, 800px);
+  height: clamp(380px, 40vw, 580px);
+  top: 15%;
+  right: -4%;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.28) 0%, rgba(251, 191, 220, 0.14) 45%, transparent 75%);
   animation: smokeFloat2 18s ease-in-out infinite;
 }
 
 .smoke-orb-3 {
-  width: 400px;
-  height: 500px;
-  bottom: 5%;
+  width: clamp(380px, 40vw, 650px);
+  height: clamp(450px, 45vw, 700px);
+  bottom: 0%;
   left: 10%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(167, 139, 250, 0.12) 55%, transparent 80%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(167, 139, 250, 0.10) 45%, transparent 75%);
   animation: smokeFloat3 22s ease-in-out infinite;
 }
 
 .smoke-orb-4 {
-  width: 350px;
-  height: 350px;
-  top: 40%;
-  left: 40%;
-  background: radial-gradient(circle, rgba(251, 207, 232, 0.30) 0%, rgba(254, 240, 248, 0.15) 55%, transparent 80%);
+  width: clamp(320px, 35vw, 550px);
+  height: clamp(320px, 35vw, 550px);
+  top: 35%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(251, 207, 232, 0.30) 0%, rgba(254, 240, 248, 0.12) 45%, transparent 75%);
   animation: smokeFloat4 16s ease-in-out infinite;
 }
 
@@ -115,16 +121,16 @@
   background: radial-gradient(circle, rgba(147, 51, 234, 0.30) 0%, rgba(192, 132, 252, 0.15) 55%, transparent 80%);
 }
 
-/* Subtle ambient spotlight behind hero */
+/* Ambient spotlight behind hero */
 .hero-ambient-soft-spot {
   position: absolute;
   top: 30%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 700px;
-  height: 480px;
+  width: clamp(650px, 75vw, 1100px);
+  height: clamp(400px, 50vh, 650px);
   background: radial-gradient(ellipse at center, rgba(220, 212, 248, 0.40) 0%, rgba(253, 226, 236, 0.25) 45%, transparent 72%);
-  filter: blur(80px);
+  filter: blur(95px);
   pointer-events: none;
   z-index: 0;
 }
@@ -136,7 +142,9 @@
 .hero-community-content {
   position: relative;
   z-index: 1;
-  max-width: 980px;
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 clamp(16px, 4vw, 32px);
   display: flex;
   flex-direction: column;
   align-items: center;

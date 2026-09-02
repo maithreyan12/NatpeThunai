@@ -231,17 +231,17 @@ export default function App() {
         onOpenSignIn={() => setIsSignInOpen(true)}
       />
 
+      {/* 1. Hero Section (Edge-to-Edge Full Viewport Atmospheric Canvas) */}
+      <Hero 
+        totalMembers={members.length}
+        onExploreTimeline={() => scrollToSection('timeline')}
+        onWatchReel={() => scrollToSection('reel')}
+        onReadStory={() => scrollToSection('story')}
+        onMeetSquad={() => scrollToSection('members')}
+      />
+
       {/* Main Container */}
       <main className="app-container">
-        {/* 1. Hero Section */}
-        <Hero 
-          totalMembers={members.length}
-          onExploreTimeline={() => scrollToSection('timeline')}
-          onWatchReel={() => scrollToSection('reel')}
-          onReadStory={() => scrollToSection('story')}
-          onMeetSquad={() => scrollToSection('members')}
-        />
-
         {/* 2. Namma Natpe Thunai Story (The Unfiltered Chronicle) */}
         <SquadStory />
 
