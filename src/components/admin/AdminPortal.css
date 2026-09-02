@@ -52,11 +52,70 @@
   margin-bottom: 28px;
 }
 
-.admin-login-form {
+/* Google Auth Box */
+.admin-google-auth-box {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  text-align: left;
+  margin: 12px 0 24px;
+}
+
+.admin-google-sign-in-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 15px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4), 0 0 25px rgba(255, 255, 255, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-google-sign-in-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #f9fafb;
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.5), 0 0 35px rgba(255, 255, 255, 0.25);
+}
+
+.admin-google-sign-in-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.admin-google-sign-in-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* User Pill in Admin Header */
+.admin-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 14px 4px 6px;
+  border-radius: 999px;
+}
+
+.admin-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-user-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e4e4e7;
 }
 
 .admin-input-group label {
