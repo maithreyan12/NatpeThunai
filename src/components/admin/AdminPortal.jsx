@@ -14,6 +14,7 @@ import {
 import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
+import brandLogo from '../../assets/brand-logo.png';
 import './AdminPortal.css';
 
 function GoogleIcon() {
@@ -459,12 +460,20 @@ export default function AdminPortal({ onExit, currentUser }) {
   if (!isAuthenticated) {
     return (
       <div className="admin-portal-login-screen">
+        {/* Soft Ambient Studio Lighting Canvas */}
+        <div className="ambient-bg" aria-hidden="true">
+          <div className="orb orb-1" />
+          <div className="orb orb-2" />
+          <div className="orb orb-3" />
+          <div className="orb orb-4" />
+        </div>
+
         <div className="admin-login-glass-card">
-          <div className="admin-login-badge">
-            <Shield className="w-8 h-8 text-indigo-400" />
+          <div className="admin-login-brand-logo">
+            <img src={brandLogo} alt="நட்பே துணை Logo" className="admin-login-logo-img" />
           </div>
           <h1 className="admin-login-title">நட்பே துணை</h1>
-          <p className="admin-login-sub">Admin Sanctuary Portal · Google Authentication</p>
+          <p className="admin-login-sub">Admin Sanctuary Console · Google Authentication</p>
 
           <div className="admin-google-auth-box">
             {authError && <p className="admin-error-text">{authError}</p>}
@@ -490,15 +499,26 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   return (
     <div className="admin-portal-wrapper">
+      {/* Soft Ambient Studio Lighting Canvas */}
+      <div className="ambient-bg" aria-hidden="true">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <div className="orb orb-4" />
+      </div>
+
       {/* ── Top Header ── */}
       <header className="admin-top-header">
         <div className="admin-header-left">
-          <div className="admin-brand-icon">
-            <Sparkles size={18} />
+          <div className="admin-brand-lockup">
+            <img src={brandLogo} alt="நட்பே துணை Logo" className="admin-brand-logo-img" />
           </div>
-          <div>
-            <h1 className="admin-header-title">நட்பே துணை <span className="admin-badge">ADMIN CONSOLE</span></h1>
-            <p className="admin-header-sub">Live Management & Cloudflare R2 Center</p>
+          <div className="admin-brand-title-wrap">
+            <div className="admin-brand-title-row">
+              <h1 className="admin-header-title">நட்பே துணை</h1>
+              <span className="admin-badge">ADMIN CONSOLE</span>
+            </div>
+            <p className="admin-header-sub">Live Management &amp; Cloudflare R2 Sanctuary</p>
           </div>
         </div>
 
