@@ -3,7 +3,7 @@ import { Heart, ArrowUp, Sparkles } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import './Footer.css';
 
-export default function Footer({ onScrollTop, onOpenSignIn, _currentUser }) {
+export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _currentUser }) {
   return (
     <footer className="community-footer-wrapper">
       <div className="footer-dock-bar">
@@ -60,6 +60,16 @@ export default function Footer({ onScrollTop, onOpenSignIn, _currentUser }) {
           <Heart size={13} className="footer-heart-glow" />
         </button>
         <span>Eternal Friendship Archive</span>
+        <a 
+          href="/admin" 
+          onClick={(e) => { 
+            e.preventDefault(); 
+            if (onOpenAdmin) onOpenAdmin(); 
+          }}
+          style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textDecoration: 'none', opacity: 0.6, marginLeft: '6px' }}
+        >
+          • Admin
+        </a>
       </div>
     </footer>
   );

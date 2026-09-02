@@ -15,7 +15,8 @@ import {
   CreatePostModal, 
   AddEventModal, 
   LightboxModal,
-  SignInModal 
+  SignInModal,
+  AdminPortal
 } from './components';
 import { 
   getStoredMembers,
@@ -42,6 +43,12 @@ export default function App() {
     return localStorage.getItem('squad_theme') || 'light';
   });
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Admin Route State (/admin and #admin support)
+  const [isAdminRoute, setIsAdminRoute] = useState(() => {
+    return typeof window !== 'undefined' && 
+      (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin');
+  });
 
   // Data States
   const [members, setMembers] = useState(getStoredMembers());
@@ -100,6 +107,31 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Listen for URL changes (/admin and browser back/forward)
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const isAdmin = window.location.pathname.startsWith('/admin') || window.location.hash === '#admin';
+      setIsAdminRoute(isAdmin);
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
+
+  const navigateToAdmin = () => {
+    window.history.pushState(null, '', '/admin');
+    setIsAdminRoute(true);
+  };
+
+  const exitAdmin = () => {
+    window.history.pushState(null, '', '/');
+    setIsAdminRoute(false);
+  };
 
   // Listen to real-time Memories
   useEffect(() => {
@@ -211,6 +243,15 @@ export default function App() {
     setEvents(updated);
   };
 
+  // If on /admin URL, render dedicated Admin Portal
+  if (isAdminRoute) {
+    return (
+      <div className="app-main">
+        <AdminPortal onExit={exitAdmin} currentUser={currentUser} />
+      </div>
+    );
+  }
+
   return (
     <div className="app-main">
       {/* Soft Ambient Studio Lighting Canvas */}
@@ -302,6 +343,7 @@ export default function App() {
         <Footer 
           onScrollTop={() => scrollToSection('hero')} 
           onOpenSignIn={() => setIsSignInOpen(true)}
+          onOpenAdmin={navigateToAdmin}
           currentUser={currentUser}
         />
       </main>

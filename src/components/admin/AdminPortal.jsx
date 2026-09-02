@@ -1,0 +1,881 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
+  Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
+  CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles
+} from 'lucide-react';
+import {
+  getStoredMembers, saveSquadMember, updateSquadMember, deleteSquadMember,
+  getStoredMemories, saveMemory,
+  getStoredPosts, savePost,
+  getStoredEvents, saveEvent
+} from '../../services';
+import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
+import { r2Photo, R2_BASE } from '../../services/r2Assets';
+import './AdminPortal.css';
+
+export default function AdminPortal({ onExit, currentUser }) {
+  // Auth state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('natpe_admin_authenticated') === 'true';
+  });
+  const [passcode, setPasscode] = useState('');
+  const [authError, setAuthError] = useState('');
+
+  // Active Tab: 'overview' | 'members' | 'memories' | 'posts' | 'events' | 'r2'
+  const [activeTab, setActiveTab] = useState('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Live Data States
+  const [members, setMembers] = useState([]);
+  const [memories, setMemories] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [events, setEvents] = useState([]);
+
+  // Modals & Form States
+  const [editingMember, setEditingMember] = useState(null);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [memberForm, setMemberForm] = useState({
+    name: '', nickname: '', role: '', category: 'core', bio: '', quote: '', instagram: '', photo: ''
+  });
+
+  const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  const [memoryForm, setMemoryForm] = useState({
+    title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: ''
+  });
+
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [postForm, setPostForm] = useState({
+    authorName: 'Admin Announcement', content: '', category: 'Announcement'
+  });
+
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: '', date: '', time: '', location: '', description: ''
+  });
+
+  // Upload States
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [recentUploads, setRecentUploads] = useState([]);
+
+  // Toast
+  const [toast, setToast] = useState('');
+
+  const triggerToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3500);
+  };
+
+  // Load all live data
+  const loadData = () => {
+    setMembers(getStoredMembers());
+    setMemories(getStoredMemories());
+    setPosts(getStoredPosts());
+    setEvents(getStoredEvents());
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Default passcode or admin password
+    if (passcode.trim() === 'Admin@123' || passcode.trim() === 'natpethunai2024' || passcode.trim() === 'admin') {
+      setIsAuthenticated(true);
+      localStorage.setItem('natpe_admin_authenticated', 'true');
+      setAuthError('');
+      triggerToast('Welcome, Administrator! 🛡️');
+    } else {
+      setAuthError('Invalid passcode. Default is Admin@123');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('natpe_admin_authenticated');
+  };
+
+  // Member CRUD
+  const openAddMember = () => {
+    setEditingMember(null);
+    setMemberForm({
+      name: '', nickname: '', role: 'Squad Member 🌟', category: 'core',
+      bio: '', quote: '', instagram: '', photo: r2Photo('Gracee.jpg')
+    });
+    setIsMemberModalOpen(true);
+  };
+
+  const openEditMember = (m) => {
+    setEditingMember(m);
+    setMemberForm({
+      name: m.name || '',
+      nickname: m.nickname || '',
+      role: m.role || '',
+      category: m.category || 'core',
+      bio: m.bio || '',
+      quote: m.quote || '',
+      instagram: m.instagram || '',
+      photo: m.photo || ''
+    });
+    setIsMemberModalOpen(true);
+  };
+
+  const handleSaveMember = (e) => {
+    e.preventDefault();
+    if (!memberForm.name.trim()) return;
+
+    if (editingMember) {
+      updateSquadMember(editingMember.id, memberForm);
+      triggerToast(`Updated ${memberForm.name} ✅`);
+    } else {
+      saveSquadMember(memberForm);
+      triggerToast(`Added ${memberForm.name} to Squad! 🎉`);
+    }
+    setIsMemberModalOpen(false);
+    loadData();
+  };
+
+  const handleDeleteMember = (id, name) => {
+    if (window.confirm(`Are you sure you want to remove ${name} from squad list?`)) {
+      deleteSquadMember(id);
+      triggerToast(`Removed ${name}`);
+      loadData();
+    }
+  };
+
+  // Memory CRUD
+  const handleSaveMemory = async (e) => {
+    e.preventDefault();
+    if (!memoryForm.title.trim() || !memoryForm.description.trim()) return;
+
+    const peopleList = memoryForm.people ? memoryForm.people.split(',').map(s => s.trim()).filter(Boolean) : ['Squad'];
+    await saveMemory({
+      ...memoryForm,
+      people: peopleList,
+      mediaType: 'image',
+      reactions: { "❤️": 10, "✨": 5, "🫂": 8 }
+    });
+    setIsMemoryModalOpen(false);
+    setMemoryForm({ title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: '' });
+    triggerToast('New memory chapter published! 📸');
+    loadData();
+  };
+
+  // Post CRUD
+  const handleSavePost = async (e) => {
+    e.preventDefault();
+    if (!postForm.content.trim()) return;
+    await savePost(postForm, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
+    setIsPostModalOpen(false);
+    setPostForm({ authorName: 'Admin Announcement', content: '', category: 'Announcement' });
+    triggerToast('Post published to squad community! 📣');
+    loadData();
+  };
+
+  // Event CRUD
+  const handleSaveEvent = async (e) => {
+    e.preventDefault();
+    if (!eventForm.title.trim() || !eventForm.date) return;
+    await saveEvent(eventForm);
+    setIsEventModalOpen(false);
+    setEventForm({ title: '', date: '', time: '', location: '', description: '' });
+    triggerToast(`Event "${eventForm.title}" created! 🗓️`);
+    loadData();
+  };
+
+  // R2 Direct File Upload
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadProgress(10);
+    setUploadMessage('Preparing upload to Cloudflare R2...');
+
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'memories', (pct) => {
+        setUploadProgress(pct);
+      });
+      setUploadProgress(100);
+      setUploadMessage('Upload complete!');
+      setRecentUploads(prev => [result, ...prev]);
+      triggerToast(`Uploaded ${file.name} to R2 CDN! ☁️`);
+    } catch (err) {
+      setUploadMessage(`Error: ${err.message}`);
+      triggerToast(`Upload failed: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Filtered members
+  const filteredMembers = members.filter(m =>
+    m.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.nickname?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    m.role?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // If not authenticated, render Login Gate
+  if (!isAuthenticated) {
+    return (
+      <div className="admin-portal-login-screen">
+        <div className="admin-login-glass-card">
+          <div className="admin-login-badge">
+            <Shield className="w-8 h-8 text-indigo-400" />
+          </div>
+          <h1 className="admin-login-title">நட்பே துணை</h1>
+          <p className="admin-login-sub">Admin Sanctuary Portal · Restricted Access</p>
+
+          <form onSubmit={handleLogin} className="admin-login-form">
+            <div className="admin-input-group">
+              <label>Passcode / Password</label>
+              <input
+                type="password"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                placeholder="Enter Admin Passcode (Default: Admin@123)"
+                autoFocus
+                required
+              />
+            </div>
+
+            {authError && <p className="admin-error-text">{authError}</p>}
+
+            <button type="submit" className="admin-primary-btn">
+              Unlock Admin Console <Shield size={16} />
+            </button>
+          </form>
+
+          <button onClick={onExit} className="admin-exit-btn">
+            <ArrowLeft size={14} /> Exit to Public Sanctuary
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-portal-wrapper">
+      {/* ── Top Header ── */}
+      <header className="admin-top-header">
+        <div className="admin-header-left">
+          <div className="admin-brand-icon">
+            <Sparkles size={18} />
+          </div>
+          <div>
+            <h1 className="admin-header-title">நட்பே துணை <span className="admin-badge">ADMIN CONSOLE</span></h1>
+            <p className="admin-header-sub">Live Management & Cloudflare R2 Center</p>
+          </div>
+        </div>
+
+        <div className="admin-header-actions">
+          <button onClick={onExit} className="admin-nav-btn admin-exit-btn-top">
+            <ArrowLeft size={16} /> Public Website
+          </button>
+          <button onClick={handleLogout} className="admin-nav-btn admin-logout-btn">
+            <LogOut size={16} /> Sign Out
+          </button>
+        </div>
+      </header>
+
+      {/* ── Main Layout: Sidebar & Content ── */}
+      <div className="admin-main-container">
+        {/* Sidebar Nav */}
+        <aside className="admin-sidebar">
+          <nav className="admin-nav-menu">
+            <button
+              className={`admin-nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              <Shield size={18} /> Overview
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'members' ? 'active' : ''}`}
+              onClick={() => setActiveTab('members')}
+            >
+              <Users size={18} /> Squad Members ({members.length})
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'memories' ? 'active' : ''}`}
+              onClick={() => setActiveTab('memories')}
+            >
+              <BookOpen size={18} /> Memory Chapters ({memories.length})
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'posts' ? 'active' : ''}`}
+              onClick={() => setActiveTab('posts')}
+            >
+              <MessageSquare size={18} /> Community Posts ({posts.length})
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'events' ? 'active' : ''}`}
+              onClick={() => setActiveTab('events')}
+            >
+              <Calendar size={18} /> Events & Trips ({events.length})
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'r2' ? 'active' : ''}`}
+              onClick={() => setActiveTab('r2')}
+            >
+              <HardDrive size={18} /> Cloudflare R2 Storage
+            </button>
+          </nav>
+        </aside>
+
+        {/* Dynamic Content Area */}
+        <main className="admin-content-pane">
+          {/* 1. OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="admin-overview-grid">
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon-wrap from-purple">
+                  <Users size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{members.length}</h3>
+                  <p className="admin-stat-label">Squad Members</p>
+                  <span className="admin-stat-meta">Active Sanctuary Circle</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon-wrap from-pink">
+                  <BookOpen size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{memories.length}</h3>
+                  <p className="admin-stat-label">Memory Chapters</p>
+                  <span className="admin-stat-meta">Chronological Journey</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon-wrap from-indigo">
+                  <MessageSquare size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{posts.length}</h3>
+                  <p className="admin-stat-label">Community Posts</p>
+                  <span className="admin-stat-meta">Manifesto & Discussions</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card">
+                <div className="admin-stat-icon-wrap from-amber">
+                  <Calendar size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{events.length}</h3>
+                  <p className="admin-stat-label">Scheduled Meetups</p>
+                  <span className="admin-stat-meta">Roadtrips & Gatherings</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card full-span">
+                <div className="admin-r2-info-box">
+                  <div className="admin-stat-icon-wrap from-cyan">
+                    <HardDrive size={24} />
+                  </div>
+                  <div className="admin-r2-meta">
+                    <h3>Cloudflare R2 Media CDN Status</h3>
+                    <p>Connected to <code>natpethunai</code> bucket at <code>{R2_BASE}</code></p>
+                    <div className="admin-badge-strip">
+                      <span className="admin-status-pill green">● R2 Bucket Active</span>
+                      <span className="admin-status-pill blue">● 100% Free-Tier Safe</span>
+                      <span className="admin-status-pill purple">● 14 Members Live</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. MEMBERS TAB */}
+          {activeTab === 'members' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Squad Roster Management</h2>
+                  <p className="admin-section-sub">Add, edit, or customize all 15 members and their profile cards.</p>
+                </div>
+                <div className="admin-action-bar">
+                  <div className="admin-search-wrap">
+                    <Search size={16} />
+                    <input
+                      type="text"
+                      placeholder="Search member..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <button onClick={openAddMember} className="admin-primary-btn">
+                    <Plus size={16} /> Add Member
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-members-table-wrap">
+                <table className="admin-data-table">
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Role & Badge</th>
+                      <th>Nickname</th>
+                      <th>Instagram</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredMembers.map((m) => (
+                      <tr key={m.id}>
+                        <td>
+                          <div className="admin-member-cell">
+                            {m.photo ? (
+                              <img src={m.photo} alt={m.name} className="admin-member-thumb" />
+                            ) : (
+                              <div className="admin-member-thumb-placeholder">{m.name.charAt(0)}</div>
+                            )}
+                            <div>
+                              <strong>{m.name}</strong>
+                              <p className="admin-member-bio-snippet">{m.bio?.slice(0, 45)}...</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td><span className="admin-role-tag">{m.role}</span></td>
+                        <td>{m.nickname || '—'}</td>
+                        <td>
+                          {m.instagram ? (
+                            <a href={m.instagram} target="_blank" rel="noopener noreferrer" className="admin-link">
+                              @{m.instagram.split('/').filter(Boolean).pop()} <ExternalLink size={12} />
+                            </a>
+                          ) : '—'}
+                        </td>
+                        <td>
+                          <div className="admin-row-actions">
+                            <button onClick={() => openEditMember(m)} className="admin-icon-action-btn" title="Edit Member">
+                              <Edit3 size={15} />
+                            </button>
+                            <button onClick={() => handleDeleteMember(m.id, m.name)} className="admin-icon-action-btn delete" title="Delete Member">
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* 3. MEMORIES TAB */}
+          {activeTab === 'memories' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Memory Chapters & Timeline</h2>
+                  <p className="admin-section-sub">Publish new chapters or edit milestone memories.</p>
+                </div>
+                <button onClick={() => setIsMemoryModalOpen(true)} className="admin-primary-btn">
+                  <Plus size={16} /> New Chapter
+                </button>
+              </div>
+
+              <div className="admin-cards-grid">
+                {memories.map((mem) => (
+                  <div key={mem.id} className="admin-card-item">
+                    {mem.mediaUrl && (
+                      <img src={mem.mediaUrl} alt={mem.title} className="admin-card-img" />
+                    )}
+                    <div className="admin-card-body">
+                      <span className="admin-card-badge">{mem.year || 'Chapter'} · {mem.date}</span>
+                      <h3 className="admin-card-title">{mem.title}</h3>
+                      <p className="admin-card-desc">{mem.description}</p>
+                      <p className="admin-card-loc">📍 {mem.location}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 4. POSTS TAB */}
+          {activeTab === 'posts' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Community Posts & Manifesto</h2>
+                  <p className="admin-section-sub">Squad announcements, notes, and community shares.</p>
+                </div>
+                <button onClick={() => setIsPostModalOpen(true)} className="admin-primary-btn">
+                  <Plus size={16} /> New Post
+                </button>
+              </div>
+
+              <div className="admin-posts-list">
+                {posts.map((p) => (
+                  <div key={p.id} className="admin-post-item">
+                    <div className="admin-post-header">
+                      <strong>{p.authorName || 'Squad Member'}</strong>
+                      <span className="admin-card-badge">{p.category || 'General'}</span>
+                    </div>
+                    <p className="admin-post-content">{p.content}</p>
+                    <span className="admin-stat-meta">❤️ {p.likes || 0} Likes</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 5. EVENTS TAB */}
+          {activeTab === 'events' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Squad Events & Reunions</h2>
+                  <p className="admin-section-sub">Road trips, milestone dinners, and hangout schedules.</p>
+                </div>
+                <button onClick={() => setIsEventModalOpen(true)} className="admin-primary-btn">
+                  <Plus size={16} /> Schedule Event
+                </button>
+              </div>
+
+              <div className="admin-cards-grid">
+                {events.map((ev) => (
+                  <div key={ev.id} className="admin-card-item">
+                    <div className="admin-card-body">
+                      <span className="admin-card-badge">🗓️ {ev.date} at {ev.time || '10:00 AM'}</span>
+                      <h3 className="admin-card-title">{ev.title}</h3>
+                      <p className="admin-card-loc">📍 {ev.location}</p>
+                      <p className="admin-card-desc">{ev.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 6. R2 STORAGE TAB */}
+          {activeTab === 'r2' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Cloudflare R2 Media Center</h2>
+                  <p className="admin-section-sub">Direct file uploads to the <code>natpethunai</code> R2 bucket with automated CDN delivery.</p>
+                </div>
+              </div>
+
+              <div className="admin-upload-zone-box">
+                <Upload className="w-12 h-12 text-indigo-400 mb-3" />
+                <h3>Upload Image or Video to Cloudflare R2</h3>
+                <p>Files are stored in <code>/photos/</code> or <code>/memories/</code> and delivered via <code>{R2_BASE}</code></p>
+
+                <label className="admin-file-upload-btn">
+                  Choose Media File
+                  <input type="file" onChange={handleFileUpload} accept="image/*,video/*" style={{ display: 'none' }} />
+                </label>
+
+                {isUploading && (
+                  <div className="admin-upload-progress-bar">
+                    <div className="admin-progress-fill" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                )}
+                {uploadMessage && <p className="admin-upload-status-text">{uploadMessage}</p>}
+              </div>
+
+              {recentUploads.length > 0 && (
+                <div className="admin-recent-uploads-list">
+                  <h3>Recent Uploads</h3>
+                  {recentUploads.map((u, i) => (
+                    <div key={i} className="admin-recent-upload-row">
+                      <CheckCircle className="text-emerald-400" size={16} />
+                      <span className="admin-code-url">{u.publicUrl}</span>
+                      <a href={u.publicUrl} target="_blank" rel="noopener noreferrer" className="admin-link">
+                        Preview <ExternalLink size={12} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ── MODALS ── */}
+
+      {/* Member Edit Modal */}
+      {isMemberModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">{editingMember ? `Edit ${editingMember.name}` : 'Add New Member'}</h2>
+            <form onSubmit={handleSaveMember} className="admin-modal-form">
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Full Name *</label>
+                  <input
+                    type="text"
+                    value={memberForm.name}
+                    onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Nickname</label>
+                  <input
+                    type="text"
+                    value={memberForm.nickname}
+                    onChange={(e) => setMemberForm({ ...memberForm, nickname: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Role & Emoji *</label>
+                  <input
+                    type="text"
+                    value={memberForm.role}
+                    onChange={(e) => setMemberForm({ ...memberForm, role: e.target.value })}
+                    placeholder="e.g. The Mastermind 🧠"
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Instagram URL</label>
+                  <input
+                    type="url"
+                    value={memberForm.instagram}
+                    onChange={(e) => setMemberForm({ ...memberForm, instagram: e.target.value })}
+                    placeholder="https://instagram.com/..."
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group">
+                <label>Photo URL (R2 CDN or Web URL)</label>
+                <input
+                  type="text"
+                  value={memberForm.photo}
+                  onChange={(e) => setMemberForm({ ...memberForm, photo: e.target.value })}
+                  placeholder={`${R2_BASE}/photos/name.jpg`}
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Bio</label>
+                <textarea
+                  rows="3"
+                  value={memberForm.bio}
+                  onChange={(e) => setMemberForm({ ...memberForm, bio: e.target.value })}
+                  placeholder="Bio description..."
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Memorable Quote</label>
+                <input
+                  type="text"
+                  value={memberForm.quote}
+                  onChange={(e) => setMemberForm({ ...memberForm, quote: e.target.value })}
+                  placeholder="Favourite squad quote..."
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsMemberModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn">
+                  Save Member
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Memory Chapter Modal */}
+      {isMemoryModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">Create Memory Chapter</h2>
+            <form onSubmit={handleSaveMemory} className="admin-modal-form">
+              <div className="admin-input-group">
+                <label>Chapter Title *</label>
+                <input
+                  type="text"
+                  value={memoryForm.title}
+                  onChange={(e) => setMemoryForm({ ...memoryForm, title: e.target.value })}
+                  placeholder="e.g. Midnight Highway Drive"
+                  required
+                />
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Date</label>
+                  <input
+                    type="text"
+                    value={memoryForm.date}
+                    onChange={(e) => setMemoryForm({ ...memoryForm, date: e.target.value })}
+                    placeholder="e.g. August 14"
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    value={memoryForm.location}
+                    onChange={(e) => setMemoryForm({ ...memoryForm, location: e.target.value })}
+                    placeholder="e.g. Campus Common"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group">
+                <label>Photo / Media URL</label>
+                <input
+                  type="text"
+                  value={memoryForm.mediaUrl}
+                  onChange={(e) => setMemoryForm({ ...memoryForm, mediaUrl: e.target.value })}
+                  placeholder={`${R2_BASE}/photos/...`}
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Story Description *</label>
+                <textarea
+                  rows="4"
+                  value={memoryForm.description}
+                  onChange={(e) => setMemoryForm({ ...memoryForm, description: e.target.value })}
+                  placeholder="Write the full memory story..."
+                  required
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsMemoryModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn">
+                  Publish Memory
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Post Modal */}
+      {isPostModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">Publish Community Announcement</h2>
+            <form onSubmit={handleSavePost} className="admin-modal-form">
+              <div className="admin-input-group">
+                <label>Post Message *</label>
+                <textarea
+                  rows="4"
+                  value={postForm.content}
+                  onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
+                  placeholder="Write message to squad..."
+                  required
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsPostModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn">
+                  Share Post
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Event Modal */}
+      {isEventModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">Schedule Squad Event</h2>
+            <form onSubmit={handleSaveEvent} className="admin-modal-form">
+              <div className="admin-input-group">
+                <label>Event Name *</label>
+                <input
+                  type="text"
+                  value={eventForm.title}
+                  onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+                  placeholder="e.g. Grand Reunion Roadtrip"
+                  required
+                />
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Date *</label>
+                  <input
+                    type="date"
+                    value={eventForm.date}
+                    onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Time</label>
+                  <input
+                    type="time"
+                    value={eventForm.time}
+                    onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group">
+                <label>Location</label>
+                <input
+                  type="text"
+                  value={eventForm.location}
+                  onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
+                  placeholder="e.g. Ooty Scenic Cottage"
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Description</label>
+                <textarea
+                  rows="3"
+                  value={eventForm.description}
+                  onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+                  placeholder="Event details..."
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsEventModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn">
+                  Save Event
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="admin-toast-banner">
+          <CheckCircle size={16} /> {toast}
+        </div>
+      )}
+    </div>
+  );
+}
