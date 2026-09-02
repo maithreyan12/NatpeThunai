@@ -1,8 +1,5 @@
 import React from 'react';
 import {
-  Calendar,
-  Film,
-  Heart,
   Users,
   Sparkles,
   Flame,
@@ -77,41 +74,6 @@ export default function Hero({
           From first-year canteen tea and midnight highway drives to shared exam panic and lifelong celebrations.
           A timeless digital home for our squad.
         </p>
-
-        {/* Calibrated Button System */}
-        <div className="hero-actions-dock">
-          <button
-            className="btn-primary hero-btn-main"
-            onClick={onReadStory}
-          >
-            <Heart size={16} fill="white" />
-            <span>Read Namma Story</span>
-          </button>
-
-          <button
-            className="btn-secondary hero-btn-sub"
-            onClick={onMeetSquad || onExploreTimeline}
-          >
-            <Users size={16} />
-            <span>Meet The Squad</span>
-          </button>
-
-          <button
-            className="btn-outline hero-btn-ghost"
-            onClick={onExploreTimeline}
-          >
-            <Calendar size={16} />
-            <span>Memory Timeline</span>
-          </button>
-
-          <button
-            className="btn-outline hero-btn-ghost"
-            onClick={onWatchReel}
-          >
-            <Film size={16} />
-            <span>Watch Reel</span>
-          </button>
-        </div>
 
         {/* Dynamic Squad Statistics Strip */}
         <div className="hero-stats-strip">

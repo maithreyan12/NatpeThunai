@@ -3,8 +3,6 @@ import {
   Search, 
   Camera,
   Users,
-  ChevronLeft,
-  ChevronRight,
   UploadCloud,
   ImagePlus,
   RotateCcw,
@@ -34,7 +32,6 @@ export default function MemoryTimeline({
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const scrollTrackRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const handleDragOver = (e) => {
@@ -122,14 +119,6 @@ export default function MemoryTimeline({
     if (onSelectMemberFilter) {
       onSelectMemberFilter(name);
     }
-  };
-
-  const handleScrollLeft = () => {
-    scrollTrackRef.current?.scrollBy({ left: -220, behavior: 'smooth' });
-  };
-
-  const handleScrollRight = () => {
-    scrollTrackRef.current?.scrollBy({ left: 220, behavior: 'smooth' });
   };
 
   // Filter memories by category, friend, and search
@@ -233,82 +222,7 @@ export default function MemoryTimeline({
 
       {/* Control Filter Bar */}
       <div className="timeline-filter-bar">
-        {/* Top: Filter by Member with Scrollable Carousel Track */}
-        <div className="member-filter-strip">
-          <div className="filter-header-line">
-            <span className="filter-label">Filter by Friend:</span>
-            {selectedMember !== 'All' && (
-              <button 
-                type="button" 
-                className="clear-member-filter-btn"
-                onClick={() => handleMemberChange('All')}
-              >
-                Clear Friend Filter ×
-              </button>
-            )}
-          </div>
-
-          <div className="member-scroll-wrapper">
-            <button 
-              type="button"
-              className="scroll-peek-btn left"
-              onClick={handleScrollLeft}
-              aria-label="Scroll friends left"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <div className="member-avatar-pills-row" ref={scrollTrackRef}>
-              <button
-                type="button"
-                className={`member-filter-pill ${selectedMember === 'All' ? 'active' : ''}`}
-                onClick={() => handleMemberChange('All')}
-              >
-                <Users size={14} />
-                <span>All Squad</span>
-              </button>
-
-              {squadList.map(member => (
-                <button
-                  key={member.id}
-                  type="button"
-                  className={`member-filter-pill ${selectedMember === member.name ? 'active' : ''}`}
-                  onClick={() => handleMemberChange(member.name)}
-                >
-                  {member.photo ? (
-                    <img 
-                      src={member.photo} 
-                      alt={member.name} 
-                      className="member-pill-avatar"
-                      onError={(e) => { 
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div 
-                      className="member-pill-initial"
-                      style={{ background: member.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
-                    >
-                      {member.name.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <span>{member.name}</span>
-                </button>
-              ))}
-            </div>
-
-            <button 
-              type="button"
-              className="scroll-peek-btn right"
-              onClick={handleScrollRight}
-              aria-label="Scroll friends right"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-
-        {/* Bottom Row: Category Filter & Search Bar */}
+        {/* Category Filter & Search Bar */}
         <div className="timeline-subfilter-row">
           {/* Category Filter Chips */}
           <div className="year-tabs-group" role="tablist">
@@ -325,7 +239,7 @@ export default function MemoryTimeline({
             ))}
           </div>
 
-          {/* Search Bar & Upload Button */}
+          {/* Search Bar */}
           <div className="timeline-actions-group">
             <div className="timeline-search-box">
               <Search size={15} className="search-icon" />
@@ -346,17 +260,6 @@ export default function MemoryTimeline({
                 </button>
               )}
             </div>
-
-            <button
-              type="button"
-              className="album-upload-header-btn"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              title="Upload group photos from your device"
-            >
-              <UploadCloud size={15} />
-              <span>{isUploading ? 'Uploading...' : 'Upload Photos'}</span>
-            </button>
           </div>
         </div>
       </div>

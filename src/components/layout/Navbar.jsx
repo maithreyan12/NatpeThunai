@@ -1,27 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Film, 
-  Users, 
-  MessageCircle, 
-  Sun, 
-  Moon, 
-  LogOut, 
-  Heart 
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Sparkles,
+  Film,
+  Users,
+  MessageCircle,
+  Sun,
+  Moon,
+  LogOut,
+  Heart,
+  Menu,
+  X
 } from 'lucide-react';
 import { signInWithGoogle, logOut } from '../../firebase';
 import { r2Photo } from '../../services';
+import brandLogo from '../../assets/brand-logo.png';
 import './Navbar.css';
 
-export default function Navbar({ 
-  activeSection, 
-  onNavigate, 
-  theme, 
-  onToggleTheme, 
+export default function Navbar({
+  activeSection,
+  onNavigate,
+  theme,
+  onToggleTheme,
   currentUser,
   onOpenSignIn
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +35,36 @@ export default function Navbar({
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close menu on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen]);
+
+  const handleNavClick = (section) => {
+    onNavigate(section);
+    setMobileMenuOpen(false);
+  };
 
   const handleAuthAction = async (e) => {
     if (e) e.stopPropagation();
@@ -51,62 +86,52 @@ export default function Navbar({
   const isMemoriesActive = activeSection === 'timeline' || activeSection === 'reel';
   const isChatActive = activeSection === 'chat' || activeSection === 'community';
 
+  const navLinks = [
+    { id: 'hero', label: 'Home', icon: Sparkles, isActive: activeSection === 'hero' },
+    { id: 'story', label: 'Story', icon: Heart, isActive: activeSection === 'story' },
+    { id: 'members', label: 'Members', icon: Users, isActive: isSquadActive },
+    { id: 'timeline', label: 'Album', icon: Film, isActive: isMemoriesActive },
+    { id: 'chat', label: 'Dashboard', icon: MessageCircle, isActive: isChatActive },
+  ];
+
   return (
     <>
-      <header className={`community-navbar-wrapper ${scrolled ? 'scrolled' : ''}`}>
+      <header
+        ref={navRef}
+        className={`community-navbar-wrapper ${scrolled ? 'scrolled' : ''} ${mobileMenuOpen ? 'menu-expanded' : ''}`}
+      >
         <nav className="community-nav-bar" aria-label="Main navigation">
           {/* Brand Identity */}
-          <a 
-            href="#hero" 
+          <a
+            href="#hero"
             className="nav-brand-lockup"
-            onClick={(e) => { e.preventDefault(); onNavigate('hero'); }}
+            onClick={(e) => { e.preventDefault(); handleNavClick('hero'); }}
           >
             <div className="brand-badge-icon">
-              <Sparkles size={16} />
-            </div>
-            <div className="brand-text-col">
-              <span className="brand-tamil-title" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
-              <span className="brand-meta-year">FRIENDSHIP SANCTUARY</span>
+              <img
+                src={brandLogo}
+                alt="நட்பே துணை Logo"
+                className="brand-badge-img"
+              />
             </div>
           </a>
 
-          {/* 5 Core Navigation Buttons */}
+          {/* 5 Core Navigation Buttons (Desktop) */}
           <div className="nav-links-dock">
-            <button 
-              className={`nav-item-btn ${activeSection === 'hero' ? 'active' : ''}`}
-              onClick={() => onNavigate('hero')}
-            >
-              Home
-            </button>
-            <button 
-              className={`nav-item-btn ${activeSection === 'story' ? 'active' : ''}`}
-              onClick={() => onNavigate('story')}
-            >
-              Story
-            </button>
-            <button 
-              className={`nav-item-btn ${isSquadActive ? 'active' : ''}`}
-              onClick={() => onNavigate('members')}
-            >
-              Members
-            </button>
-            <button 
-              className={`nav-item-btn ${isMemoriesActive ? 'active' : ''}`}
-              onClick={() => onNavigate('timeline')}
-            >
-              Album
-            </button>
-            <button 
-              className={`nav-item-btn ${isChatActive ? 'active' : ''}`}
-              onClick={() => onNavigate('chat')}
-            >
-              Dashboard
-            </button>
+            {navLinks.map(({ id, label, isActive }) => (
+              <button
+                key={id}
+                className={`nav-item-btn ${isActive ? 'active' : ''}`}
+                onClick={() => onNavigate(id)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {/* Actions: Theme Toggle, Auth */}
+          {/* Actions: Theme Toggle, Auth, Hamburger Menu */}
           <div className="nav-actions-dock">
-            <button 
+            <button
               className="theme-switcher-btn"
               onClick={onToggleTheme}
               title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
@@ -118,21 +143,21 @@ export default function Navbar({
             {/* Profile / Auth Button (Only visible when logged in) */}
             {currentUser && (
               <div className="user-profile-menu">
-                <button 
+                <button
                   className="user-profile-avatar-btn"
                   onClick={onOpenSignIn}
                   title="My Sanctuary Profile"
                 >
-                  <img 
-                    src={currentUser.photoURL || r2Photo('Gracee.jpg')} 
-                    alt={currentUser.displayName || 'Member'} 
+                  <img
+                    src={currentUser.photoURL || r2Photo('Gracee.jpg')}
+                    alt={currentUser.displayName || 'Member'}
                     className="user-nav-avatar"
                     referrerPolicy="no-referrer"
                   />
                   <span className="nav-status-indicator" />
                 </button>
-                <button 
-                  className="auth-signout-btn" 
+                <button
+                  className="auth-signout-btn"
                   onClick={handleAuthAction}
                   title="Sign out"
                 >
@@ -140,48 +165,44 @@ export default function Navbar({
                 </button>
               </div>
             )}
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              className={`mobile-hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
+
+          {/* Mobile Responsive Dropdown Menu (Under the navbar/hamburger) */}
+          {mobileMenuOpen && (
+            <div className="mobile-nav-dropdown" role="menu">
+              <div className="mobile-dropdown-header">
+                <span>Navigation Menu</span>
+              </div>
+              <div className="mobile-nav-items-grid">
+                {navLinks.map(({ id, label, icon: Icon, isActive }) => (
+                  <button
+                    key={id}
+                    role="menuitem"
+                    className={`mobile-nav-menu-item ${isActive ? 'active' : ''}`}
+                    onClick={() => handleNavClick(id)}
+                  >
+                    <div className="mobile-menu-icon-wrap">
+                      <Icon size={18} />
+                    </div>
+                    <span className="mobile-menu-label">{label}</span>
+                    {isActive && <span className="mobile-menu-active-dot" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </nav>
       </header>
-
-      {/* Mobile Floating Bottom Bar — Exactly 5 Balanced Tabs */}
-      <nav className="mobile-bottom-bar" aria-label="Mobile navigation">
-        <button 
-          className={`mobile-tab ${activeSection === 'hero' ? 'active' : ''}`}
-          onClick={() => onNavigate('hero')}
-        >
-          <Sparkles size={19} />
-          <span>Home</span>
-        </button>
-        <button 
-          className={`mobile-tab ${activeSection === 'story' ? 'active' : ''}`}
-          onClick={() => onNavigate('story')}
-        >
-          <Heart size={19} />
-          <span>Story</span>
-        </button>
-        <button 
-          className={`mobile-tab ${isSquadActive ? 'active' : ''}`}
-          onClick={() => onNavigate('members')}
-        >
-          <Users size={19} />
-          <span>Members</span>
-        </button>
-        <button 
-          className={`mobile-tab ${isMemoriesActive ? 'active' : ''}`}
-          onClick={() => onNavigate('timeline')}
-        >
-          <Film size={19} />
-          <span>Album</span>
-        </button>
-        <button 
-          className={`mobile-tab ${isChatActive ? 'active' : ''}`}
-          onClick={() => onNavigate('chat')}
-        >
-          <MessageCircle size={19} />
-          <span>Dashboard</span>
-        </button>
-      </nav>
     </>
   );
 }
