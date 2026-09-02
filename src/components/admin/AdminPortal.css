@@ -720,6 +720,23 @@
   color: #71717a;
 }
 
+.admin-card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.admin-card-header-row .admin-card-badge {
+  margin-bottom: 0;
+}
+
+.admin-post-author-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* Posts List */
 .admin-posts-list {
   display: flex;

@@ -85,16 +85,19 @@ export default function AdminPortal({ onExit, currentUser }) {
     name: '', nickname: '', role: '', category: 'core', bio: '', quote: '', instagram: '', photo: ''
   });
 
+  const [editingMemory, setEditingMemory] = useState(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [memoryForm, setMemoryForm] = useState({
     title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: ''
   });
 
+  const [editingPost, setEditingPost] = useState(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [postForm, setPostForm] = useState({
     authorName: 'Admin Announcement', content: '', category: 'Announcement'
   });
 
+  const [editingEvent, setEditingEvent] = useState(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [eventForm, setEventForm] = useState({
     title: '', date: '', time: '', location: '', description: ''
@@ -277,44 +280,146 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   // Memory CRUD
+  const openAddMemory = () => {
+    setEditingMemory(null);
+    setMemoryForm({
+      title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: ''
+    });
+    setIsMemoryModalOpen(true);
+  };
+
+  const openEditMemory = (mem) => {
+    setEditingMemory(mem);
+    setMemoryForm({
+      title: mem.title || '',
+      year: mem.year || 'Chapter 1',
+      description: mem.description || '',
+      date: mem.date || '',
+      location: mem.location || '',
+      mediaUrl: mem.mediaUrl || '',
+      people: Array.isArray(mem.people) ? mem.people.join(', ') : (mem.people || '')
+    });
+    setIsMemoryModalOpen(true);
+  };
+
   const handleSaveMemory = async (e) => {
     e.preventDefault();
     if (!memoryForm.title.trim() || !memoryForm.description.trim()) return;
     setIsMemoryModalOpen(false);
     try {
-      await saveMemoryR2(memoryForm);
+      const payload = editingMemory
+        ? { ...editingMemory, ...memoryForm }
+        : memoryForm;
+      await saveMemoryR2(payload);
+      triggerToast(editingMemory ? `Updated memory "${memoryForm.title}"! ✅` : 'New memory chapter published to R2! 📸');
+      setEditingMemory(null);
       setMemoryForm({ title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: '' });
-      triggerToast('New memory chapter published to R2! 📸');
     } catch (err) {
       triggerToast(`Memory save failed: ${err.message}`);
     }
   };
 
+  const handleDeleteMemory = async (id, title) => {
+    if (window.confirm(`Delete memory chapter "${title || 'this chapter'}"?`)) {
+      try {
+        await deleteMemoryR2(id);
+        triggerToast(`Deleted memory "${title || id}" 🗑️`);
+      } catch (err) {
+        triggerToast(`Delete failed: ${err.message}`);
+      }
+    }
+  };
+
   // Post CRUD
+  const openAddPost = () => {
+    setEditingPost(null);
+    setPostForm({ authorName: 'Admin Announcement', content: '', category: 'Announcement' });
+    setIsPostModalOpen(true);
+  };
+
+  const openEditPost = (post) => {
+    setEditingPost(post);
+    setPostForm({
+      authorName: post.authorName || 'Admin Announcement',
+      content: post.content || '',
+      category: post.category || 'Announcement'
+    });
+    setIsPostModalOpen(true);
+  };
+
   const handleSavePost = async (e) => {
     e.preventDefault();
     if (!postForm.content.trim()) return;
     setIsPostModalOpen(false);
     try {
-      await savePostR2(postForm, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
+      const payload = editingPost
+        ? { ...editingPost, ...postForm }
+        : postForm;
+      await savePostR2(payload, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
+      triggerToast(editingPost ? 'Post updated! ✅' : 'Post published live to squad! 📣');
+      setEditingPost(null);
       setPostForm({ authorName: 'Admin Announcement', content: '', category: 'Announcement' });
-      triggerToast('Post published live to squad! 📣');
     } catch (err) {
       triggerToast(`Post failed: ${err.message}`);
     }
   };
 
+  const handleDeletePost = async (id, snippet) => {
+    if (window.confirm(`Delete post "${snippet || 'this post'}"?`)) {
+      try {
+        await deletePostR2(id);
+        triggerToast('Post deleted 🗑️');
+      } catch (err) {
+        triggerToast(`Delete failed: ${err.message}`);
+      }
+    }
+  };
+
   // Event CRUD
+  const openAddEvent = () => {
+    setEditingEvent(null);
+    setEventForm({ title: '', date: '', time: '', location: '', description: '', category: 'Celebration' });
+    setIsEventModalOpen(true);
+  };
+
+  const openEditEvent = (ev) => {
+    setEditingEvent(ev);
+    setEventForm({
+      title: ev.title || '',
+      date: ev.date || '',
+      time: ev.time || '7:00 PM',
+      location: ev.location || '',
+      description: ev.description || '',
+      category: ev.category || 'Celebration'
+    });
+    setIsEventModalOpen(true);
+  };
+
   const handleSaveEvent = async (e) => {
     e.preventDefault();
     if (!eventForm.title.trim() || !eventForm.date) return;
     setIsEventModalOpen(false);
     try {
-      await saveEventR2(eventForm);
+      const payload = editingEvent
+        ? { ...editingEvent, ...eventForm }
+        : eventForm;
+      await saveEventR2(payload);
+      triggerToast(editingEvent ? `Updated event "${eventForm.title}"! ✅` : `Event "${eventForm.title}" live on website! 🗓️`);
+      setEditingEvent(null);
       setEventForm({ title: '', date: '', time: '', location: '', description: '' });
-      triggerToast(`Event "${eventForm.title}" live on website! 🗓️`);
     } catch (err) {
       triggerToast(`Event save failed: ${err.message}`);
+    }
+  };
+
+  const handleDeleteEvent = async (id, title) => {
+    if (window.confirm(`Delete event "${title || 'this event'}"?`)) {
+      try {
+        await deleteEventR2(id);
+        triggerToast(`Deleted event "${title || id}" 🗑️`);
+      } catch (err) {
+        triggerToast(`Delete failed: ${err.message}`);
+      }
     }
   };
 
@@ -616,7 +721,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h2 className="admin-section-title">Memory Chapters & Timeline</h2>
                   <p className="admin-section-sub">Publish new chapters or edit milestone memories.</p>
                 </div>
-                <button onClick={() => setIsMemoryModalOpen(true)} className="admin-primary-btn">
+                <button onClick={openAddMemory} className="admin-primary-btn">
                   <Plus size={16} /> New Chapter
                 </button>
               </div>
@@ -628,7 +733,17 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <img src={mem.mediaUrl} alt={mem.title} className="admin-card-img" />
                     )}
                     <div className="admin-card-body">
-                      <span className="admin-card-badge">{mem.year || 'Chapter'} · {mem.date}</span>
+                      <div className="admin-card-header-row">
+                        <span className="admin-card-badge">{mem.year || 'Chapter'} · {mem.date}</span>
+                        <div className="admin-row-actions">
+                          <button onClick={() => openEditMemory(mem)} className="admin-icon-action-btn" title="Edit Chapter">
+                            <Edit3 size={15} />
+                          </button>
+                          <button onClick={() => handleDeleteMemory(mem.id, mem.title)} className="admin-icon-action-btn delete" title="Delete Chapter">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
                       <h3 className="admin-card-title">{mem.title}</h3>
                       <p className="admin-card-desc">{mem.description}</p>
                       <p className="admin-card-loc">📍 {mem.location}</p>
@@ -647,7 +762,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h2 className="admin-section-title">Community Posts & Manifesto</h2>
                   <p className="admin-section-sub">Squad announcements, notes, and community shares.</p>
                 </div>
-                <button onClick={() => setIsPostModalOpen(true)} className="admin-primary-btn">
+                <button onClick={openAddPost} className="admin-primary-btn">
                   <Plus size={16} /> New Post
                 </button>
               </div>
@@ -656,8 +771,18 @@ export default function AdminPortal({ onExit, currentUser }) {
                 {posts.map((p) => (
                   <div key={p.id} className="admin-post-item">
                     <div className="admin-post-header">
-                      <strong>{p.authorName || 'Squad Member'}</strong>
-                      <span className="admin-card-badge">{p.category || 'General'}</span>
+                      <div className="admin-post-author-meta">
+                        <strong>{p.authorName || 'Squad Member'}</strong>
+                        <span className="admin-card-badge">{p.category || 'General'}</span>
+                      </div>
+                      <div className="admin-row-actions">
+                        <button onClick={() => openEditPost(p)} className="admin-icon-action-btn" title="Edit Post">
+                          <Edit3 size={15} />
+                        </button>
+                        <button onClick={() => handleDeletePost(p.id, p.content?.slice(0, 30))} className="admin-icon-action-btn delete" title="Delete Post">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                     <p className="admin-post-content">{p.content}</p>
                     <span className="admin-stat-meta">❤️ {p.likes || 0} Likes</span>
@@ -675,7 +800,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h2 className="admin-section-title">Squad Events & Reunions</h2>
                   <p className="admin-section-sub">Road trips, milestone dinners, and hangout schedules.</p>
                 </div>
-                <button onClick={() => setIsEventModalOpen(true)} className="admin-primary-btn">
+                <button onClick={openAddEvent} className="admin-primary-btn">
                   <Plus size={16} /> Schedule Event
                 </button>
               </div>
@@ -684,7 +809,17 @@ export default function AdminPortal({ onExit, currentUser }) {
                 {events.map((ev) => (
                   <div key={ev.id} className="admin-card-item">
                     <div className="admin-card-body">
-                      <span className="admin-card-badge">🗓️ {ev.date} at {ev.time || '10:00 AM'}</span>
+                      <div className="admin-card-header-row">
+                        <span className="admin-card-badge">🗓️ {ev.date} at {ev.time || '10:00 AM'}</span>
+                        <div className="admin-row-actions">
+                          <button onClick={() => openEditEvent(ev)} className="admin-icon-action-btn" title="Edit Event">
+                            <Edit3 size={15} />
+                          </button>
+                          <button onClick={() => handleDeleteEvent(ev.id, ev.title)} className="admin-icon-action-btn delete" title="Delete Event">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
                       <h3 className="admin-card-title">{ev.title}</h3>
                       <p className="admin-card-loc">📍 {ev.location}</p>
                       <p className="admin-card-desc">{ev.description}</p>
@@ -869,7 +1004,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       {isMemoryModalOpen && (
         <div className="admin-modal-backdrop">
           <div className="admin-modal-card">
-            <h2 className="admin-modal-title">Create Memory Chapter</h2>
+            <h2 className="admin-modal-title">{editingMemory ? 'Edit Memory Chapter' : 'Create Memory Chapter'}</h2>
             <form onSubmit={handleSaveMemory} className="admin-modal-form">
               <div className="admin-input-group">
                 <label>Chapter Title *</label>
@@ -959,7 +1094,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   Cancel
                 </button>
                 <button type="submit" className="admin-primary-btn">
-                  Publish Memory
+                  {editingMemory ? 'Save Changes' : 'Publish Memory'}
                 </button>
               </div>
             </form>
@@ -971,7 +1106,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       {isPostModalOpen && (
         <div className="admin-modal-backdrop">
           <div className="admin-modal-card">
-            <h2 className="admin-modal-title">Publish Community Announcement</h2>
+            <h2 className="admin-modal-title">{editingPost ? 'Edit Community Post' : 'Publish Community Announcement'}</h2>
             <form onSubmit={handleSavePost} className="admin-modal-form">
               <div className="admin-input-group">
                 <label>Post Message *</label>
@@ -989,7 +1124,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   Cancel
                 </button>
                 <button type="submit" className="admin-primary-btn">
-                  Share Post
+                  {editingPost ? 'Save Changes' : 'Share Post'}
                 </button>
               </div>
             </form>
@@ -1001,7 +1136,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       {isEventModalOpen && (
         <div className="admin-modal-backdrop">
           <div className="admin-modal-card">
-            <h2 className="admin-modal-title">Schedule Squad Event</h2>
+            <h2 className="admin-modal-title">{editingEvent ? 'Edit Squad Event' : 'Schedule Squad Event'}</h2>
             <form onSubmit={handleSaveEvent} className="admin-modal-form">
               <div className="admin-input-group">
                 <label>Event Name *</label>
@@ -1059,7 +1194,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   Cancel
                 </button>
                 <button type="submit" className="admin-primary-btn">
-                  Save Event
+                  {editingEvent ? 'Save Changes' : 'Save Event'}
                 </button>
               </div>
             </form>

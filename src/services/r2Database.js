@@ -254,7 +254,7 @@ export async function deleteMemberR2(memberId) {
 }
 
 export async function saveMemoryR2(memoryData) {
-  const id = `mem-${Date.now()}`;
+  const id = memoryData.id || `mem-${Date.now()}`;
   const item = {
     id,
     year: memoryData.year || 'Chapter 5',
@@ -263,14 +263,15 @@ export async function saveMemoryR2(memoryData) {
     date: memoryData.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     location: memoryData.location || 'Squad Circle',
     mediaUrl: memoryData.mediaUrl || r2Photo('Gracee.jpg'),
-    mediaType: 'image',
+    mediaType: memoryData.mediaType || 'image',
     people: Array.isArray(memoryData.people)
       ? memoryData.people
       : (memoryData.people || '').split(',').map(s => s.trim()).filter(Boolean),
     category: memoryData.category || 'Moment',
-    reactions: { '❤️': 1, '✨': 0, '🫂': 0, '😂': 0 },
-    comments: [],
-    createdAt: new Date().toISOString(),
+    reactions: memoryData.reactions || { '❤️': 1, '✨': 0, '🫂': 0, '😂': 0 },
+    comments: memoryData.comments || [],
+    createdAt: memoryData.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   const result = await callAPI({ collection: COLLECTIONS.MEMORIES, action: 'upsert', item });
   if (result.data) cache.set(COLLECTIONS.MEMORIES, result.data);
@@ -283,16 +284,17 @@ export async function deleteMemoryR2(memoryId) {
 }
 
 export async function savePostR2(postData, user) {
-  const id = `post-${Date.now()}`;
+  const id = postData.id || `post-${Date.now()}`;
   const item = {
     id,
     authorName: user?.displayName || postData.authorName || 'Admin',
-    authorPhoto: user?.photoURL || r2Photo('Gracee.jpg'),
+    authorPhoto: user?.photoURL || postData.authorPhoto || r2Photo('Gracee.jpg'),
     content: postData.content,
     category: postData.category || 'Announcement',
-    likes: 0,
-    comments: [],
-    createdAt: new Date().toISOString(),
+    likes: postData.likes ?? 0,
+    comments: postData.comments || [],
+    createdAt: postData.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   const result = await callAPI({ collection: COLLECTIONS.POSTS, action: 'upsert', item });
   if (result.data) cache.set(COLLECTIONS.POSTS, result.data);
@@ -305,7 +307,7 @@ export async function deletePostR2(postId) {
 }
 
 export async function saveEventR2(eventData) {
-  const id = `evt-${Date.now()}`;
+  const id = eventData.id || `evt-${Date.now()}`;
   const item = {
     id,
     title: eventData.title,
@@ -314,8 +316,9 @@ export async function saveEventR2(eventData) {
     location: eventData.location || 'Squad Circle',
     description: eventData.description || '',
     category: eventData.category || 'Celebration',
-    rsvpCount: 0,
-    createdAt: new Date().toISOString(),
+    rsvpCount: eventData.rsvpCount ?? 0,
+    createdAt: eventData.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
   const result = await callAPI({ collection: COLLECTIONS.EVENTS, action: 'upsert', item });
   if (result.data) cache.set(COLLECTIONS.EVENTS, result.data);
