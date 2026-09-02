@@ -27,29 +27,49 @@ function GoogleIcon() {
   );
 }
 
+// Authorized Admin Email (kept hidden from UI)
+const AUTHORIZED_ADMIN_EMAIL = 'maithreyan2006@gmail.com';
+
+const isAuthorizedAdmin = (user) => {
+  return Boolean(user && user.email && user.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL);
+};
+
 export default function AdminPortal({ onExit, currentUser }) {
-  // Auth state — unlocked if currentUser exists or flag set
+  // Auth state — only unlocked if currentUser is the authorized admin
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return Boolean(currentUser) || localStorage.getItem('natpe_admin_authenticated') === 'true';
+    return isAuthorizedAdmin(currentUser);
   });
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [showPasscodeBackup, setShowPasscodeBackup] = useState(false);
-  const [backupPasscode, setBackupPasscode] = useState('');
 
   // Sync with Firebase currentUser & check redirect result
   useEffect(() => {
     if (currentUser) {
-      setIsAuthenticated(true);
-      localStorage.setItem('natpe_admin_authenticated', 'true');
+      if (isAuthorizedAdmin(currentUser)) {
+        setIsAuthenticated(true);
+        setAuthError('');
+      } else {
+        setIsAuthenticated(false);
+        setAuthError('Access Denied. Only the authorized administrator can access this console.');
+        logOut();
+      }
+    } else {
+      setIsAuthenticated(false);
     }
 
     // Check if user just returned from a Google redirect
     checkRedirectResult?.()
       .then(res => {
         if (res?.user) {
-          setIsAuthenticated(true);
-          localStorage.setItem('natpe_admin_authenticated', 'true');
+          if (isAuthorizedAdmin(res.user)) {
+            setIsAuthenticated(true);
+            setAuthError('');
+            triggerToast(`Welcome back, Admin! 🛡️`);
+          } else {
+            setIsAuthenticated(false);
+            setAuthError('Access Denied. Only the authorized administrator can access this console.');
+            logOut();
+          }
         }
       })
       .catch(() => {});
@@ -181,10 +201,16 @@ export default function AdminPortal({ onExit, currentUser }) {
     setAuthError('');
     try {
       const res = await signInWithGoogle();
-      if (res?.user) {
-        setIsAuthenticated(true);
-        localStorage.setItem('natpe_admin_authenticated', 'true');
-        triggerToast(`Welcome, ${res.user.displayName || 'Admin'}! 🛡️`);
+      const user = res?.user;
+      if (user) {
+        if (isAuthorizedAdmin(user)) {
+          setIsAuthenticated(true);
+          triggerToast(`Welcome back, Admin! 🛡️`);
+        } else {
+          setIsAuthenticated(false);
+          setAuthError('Access Denied. Only the authorized administrator can access this console.');
+          await logOut();
+        }
       }
     } catch (err) {
       console.warn('Google Sign In:', err);
@@ -194,29 +220,16 @@ export default function AdminPortal({ onExit, currentUser }) {
       } else if (err.message && err.message.toLowerCase().includes('database is closing')) {
         setAuthError('Browser session refreshed. Please click "Continue with Google" once more.');
       } else {
-        setAuthError('Sign in could not be completed. You can try again or use the backup passkey below.');
+        setAuthError('Sign in could not be completed. Please try again.');
       }
     } finally {
       setIsSigningIn(false);
     }
   };
 
-  const handleBackupLogin = (e) => {
-    e.preventDefault();
-    if (backupPasscode.trim() === 'Admin@123' || backupPasscode.trim() === 'natpethunai2024' || backupPasscode.trim() === 'admin') {
-      setIsAuthenticated(true);
-      localStorage.setItem('natpe_admin_authenticated', 'true');
-      setAuthError('');
-      triggerToast('Welcome back, Admin! 🛡️');
-    } else {
-      setAuthError('Incorrect passkey.');
-    }
-  };
-
   const handleLogout = async () => {
     await logOut();
     setIsAuthenticated(false);
-    localStorage.removeItem('natpe_admin_authenticated');
   };
 
   // Member CRUD
@@ -358,49 +371,15 @@ export default function AdminPortal({ onExit, currentUser }) {
           <div className="admin-google-auth-box">
             {authError && <p className="admin-error-text">{authError}</p>}
 
-            {!showPasscodeBackup ? (
-              <>
-                <button 
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isSigningIn}
-                  className="admin-google-sign-in-btn"
-                >
-                  <GoogleIcon />
-                  <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
-                </button>
-
-                <button 
-                  type="button"
-                  onClick={() => { setShowPasscodeBackup(true); setAuthError(''); }}
-                  className="admin-secondary-auth-toggle"
-                >
-                  Use Backup Passkey
-                </button>
-              </>
-            ) : (
-              <form onSubmit={handleBackupLogin} className="admin-backup-form">
-                <input
-                  type="password"
-                  placeholder="Enter Admin Passkey"
-                  value={backupPasscode}
-                  onChange={(e) => setBackupPasscode(e.target.value)}
-                  autoFocus
-                  required
-                  className="admin-backup-input"
-                />
-                <button type="submit" className="admin-primary-btn">
-                  Unlock Console <Shield size={15} />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => { setShowPasscodeBackup(false); setAuthError(''); }}
-                  className="admin-secondary-auth-toggle"
-                >
-                  ← Back to Google Sign-In
-                </button>
-              </form>
-            )}
+            <button 
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isSigningIn}
+              className="admin-google-sign-in-btn"
+            >
+              <GoogleIcon />
+              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
+            </button>
           </div>
 
           <button onClick={onExit} className="admin-exit-btn">
