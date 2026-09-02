@@ -175,36 +175,36 @@ export default function MemoryTimeline({
         fallbackSrc: '/photos/farish.jpg'
       }));
 
-    // Ordered strictly: Maithreyan first -> Gopika next -> Squad Girls -> Squad Boys
+    // Ordered: Squad members first -> Maithreyan -> Gopika -> Squad Girl (Grace)
     const orderedMemberPhotos = [
-      // 1. Maithreyan (Up first)
+      { id: 'kafil', src: getPhoto('kafil', 'kafil.jpg'), fallbackSrc: '/photos/kafil.jpg', alt: 'Kafil' },
+      { id: 'farish', src: getPhoto('farish', 'farish.jpg'), fallbackSrc: '/photos/farish.jpg', alt: 'Farish Sharif' },
+      { id: 'samuel', src: getPhoto('samuel', 'samuel.jpg'), fallbackSrc: '/photos/samuel.jpg', alt: 'Samuel' },
+      { id: 'meshak', src: getPhoto('meshak', 'meshak.jpg'), fallbackSrc: '/photos/meshak.jpg', alt: 'Meshak' },
+      { id: 'haniya', src: getPhoto('haniya', 'hanuu.jpg'), fallbackSrc: '/photos/hanuu.jpg', alt: 'Haniya' },
+      { id: 'jaffreen', src: getPhoto('jaffreen', 'jaffreen.jpg'), fallbackSrc: '/photos/jaffreen.jpg', alt: 'Jaffreen' },
+      { id: 'harshitha', src: getPhoto('harshitha', 'harshuuu.jpg'), fallbackSrc: '/photos/harshuuu.jpg', alt: 'Harshitha' },
+      { id: 'heenuuu', src: getPhoto('heenuuu', 'Heenuuu.jpg'), fallbackSrc: '/photos/Heenuuu.jpg', alt: 'Heenuuu' },
+      { id: 'puppy', src: getPhoto('puppy', 'Puppy.jpg'), fallbackSrc: '/photos/Puppy.jpg', alt: 'Puppy' },
+      { id: 'afnaan', src: getPhoto('afnaan', 'affu.jpg'), fallbackSrc: '/photos/affu.jpg', alt: 'Afnaaan' },
+      { id: 'divyaaa', src: getPhoto('divyaaa', 'Divyaa.jpg'), fallbackSrc: '/photos/Divyaa.jpg', alt: 'Divyaaa' },
+
+      // Me (Maithreyan) and Gopika added last
       { 
         id: 'maithreyan', 
         src: getPhoto('maithreyan', null) || 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg', 
         fallbackSrc: 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg', 
         alt: 'Maithreyan' 
       },
-      // 2. Gopika (Next)
       { 
         id: 'gopika', 
         src: getPhoto('gopika', null) || r2Photo('Gracee.jpg'), 
         fallbackSrc: '/photos/Gracee.jpg', 
         alt: 'Gopika' 
       },
-      // 3. Squad Girls
-      { id: 'grace', src: getPhoto('grace', 'Gracee.jpg'), fallbackSrc: '/photos/Gracee.jpg', alt: 'Grace' },
-      { id: 'divyaaa', src: getPhoto('divyaaa', 'Divyaa.jpg'), fallbackSrc: '/photos/Divyaa.jpg', alt: 'Divyaaa' },
-      { id: 'jaffreen', src: getPhoto('jaffreen', 'jaffreen.jpg'), fallbackSrc: '/photos/jaffreen.jpg', alt: 'Jaffreen' },
-      { id: 'haniya', src: getPhoto('haniya', 'hanuu.jpg'), fallbackSrc: '/photos/hanuu.jpg', alt: 'Haniya' },
-      { id: 'harshitha', src: getPhoto('harshitha', 'harshuuu.jpg'), fallbackSrc: '/photos/harshuuu.jpg', alt: 'Harshitha' },
-      { id: 'heenuuu', src: getPhoto('heenuuu', 'Heenuuu.jpg'), fallbackSrc: '/photos/Heenuuu.jpg', alt: 'Heenuuu' },
-      { id: 'puppy', src: getPhoto('puppy', 'Puppy.jpg'), fallbackSrc: '/photos/Puppy.jpg', alt: 'Puppy' },
-      { id: 'afnaan', src: getPhoto('afnaan', 'affu.jpg'), fallbackSrc: '/photos/affu.jpg', alt: 'Afnaaan' },
-      // 4. Squad Boys
-      { id: 'farish', src: getPhoto('farish', 'farish.jpg'), fallbackSrc: '/photos/farish.jpg', alt: 'Farish Sharif' },
-      { id: 'samuel', src: getPhoto('samuel', 'samuel.jpg'), fallbackSrc: '/photos/samuel.jpg', alt: 'Samuel' },
-      { id: 'meshak', src: getPhoto('meshak', 'meshak.jpg'), fallbackSrc: '/photos/meshak.jpg', alt: 'Meshak' },
-      { id: 'kafil', src: getPhoto('kafil', 'kafil.jpg'), fallbackSrc: '/photos/kafil.jpg', alt: 'Kafil' }
+
+      // Next after Gopika: Girl (Grace)
+      { id: 'grace', src: getPhoto('grace', 'Gracee.jpg'), fallbackSrc: '/photos/Gracee.jpg', alt: 'Grace' }
     ];
 
     return [...orderedMemberPhotos, ...memoryPhotos];
