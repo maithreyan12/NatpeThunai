@@ -62,17 +62,15 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { collection } = req.query;
-
-  if (!collection || !ALLOWED.has(collection)) {
-    return res.status(400).json({ error: `Invalid collection. Must be one of: ${[...ALLOWED].join(', ')}` });
-  }
-
   try {
     const client = getR2Client();
 
-    // ── GET: read collection ──────────────────────────────────────
+    // ── GET: read collection ─────────────────────────────────────────
     if (req.method === 'GET') {
+      const collection = req.query?.collection;
+      if (!collection || !ALLOWED.has(collection)) {
+        return res.status(400).json({ error: `Invalid collection. Must be one of: ${[...ALLOWED].join(', ')}` });
+      }
       const data = await readData(client, collection);
       if (data === null) {
         return res.status(404).json({ data: null, seeded: false });
@@ -80,44 +78,45 @@ export default async function handler(req, res) {
       return res.status(200).json({ data });
     }
 
-    // ── POST: write/update full collection or append one item ─────
+    // ── POST: write/update full collection or append one item ────────
     if (req.method === 'POST') {
-      const body = req.body;
+      const body = req.body || {};
+      const { collection, action, data, item, id } = body;
 
-      if (body.action === 'seed') {
-        // Seed with initial data (only if empty)
+      if (!collection || !ALLOWED.has(collection)) {
+        return res.status(400).json({ error: `Invalid collection. Must be one of: ${[...ALLOWED].join(', ')}` });
+      }
+
+      if (action === 'seed') {
         const existing = await readData(client, collection);
         if (existing !== null) {
           return res.status(200).json({ message: 'Already seeded', data: existing });
         }
-        await writeData(client, collection, body.data);
-        return res.status(200).json({ message: 'Seeded successfully', data: body.data });
+        await writeData(client, collection, data);
+        return res.status(200).json({ message: 'Seeded successfully', data });
       }
 
-      if (body.action === 'set') {
-        // Replace entire collection
-        await writeData(client, collection, body.data);
-        return res.status(200).json({ message: 'Collection saved', data: body.data });
+      if (action === 'set') {
+        await writeData(client, collection, data);
+        return res.status(200).json({ message: 'Collection saved', data });
       }
 
-      if (body.action === 'upsert') {
-        // Add or update a single item by id
+      if (action === 'upsert') {
         const existing = await readData(client, collection) || [];
         const list = Array.isArray(existing) ? existing : [];
-        const idx = list.findIndex(item => item.id === body.item.id);
+        const idx = list.findIndex(i => i.id === item.id);
         if (idx >= 0) {
-          list[idx] = { ...list[idx], ...body.item };
+          list[idx] = { ...list[idx], ...item };
         } else {
-          list.unshift(body.item);
+          list.unshift(item);
         }
         await writeData(client, collection, list);
         return res.status(200).json({ message: 'Upserted', data: list });
       }
 
-      if (body.action === 'delete') {
-        // Remove one item by id
+      if (action === 'delete') {
         const existing = await readData(client, collection) || [];
-        const list = (Array.isArray(existing) ? existing : []).filter(item => item.id !== body.id);
+        const list = (Array.isArray(existing) ? existing : []).filter(i => i.id !== id);
         await writeData(client, collection, list);
         return res.status(200).json({ message: 'Deleted', data: list });
       }
