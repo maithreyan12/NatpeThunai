@@ -10,7 +10,20 @@
 // 6. Copy the firebaseConfig object and paste it below
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { 
+  getAuth, 
+  initializeAuth, 
+  browserLocalPersistence, 
+  browserSessionPersistence, 
+  indexedDBLocalPersistence,
+  browserPopupRedirectResolver, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 import {
   getFirestore,
   collection,
@@ -34,12 +47,55 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+
+let auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+} catch {
+  auth = getAuth(app);
+}
+
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+// Check redirect result on app load if redirected
+getRedirectResult(auth).catch(() => {});
 
 // Auth functions
-export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+export const signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+    return result.user;
+  } catch (err) {
+    console.warn("Sign-in popup error:", err);
+    // User closed popup
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      throw err;
+    }
+    // If popup was blocked or browser threw internal/indexeddb error, fallback to redirect
+    if (
+      err.code === 'auth/popup-blocked' || 
+      err.code === 'auth/internal-error' || 
+      err.message?.toLowerCase().includes('indexeddb') || 
+      err.message?.toLowerCase().includes('database')
+    ) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      } catch (redirErr) {
+        throw redirErr;
+      }
+    }
+    throw err;
+  }
+};
+
 export const logOut = () => signOut(auth);
 export const onAuthChange = (callback) => onAuthStateChanged(auth, callback);
 

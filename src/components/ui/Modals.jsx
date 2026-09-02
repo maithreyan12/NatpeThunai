@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, ShieldCheck, Lock } from 'lucide-react';
 import { r2Photo } from '../../services';
 import { signInWithGoogle } from '../../firebase';
+import brandLogo from '../../assets/brand-logo.png';
 import './Modals.css';
 
 function GoogleIcon() {
@@ -455,7 +456,11 @@ export function SignInModal({ isOpen, onClose, currentUser, onSignIn, onSignOut 
           <div className="auth-signin-view">
             <div className="auth-header-graphic">
               <div className="auth-beacon-icon">
-                <span>🫂</span>
+                <img 
+                  src={brandLogo} 
+                  alt="நட்பே துணை Logo" 
+                  className="auth-beacon-logo-img" 
+                />
               </div>
             </div>
 

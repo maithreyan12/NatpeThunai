@@ -1,6 +1,7 @@
 import React from 'react';
-import { Heart, ArrowUp, Sparkles } from 'lucide-react';
+import { Heart, ArrowUp } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
+import brandLogo from '../../assets/brand-logo.png';
 import './Footer.css';
 
 export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _currentUser }) {
@@ -11,7 +12,7 @@ export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _curren
         <div className="footer-identity-col">
           <div className="footer-brand-lockup">
             <div className="footer-brand-icon">
-              <Sparkles size={16} />
+              <img src={brandLogo} alt="நட்பே துணை" className="footer-brand-logo-img" />
             </div>
             <div className="footer-brand-names">
               <span className="footer-title-text" style={{ fontFamily: 'var(--font-tamil)' }}>நட்பே துணை</span>
