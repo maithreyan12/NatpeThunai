@@ -11,7 +11,6 @@ import {
   GroupChat, 
   Footer, 
   FriendModal,
-  AddMemberModal,
   CreatePostModal, 
   AddEventModal, 
   LightboxModal,
@@ -58,8 +57,6 @@ export default function App() {
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
-  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState(null);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [lightboxMemory, setLightboxMemory] = useState(null);
 
@@ -180,17 +177,6 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Member Management Handlers
-  const handleSaveMember = async (memberData) => {
-    try {
-      await saveMemberR2(editingMember ? { ...editingMember, ...memberData } : memberData);
-      showToast(editingMember ? `${memberData.name}'s profile updated! ✨` : `Added ${memberData.name} to the gang! 🎉`);
-    } catch (err) {
-      showToast(`Could not save member: ${err.message}`);
-    }
-    setEditingMember(null);
-  };
-
   const handleFilterMemories = (memberName) => {
     setActiveMemberFilter(memberName);
     scrollToSection('timeline');
@@ -301,17 +287,8 @@ export default function App() {
         {/* 4. Dedicated Squad Sanctuary Showcase */}
         <SquadMembers 
           members={members}
-          currentUser={currentUser}
           onSelectMember={(member) => setSelectedFriend(member)}
           onFilterByMember={handleFilterMemories}
-          onOpenAddMember={() => {
-            setEditingMember(null);
-            setIsAddMemberOpen(true);
-          }}
-          onEditMember={(member) => {
-            setEditingMember(member);
-            setIsAddMemberOpen(true);
-          }}
         />
 
         {/* 5. Chronological Memory Timeline with Scrollable Filter */}
@@ -370,16 +347,6 @@ export default function App() {
         isOpen={isAddEventOpen}
         onClose={() => setIsAddEventOpen(false)}
         onSave={handleSaveEvent}
-      />
-
-      <AddMemberModal 
-        isOpen={isAddMemberOpen}
-        onClose={() => {
-          setIsAddMemberOpen(false);
-          setEditingMember(null);
-        }}
-        onSave={handleSaveMember}
-        existingMember={editingMember}
       />
 
       <LightboxModal 

@@ -4,10 +4,8 @@ import {
   Search, 
   Grid, 
   List, 
-  UserPlus, 
   Camera, 
   HeartHandshake,
-  Edit2,
   ArrowUpRight,
   CheckCircle2,
   BookOpen,
@@ -28,7 +26,7 @@ const VIBE_FILTERS = [
 ];
 
 /* ─── 3D Flip Card (Photo front / Bio back) ─── */
-function MemberFlipCard({ member, currentUser, onSelectMember, onFilterByMember, onEditMember }) {
+function MemberFlipCard({ member, onSelectMember, onFilterByMember }) {
   const [flipped, setFlipped] = useState(false);
   const handle = member.instagram ? member.instagram.split('/').filter(Boolean).pop() : null;
 
@@ -110,19 +108,6 @@ function MemberFlipCard({ member, currentUser, onSelectMember, onFilterByMember,
             <span>Tap for bio</span>
             <span className="flip-tap-arrow">↩</span>
           </div>
-
-          {/* Edit btn */}
-          {currentUser && onEditMember && (
-            <button
-              type="button"
-              className="flip-edit-btn"
-              onClick={(e) => { e.stopPropagation(); onEditMember(member); }}
-              title={`Edit ${member.name}`}
-              aria-label={`Edit ${member.name}`}
-            >
-              <Edit2 size={12} />
-            </button>
-          )}
         </div>
 
         {/* ── BACK: Bio, Instagram, buttons ── */}
@@ -229,11 +214,8 @@ function MemberFlipCard({ member, currentUser, onSelectMember, onFilterByMember,
 
 export default function SquadMembers({ 
   members = [], 
-  currentUser = null,
   onSelectMember, 
-  onFilterByMember, 
-  onOpenAddMember,
-  onEditMember
+  onFilterByMember
 }) {
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -320,17 +302,6 @@ export default function SquadMembers({
                 <List size={15} />
               </button>
             </div>
-
-            {currentUser && onOpenAddMember && (
-              <button 
-                type="button" 
-                className="btn-secondary add-member-btn"
-                onClick={onOpenAddMember}
-              >
-                <UserPlus size={15} />
-                <span>Add / Customize</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -379,10 +350,8 @@ export default function SquadMembers({
                 <MemberFlipCard
                   key={member.id}
                   member={member}
-                  currentUser={currentUser}
                   onSelectMember={onSelectMember}
                   onFilterByMember={onFilterByMember}
-                  onEditMember={onEditMember}
                 />
               ))}
             </div>
@@ -405,10 +374,8 @@ export default function SquadMembers({
                   <MemberFlipCard
                     key={member.id}
                     member={member}
-                    currentUser={currentUser}
                     onSelectMember={onSelectMember}
                     onFilterByMember={onFilterByMember}
-                    onEditMember={onEditMember}
                   />
                 ))}
               </div>
