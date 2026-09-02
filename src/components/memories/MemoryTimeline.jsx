@@ -9,7 +9,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import MemoryCard from './MemoryCard';
-import InfiniteSpiral from '../ui/InfiniteSpiral';
+import MatchedDualReel from '../ui/MatchedDualReel';
 import { getStoredMembers, uploadToR2WithGuardrails, r2Photo } from '../../services';
 import './MemoryTimeline.css';
 
@@ -143,41 +143,135 @@ export default function MemoryTimeline({
     return matchesCategory && matchesMember && matchesSearch;
   });
 
-  // Prepare dynamic spiral items from cloud R2 photos & memory entries (web-safe formats only)
-  const spiralItems = useMemo(() => {
-    const isWebImage = (url) => {
-      if (!url || typeof url !== 'string') return false;
-      const cleanUrl = url.split('?')[0].toLowerCase();
-      // Exclude raw Apple HEIC/HEIF files which browsers cannot decode directly
-      if (cleanUrl.endsWith('.heic') || cleanUrl.endsWith('.heif')) return false;
-      return true;
+  // Prepare matched dual streams: Maithreyan & Boys (Left) and Gopika & Girls (Right)
+  const { boysList, girlsList } = useMemo(() => {
+    const memberMap = new Map();
+    (members || []).forEach(m => {
+      if (m?.id) memberMap.set(m.id.toLowerCase(), m);
+      if (m?.name) memberMap.set(m.name.toLowerCase(), m);
+    });
+
+    const getMemberPhoto = (id, fallbackR2) => {
+      const found = memberMap.get(id.toLowerCase());
+      if (found && found.photo) return found.photo;
+      return fallbackR2 ? r2Photo(fallbackR2) : `/photos/${fallbackR2}`;
     };
 
-    const memoryPhotos = (memories || [])
-      .filter(m => m.mediaUrl && m.mediaType !== 'video' && isWebImage(m.mediaUrl))
-      .slice(0, 6)
-      .map((m, idx) => ({
-        id: m.id || `memory-${idx}`,
-        src: m.mediaUrl,
-        alt: m.title || 'Squad memory',
-        fallbackSrc: '/photos/farish.jpg'
-      }));
+    const getMemberField = (id, field, fallback) => {
+      const found = memberMap.get(id.toLowerCase());
+      return found?.[field] || fallback;
+    };
 
-    const memberPhotos = [
-      { id: 'kafil', src: r2Photo('kafil.jpg'), fallbackSrc: '/photos/kafil.jpg', alt: 'Kafil..KK' },
-      { id: 'grace', src: r2Photo('Gracee.jpg'), fallbackSrc: '/photos/Gracee.jpg', alt: 'Grace' },
-      { id: 'jaffreen', src: r2Photo('jaffreen.jpg'), fallbackSrc: '/photos/jaffreen.jpg', alt: 'Jaffreen' },
-      { id: 'haniya', src: r2Photo('hanuu.jpg'), fallbackSrc: '/photos/hanuu.jpg', alt: 'Haniya' },
-      { id: 'farish', src: r2Photo('farish.jpg'), fallbackSrc: '/photos/farish.jpg', alt: 'Farish Sharif' },
-      { id: 'divyaa', src: r2Photo('Divyaa.jpg'), fallbackSrc: '/photos/Divyaa.jpg', alt: 'Divyaa' },
-      { id: 'samuel', src: r2Photo('samuel.jpg'), fallbackSrc: '/photos/samuel.jpg', alt: 'Samuel' },
-      { id: 'meshak', src: r2Photo('meshak.jpg'), fallbackSrc: '/photos/meshak.jpg', alt: 'Meshak' },
-      { id: 'afnan', src: r2Photo('affu.jpg'), fallbackSrc: '/photos/affu.jpg', alt: 'Afnan' },
-      { id: 'harshitha', src: r2Photo('harshuuu.jpg'), fallbackSrc: '/photos/harshuuu.jpg', alt: 'Harshitha' }
+    // 1. BOYS STREAM — Led by Maithreyan
+    const boys = [
+      {
+        id: 'maithreyan',
+        name: getMemberField('maithreyan', 'name', 'Maithreyan'),
+        role: getMemberField('maithreyan', 'role', 'Duo · Tech & Vibe Pilot 🚀'),
+        src: getMemberPhoto('maithreyan', null) || 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg',
+        fallbackSrc: 'https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/members/2026-09/1788346038031-lbh4ge_IMG_2100.jpeg',
+        isLead: true
+      },
+      {
+        id: 'farish',
+        name: getMemberField('farish', 'name', 'Farish Sharif'),
+        role: getMemberField('farish', 'role', 'The Mastermind 🧠'),
+        src: getMemberPhoto('farish', 'farish.jpg'),
+        fallbackSrc: '/photos/farish.jpg'
+      },
+      {
+        id: 'samuel',
+        name: getMemberField('samuel', 'name', 'Samuel'),
+        role: getMemberField('samuel', 'role', 'The Joyful Soul 🌟'),
+        src: getMemberPhoto('samuel', 'samuel.jpg'),
+        fallbackSrc: '/photos/samuel.jpg'
+      },
+      {
+        id: 'meshak',
+        name: getMemberField('meshak', 'name', 'Meshak'),
+        role: getMemberField('meshak', 'role', 'The Silent Strength 🛡️'),
+        src: getMemberPhoto('meshak', 'meshak.jpg'),
+        fallbackSrc: '/photos/meshak.jpg'
+      },
+      {
+        id: 'kafil',
+        name: getMemberField('kafil', 'name', 'Kafil'),
+        role: getMemberField('kafil', 'role', 'The Creative Soul 🎨'),
+        src: getMemberPhoto('kafil', 'kafil.jpg'),
+        fallbackSrc: '/photos/kafil.jpg'
+      }
     ];
 
-    return [...memberPhotos, ...memoryPhotos];
-  }, [memories]);
+    // 2. GIRLS STREAM — Led by Gopika
+    const girls = [
+      {
+        id: 'gopika',
+        name: getMemberField('gopika', 'name', 'Gopika'),
+        role: getMemberField('gopika', 'role', 'Duo · The Graceful Heart 🌸'),
+        src: getMemberPhoto('gopika', null) || r2Photo('Gracee.jpg'),
+        fallbackSrc: '/photos/Gracee.jpg',
+        isLead: true
+      },
+      {
+        id: 'grace',
+        name: getMemberField('grace', 'name', 'Grace'),
+        role: getMemberField('grace', 'role', 'The Spark & Creative ✨'),
+        src: getMemberPhoto('grace', 'Gracee.jpg'),
+        fallbackSrc: '/photos/Gracee.jpg'
+      },
+      {
+        id: 'divyaaa',
+        name: getMemberField('divyaaa', 'name', 'Divyaaa'),
+        role: getMemberField('divyaaa', 'role', 'The Sunshine ☀️'),
+        src: getMemberPhoto('divyaaa', 'Divyaa.jpg'),
+        fallbackSrc: '/photos/Divyaa.jpg'
+      },
+      {
+        id: 'jaffreen',
+        name: getMemberField('jaffreen', 'name', 'Jaffreen'),
+        role: getMemberField('jaffreen', 'role', 'The Sweet Heart 💖'),
+        src: getMemberPhoto('jaffreen', 'jaffreen.jpg'),
+        fallbackSrc: '/photos/jaffreen.jpg'
+      },
+      {
+        id: 'haniya',
+        name: getMemberField('haniya', 'name', 'Haniya'),
+        role: getMemberField('haniya', 'role', 'The Chill Sloth 🦥'),
+        src: getMemberPhoto('haniya', 'hanuu.jpg'),
+        fallbackSrc: '/photos/hanuu.jpg'
+      },
+      {
+        id: 'harshitha',
+        name: getMemberField('harshitha', 'name', 'Harshitha'),
+        role: getMemberField('harshitha', 'role', 'Radiant Sunshine 🌻'),
+        src: getMemberPhoto('harshitha', 'harshuuu.jpg'),
+        fallbackSrc: '/photos/harshuuu.jpg'
+      },
+      {
+        id: 'heenuuu',
+        name: getMemberField('heenuuu', 'name', 'Heenuuu'),
+        role: getMemberField('heenuuu', 'role', 'The Spark & Heart 💖'),
+        src: getMemberPhoto('heenuuu', 'Heenuuu.jpg'),
+        fallbackSrc: '/photos/Heenuuu.jpg'
+      },
+      {
+        id: 'puppy',
+        name: getMemberField('puppy', 'name', 'Puppy'),
+        role: getMemberField('puppy', 'role', 'The Chill Vibe 🎯'),
+        src: getMemberPhoto('puppy', 'Puppy.jpg'),
+        fallbackSrc: '/photos/Puppy.jpg'
+      },
+      {
+        id: 'afnaan',
+        name: getMemberField('afnaan', 'name', 'Afnaaan'),
+        role: getMemberField('afnaan', 'role', 'The Energy Dynamo ⚡'),
+        src: getMemberPhoto('afnaan', 'affu.jpg'),
+        fallbackSrc: '/photos/affu.jpg'
+      }
+    ];
+
+    return { boysList: boys, girlsList: girls };
+  }, [members]);
 
   return (
     <section id="timeline" className="timeline-section">
@@ -194,31 +288,12 @@ export default function MemoryTimeline({
         </p>
       </div>
 
-      {/* 3D Infinite Spiral Memory Vortex — Borderless Full-Screen Flow */}
-      <div className="memory-spiral-fullscreen-stage">
-        <InfiniteSpiral
-          items={spiralItems}
-          animationMode="all"
-          speed={0.55}
-          radius={205}
-          cardWidth={148}
-          cardHeight={112}
-          verticalSpacing={68}
-          perspective={840}
-          cardRadius={16}
-          centerScale={1.34}
-          edgeBlur={5.5}
-          cardsPerTurn={6}
-          pauseOnHover
-          direction="up"
-          rotation={0}
-          cardTilt={0}
-          edgeFade={0.75}
-          imageFit="cover"
-          grayscale={0.05}
-          onItemClick={(item) => onOpenLightbox && onOpenLightbox(item.src)}
-        />
-      </div>
+      {/* Matched Dual-Stream Photo Reel: Maithreyan & Boys vs Gopika & Girls */}
+      <MatchedDualReel
+        boys={boysList}
+        girls={girlsList}
+        onPhotoClick={(photoUrl) => onOpenLightbox && onOpenLightbox(photoUrl)}
+      />
 
       {/* Control Filter Bar */}
       <div className="timeline-filter-bar">
