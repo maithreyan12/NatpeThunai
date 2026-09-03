@@ -3,8 +3,9 @@ import {
   Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
-  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2
+  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film
 } from 'lucide-react';
+
 import {
   subscribeToMembersR2, saveMemberR2, deleteMemberR2,
   subscribeToMemoriesR2, saveMemoryR2, deleteMemoryR2,
@@ -105,6 +106,20 @@ export default function AdminPortal({ onExit, currentUser }) {
     title: '', date: '', time: '', location: '', description: ''
   });
 
+  // ── Reels (Cinematic Archive) States ──
+  const [editingReel, setEditingReel] = useState(null);
+  const [isReelModalOpen, setIsReelModalOpen] = useState(false);
+  const [reelPhotoUploading, setReelPhotoUploading] = useState(false);
+  const [reelForm, setReelForm] = useState({
+    title: '',
+    category: 'Adventures',
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    location: 'Squad Sanctuary',
+    description: '',
+    mediaUrl: '',
+    mediaType: 'image'
+  });
+
   // Upload States
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -112,6 +127,7 @@ export default function AdminPortal({ onExit, currentUser }) {
   const [recentUploads, setRecentUploads] = useState([]);
   const [memberPhotoUploading, setMemberPhotoUploading] = useState(false);
   const [memoryPhotoUploading, setMemoryPhotoUploading] = useState(false);
+
 
   // Toast
   const [toast, setToast] = useState('');
@@ -306,6 +322,42 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
+  // Direct Photo/Video Upload for Reel Slide
+  const handleReelPhotoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isVideo = file.type.startsWith('video/');
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setReelForm(prev => ({
+        ...prev,
+        mediaUrl: ev.target.result,
+        mediaType: isVideo ? 'video' : 'image'
+      }));
+    };
+    reader.readAsDataURL(file);
+
+    setReelPhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'memories');
+      if (result?.publicUrl) {
+        setReelForm(prev => ({
+          ...prev,
+          mediaUrl: result.publicUrl,
+          mediaType: isVideo ? 'video' : 'image'
+        }));
+        triggerToast(`Reel media uploaded to Cloudflare R2! ☁️🎬`);
+      }
+    } catch (err) {
+      console.warn("R2 Upload warning:", err);
+      triggerToast(`Media selected for reel`);
+    } finally {
+      setReelPhotoUploading(false);
+    }
+  };
+
+
   // ── Live R2 subscriptions — push updates to this component AND public website ──
   useEffect(() => {
     // Boot: seed R2 if first time
@@ -465,6 +517,72 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
+  // ── Reel (Cinematic Archive) CRUD ──
+  const openAddReel = () => {
+    setEditingReel(null);
+    setReelForm({
+      title: '',
+      category: 'Adventures',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      location: 'Squad Sanctuary',
+      description: '',
+      mediaUrl: '',
+      mediaType: 'image'
+    });
+    setIsReelModalOpen(true);
+  };
+
+  const openEditReel = (reel) => {
+    setEditingReel(reel);
+    setReelForm({
+      title: reel.title || '',
+      category: reel.category || reel.year || 'Adventures',
+      date: reel.date || '',
+      location: reel.location || '',
+      description: reel.description || '',
+      mediaUrl: reel.mediaUrl || '',
+      mediaType: reel.mediaType || 'image'
+    });
+    setIsReelModalOpen(true);
+  };
+
+  const handleSaveReel = async (e) => {
+    e.preventDefault();
+    if (!reelForm.mediaUrl) {
+      triggerToast('Please upload a photo or provide a media URL 📸');
+      return;
+    }
+    setIsReelModalOpen(false);
+    try {
+      const payload = editingReel
+        ? { ...editingReel, ...reelForm }
+        : {
+            id: `reel_${Date.now()}`,
+            ...reelForm,
+            year: reelForm.category || 'Adventures',
+            isReel: true,
+            timestamp: Date.now()
+          };
+      await saveMemoryR2(payload);
+      triggerToast(editingReel ? `Updated Reel slide! 🎬` : `New Reel slide published to Cinematic Archive! 🎬`);
+      setEditingReel(null);
+    } catch (err) {
+      triggerToast(`Reel save failed: ${err.message}`);
+    }
+  };
+
+  const handleDeleteReel = async (id, title) => {
+    if (window.confirm(`Delete reel slide "${title || 'this slide'}" from Cinematic Archive?`)) {
+      try {
+        await deleteMemoryR2(id);
+        triggerToast(`Reel slide removed 🗑️`);
+      } catch (err) {
+        triggerToast(`Delete failed: ${err.message}`);
+      }
+    }
+  };
+
+
   // Post CRUD
   const openAddPost = () => {
     setEditingPost(null);
@@ -590,6 +708,19 @@ export default function AdminPortal({ onExit, currentUser }) {
     m.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Cinematic Memory Reel Items
+  const reelItems = memories.filter(m => m.mediaUrl || m.isReel);
+  const filteredReels = reelItems.filter(r => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (r.title || '').toLowerCase().includes(q) ||
+      (r.category || r.year || '').toLowerCase().includes(q) ||
+      (r.location || '').toLowerCase().includes(q) ||
+      (r.description || '').toLowerCase().includes(q)
+    );
+  });
+
+
   // If not authenticated, render Google Sign-In Gate
   if (!isAuthenticated) {
     return (
@@ -695,6 +826,12 @@ export default function AdminPortal({ onExit, currentUser }) {
               <Users size={18} /> Squad Members ({members.length})
             </button>
             <button
+              className={`admin-nav-tab ${activeTab === 'reels' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reels')}
+            >
+              <Film size={18} /> Cinematic Reels ({reelItems.length})
+            </button>
+            <button
               className={`admin-nav-tab ${activeTab === 'memories' ? 'active' : ''}`}
               onClick={() => setActiveTab('memories')}
             >
@@ -737,6 +874,17 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
+              <div className="admin-stat-card" onClick={() => setActiveTab('reels')} style={{ cursor: 'pointer' }}>
+                <div className="admin-stat-icon-wrap from-pink">
+                  <Film size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{reelItems.length}</h3>
+                  <p className="admin-stat-label">Cinematic Reels</p>
+                  <span className="admin-stat-meta">Live in Our Memory Reel</span>
+                </div>
+              </div>
+
               <div className="admin-stat-card">
                 <div className="admin-stat-icon-wrap from-pink">
                   <BookOpen size={24} />
@@ -747,6 +895,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <span className="admin-stat-meta">Chronological Journey</span>
                 </div>
               </div>
+
 
               <div className="admin-stat-card">
                 <div className="admin-stat-icon-wrap from-indigo">
@@ -867,8 +1016,69 @@ export default function AdminPortal({ onExit, currentUser }) {
             </div>
           )}
 
+          {/* 2.5 REELS TAB */}
+          {activeTab === 'reels' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Cinematic Memory Reels</h2>
+                  <p className="admin-section-sub">
+                    Manage slides featured in the live "Our Memory Reel" cinematic theater ({reelItems.length} active).
+                  </p>
+                </div>
+                <div className="admin-action-bar">
+                  <button onClick={() => setIsBundleModalOpen(true)} className="admin-secondary-btn bundle-upload-btn">
+                    <FolderPlus size={16} /> Batch Upload
+                  </button>
+                  <button onClick={openAddReel} className="admin-primary-btn">
+                    <Plus size={16} /> Add Reel Slide
+                  </button>
+                </div>
+              </div>
+
+              {filteredReels.length === 0 ? (
+                <div className="admin-empty-pane" style={{ textAlign: 'center', padding: '60px 20px' }}>
+                  <Film size={44} style={{ opacity: 0.4, margin: '0 auto 12px' }} />
+                  <h3>No reel slides found</h3>
+                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Reel Slide" or upload photos to populate your cinematic theater.</p>
+                </div>
+              ) : (
+                <div className="admin-cards-grid">
+                  {filteredReels.map((reel) => (
+                    <div key={reel.id} className="admin-card-item">
+                      {reel.mediaType === 'video' ? (
+                        <video src={reel.mediaUrl} className="admin-card-img" muted />
+                      ) : (
+                        <img src={reel.mediaUrl} alt={reel.title} className="admin-card-img" />
+                      )}
+                      <div className="admin-card-body">
+                        <div className="admin-card-header-row">
+                          <span className="admin-card-badge">
+                            {reel.category || reel.year || 'Adventures'} · {reel.date || 'Moment'}
+                          </span>
+                          <div className="admin-row-actions">
+                            <button onClick={() => openEditReel(reel)} className="admin-icon-action-btn" title="Edit Reel">
+                              <Edit3 size={15} />
+                            </button>
+                            <button onClick={() => handleDeleteReel(reel.id, reel.title)} className="admin-icon-action-btn delete" title="Delete Reel">
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="admin-card-title">{reel.title || 'Untitled Slide'}</h3>
+                        <p className="admin-card-desc">{reel.description || 'No description provided.'}</p>
+                        {reel.location && <p className="admin-card-loc">📍 {reel.location}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 3. MEMORIES TAB */}
           {activeTab === 'memories' && (
+
             <div className="admin-section-block">
               <div className="admin-section-header">
                 <div>
@@ -1164,8 +1374,129 @@ export default function AdminPortal({ onExit, currentUser }) {
         </div>
       )}
 
+      {/* Reel Modal */}
+      {isReelModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">
+              {editingReel ? 'Edit Cinematic Reel Slide' : 'Add New Reel Slide'}
+            </h2>
+            <form onSubmit={handleSaveReel} className="admin-modal-form">
+              {/* Media Upload & Preview */}
+              <div className="admin-photo-upload-section">
+                <label className="admin-field-label">Reel Media (Photo or Video) *</label>
+                <div className="admin-photo-picker-row">
+                  <div className="admin-photo-preview-box memory-preview">
+                    {reelForm.mediaUrl ? (
+                      reelForm.mediaType === 'video' ? (
+                        <video src={reelForm.mediaUrl} className="admin-photo-preview-img" muted controls />
+                      ) : (
+                        <img src={reelForm.mediaUrl} alt="Preview" className="admin-photo-preview-img" />
+                      )
+                    ) : (
+                      <div className="admin-photo-preview-placeholder">
+                        <Film size={28} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-photo-picker-controls">
+                    <label className="admin-file-pick-btn">
+                      <Camera size={16} />
+                      <span>{reelPhotoUploading ? 'Uploading to R2...' : 'Choose Media File'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*,video/*" 
+                        onChange={handleReelPhotoFile}
+                        disabled={reelPhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span className="admin-photo-hint">Directly uploaded to Cloudflare R2 bucket with live preview</span>
+                  </div>
+                </div>
+
+                <div className="admin-input-group" style={{ marginTop: '10px' }}>
+                  <label>Or Media URL *</label>
+                  <input
+                    type="text"
+                    value={reelForm.mediaUrl}
+                    onChange={(e) => setReelForm({ ...reelForm, mediaUrl: e.target.value })}
+                    placeholder={`e.g. ${R2_BASE}/photos/...`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Slide Title *</label>
+                  <input
+                    type="text"
+                    value={reelForm.title}
+                    onChange={(e) => setReelForm({ ...reelForm, title: e.target.value })}
+                    placeholder="e.g. Squad Memory – Goa Sunset"
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Category / Tag</label>
+                  <input
+                    type="text"
+                    value={reelForm.category}
+                    onChange={(e) => setReelForm({ ...reelForm, category: e.target.value })}
+                    placeholder="e.g. Adventures, Celebration, Late Nights"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Date Tag</label>
+                  <input
+                    type="text"
+                    value={reelForm.date}
+                    onChange={(e) => setReelForm({ ...reelForm, date: e.target.value })}
+                    placeholder="e.g. Sep 3 or Year 2026"
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    value={reelForm.location}
+                    onChange={(e) => setReelForm({ ...reelForm, location: e.target.value })}
+                    placeholder="e.g. Squad Sanctuary, Bangalore"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group">
+                <label>Story Description / Caption</label>
+                <textarea
+                  rows="3"
+                  value={reelForm.description}
+                  onChange={(e) => setReelForm({ ...reelForm, description: e.target.value })}
+                  placeholder="Caption or moment description shown in the cinematic reel..."
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsReelModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn" disabled={reelPhotoUploading}>
+                  {editingReel ? 'Save Changes' : 'Publish to Reel'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Memory Chapter Modal */}
       {isMemoryModalOpen && (
+
         <div className="admin-modal-backdrop">
           <div className="admin-modal-card">
             <h2 className="admin-modal-title">{editingMemory ? 'Edit Memory Chapter' : 'Create Memory Chapter'}</h2>
