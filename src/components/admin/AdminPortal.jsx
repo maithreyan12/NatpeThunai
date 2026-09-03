@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
-  CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera
+  CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
+  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2
 } from 'lucide-react';
 import {
   subscribeToMembersR2, saveMemberR2, deleteMemberR2,
@@ -118,6 +119,137 @@ export default function AdminPortal({ onExit, currentUser }) {
   const triggerToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3500);
+  };
+
+  // ── Batch / Folder Photo Upload States ──
+  const [isBundleModalOpen, setIsBundleModalOpen] = useState(false);
+  const [bundleFiles, setBundleFiles] = useState([]);
+  const [bundleSettings, setBundleSettings] = useState({
+    autoCreateMemories: true,
+    titlePrefix: 'Squad Memory',
+    year: 'Chapter 5',
+    location: 'Squad Sanctuary',
+    category: 'Adventures',
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  });
+  const [isBundleUploading, setIsBundleUploading] = useState(false);
+  const [bundleProgress, setBundleProgress] = useState(0);
+  const [bundleCurrentIndex, setBundleCurrentIndex] = useState(0);
+
+  const folderInputRef = useRef(null);
+  const multiFileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (folderInputRef.current) {
+      folderInputRef.current.setAttribute('webkitdirectory', '');
+      folderInputRef.current.setAttribute('directory', '');
+    }
+  }, [isBundleModalOpen]);
+
+  const handleSelectFiles = (fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const validFiles = Array.from(fileList).filter(f => {
+      if (f.name.startsWith('.') || f.name.includes('DS_Store')) return false;
+      return f.type.startsWith('image/') || f.type.startsWith('video/');
+    });
+
+    if (validFiles.length === 0) {
+      triggerToast('No valid photos or videos found in selection.');
+      return;
+    }
+
+    const newItems = validFiles.map((f, idx) => ({
+      id: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      file: f,
+      name: f.name,
+      size: f.size,
+      previewUrl: URL.createObjectURL(f),
+      status: 'pending',
+      error: null,
+      publicUrl: null
+    }));
+
+    setBundleFiles(prev => [...prev, ...newItems]);
+    triggerToast(`Added ${newItems.length} photos to batch queue! 📸`);
+  };
+
+  const handleRemoveBundleItem = (id) => {
+    setBundleFiles(prev => {
+      const item = prev.find(x => x.id === id);
+      if (item?.previewUrl && item.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+      return prev.filter(x => x.id !== id);
+    });
+  };
+
+  const handleClearBundle = () => {
+    bundleFiles.forEach(f => {
+      if (f.previewUrl && f.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(f.previewUrl);
+      }
+    });
+    setBundleFiles([]);
+    setBundleProgress(0);
+    setBundleCurrentIndex(0);
+  };
+
+  const handleStartBundleUpload = async () => {
+    if (bundleFiles.length === 0 || isBundleUploading) return;
+
+    setIsBundleUploading(true);
+    let successCount = 0;
+    const total = bundleFiles.length;
+
+    for (let i = 0; i < total; i++) {
+      const item = bundleFiles[i];
+      if (item.status === 'done') {
+        successCount++;
+        continue;
+      }
+
+      setBundleCurrentIndex(i + 1);
+      setBundleFiles(prev => prev.map((x, idx) => idx === i ? { ...x, status: 'uploading' } : x));
+
+      try {
+        const uploadResult = await uploadToR2WithGuardrails(item.file, 'memories', (pct) => {
+          const overall = Math.round(((i + (pct / 100)) / total) * 100);
+          setBundleProgress(overall);
+        });
+
+        const publicUrl = uploadResult?.publicUrl;
+
+        // If auto-create memories is checked, add it as a live memory chapter to R2 database
+        if (bundleSettings.autoCreateMemories && publicUrl) {
+          const cleanedName = item.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+          const title = bundleSettings.titlePrefix 
+            ? `${bundleSettings.titlePrefix} - ${cleanedName}`
+            : cleanedName;
+
+          await saveMemoryR2({
+            title,
+            year: bundleSettings.year || 'Chapter 5',
+            date: bundleSettings.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            location: bundleSettings.location || 'Squad Sanctuary',
+            mediaUrl: publicUrl,
+            mediaType: item.file.type.startsWith('video/') ? 'video' : 'image',
+            category: bundleSettings.category || 'Adventures',
+            description: `Captured squad moment: ${item.name}`,
+          });
+        }
+
+        setBundleFiles(prev => prev.map((x, idx) => idx === i ? { ...x, status: 'done', publicUrl } : x));
+        successCount++;
+      } catch (err) {
+        console.error('Bundle item upload failed:', err);
+        setBundleFiles(prev => prev.map((x, idx) => idx === i ? { ...x, status: 'error', error: err.message } : x));
+      }
+
+      setBundleProgress(Math.round(((i + 1) / total) * 100));
+    }
+
+    setIsBundleUploading(false);
+    triggerToast(`Batch complete: ${successCount} of ${total} photos uploaded to R2! 🎉`);
   };
 
   // Direct Photo File Upload for Member
@@ -743,9 +875,14 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h2 className="admin-section-title">Memory Chapters & Timeline</h2>
                   <p className="admin-section-sub">Publish new chapters or edit milestone memories.</p>
                 </div>
-                <button onClick={openAddMemory} className="admin-primary-btn">
-                  <Plus size={16} /> New Chapter
-                </button>
+                <div className="admin-action-bar">
+                  <button onClick={() => setIsBundleModalOpen(true)} className="admin-secondary-btn bundle-upload-btn">
+                    <FolderPlus size={16} /> Batch / Folder Upload
+                  </button>
+                  <button onClick={openAddMemory} className="admin-primary-btn">
+                    <Plus size={16} /> New Chapter
+                  </button>
+                </div>
               </div>
 
               <div className="admin-cards-grid">
@@ -867,10 +1004,15 @@ export default function AdminPortal({ onExit, currentUser }) {
                 <h3>Upload Image or Video to Cloudflare R2</h3>
                 <p>Files are stored in <code>/photos/</code> or <code>/memories/</code> and delivered via <code>{R2_BASE}</code></p>
 
-                <label className="admin-file-upload-btn">
-                  Choose Media File
-                  <input type="file" onChange={handleFileUpload} accept="image/*,video/*" style={{ display: 'none' }} />
-                </label>
+                <div className="admin-upload-actions-row">
+                  <label className="admin-file-upload-btn">
+                    Choose Media File
+                    <input type="file" onChange={handleFileUpload} accept="image/*,video/*" style={{ display: 'none' }} />
+                  </label>
+                  <button onClick={() => setIsBundleModalOpen(true)} className="admin-secondary-btn bundle-upload-btn">
+                    <FolderPlus size={16} /> Batch / Folder Upload
+                  </button>
+                </div>
 
                 {isUploading && (
                   <div className="admin-upload-progress-bar">
@@ -1220,6 +1362,274 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Batch & Folder Upload Modal */}
+      {isBundleModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card admin-bundle-modal-card">
+            <div className="admin-modal-header-row">
+              <div className="admin-bundle-header-meta">
+                <div className="admin-bundle-badge">
+                  <FolderPlus size={14} />
+                  <span>BATCH & FOLDER VAULT UPLOADER</span>
+                </div>
+                <h2 className="admin-modal-title">Upload Folder / Bundle of Photos</h2>
+                <p className="admin-section-sub">
+                  Upload multiple photos or an entire computer folder directly to Cloudflare R2 and optionally publish them as Memories.
+                </p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (!isBundleUploading) {
+                    setIsBundleModalOpen(false);
+                    handleClearBundle();
+                  }
+                }} 
+                disabled={isBundleUploading}
+                className="admin-modal-close-btn"
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Hidden Input Pickers */}
+            <input 
+              ref={folderInputRef} 
+              type="file" 
+              multiple 
+              onChange={(e) => handleSelectFiles(e.target.files)} 
+              style={{ display: 'none' }} 
+            />
+            <input 
+              ref={multiFileInputRef} 
+              type="file" 
+              multiple 
+              accept="image/*,video/*" 
+              onChange={(e) => handleSelectFiles(e.target.files)} 
+              style={{ display: 'none' }} 
+            />
+
+            {/* Selection Dropzone */}
+            <div 
+              className="admin-bundle-dropzone"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                handleSelectFiles(e.dataTransfer.files);
+              }}
+            >
+              <div className="admin-bundle-dropzone-icon">
+                <FolderUp size={32} />
+              </div>
+              <h3>Choose Photos or Entire Folder</h3>
+              <p>Drag &amp; drop photos here, or click below to select multiple files or a whole folder from your device</p>
+              
+              <div className="admin-bundle-picker-buttons">
+                <button 
+                  type="button" 
+                  onClick={() => folderInputRef.current?.click()}
+                  disabled={isBundleUploading}
+                  className="admin-folder-picker-btn"
+                >
+                  <FolderPlus size={16} /> Select Entire Folder
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => multiFileInputRef.current?.click()}
+                  disabled={isBundleUploading}
+                  className="admin-multifile-picker-btn"
+                >
+                  <Camera size={16} /> Select Multiple Photos
+                </button>
+              </div>
+            </div>
+
+            {/* Memory Publish Configuration */}
+            <div className="admin-bundle-config-box">
+              <label className="admin-bundle-checkbox-label">
+                <input 
+                  type="checkbox" 
+                  checked={bundleSettings.autoCreateMemories} 
+                  onChange={(e) => setBundleSettings({ ...bundleSettings, autoCreateMemories: e.target.checked })}
+                  disabled={isBundleUploading}
+                />
+                <span className="admin-bundle-checkbox-custom" />
+                <span>
+                  <strong>Automatically create a Memory Chapter for each photo</strong>
+                  <small>Publishes photos directly to the public memories timeline in real time</small>
+                </span>
+              </label>
+
+              {bundleSettings.autoCreateMemories && (
+                <div className="admin-bundle-config-grid">
+                  <div className="admin-input-group">
+                    <label>Chapter Label</label>
+                    <input 
+                      type="text" 
+                      value={bundleSettings.year} 
+                      onChange={(e) => setBundleSettings({ ...bundleSettings, year: e.target.value })}
+                      placeholder="e.g. Chapter 5, College Trip"
+                      disabled={isBundleUploading}
+                    />
+                  </div>
+                  <div className="admin-input-group">
+                    <label>Title Prefix (Optional)</label>
+                    <input 
+                      type="text" 
+                      value={bundleSettings.titlePrefix} 
+                      onChange={(e) => setBundleSettings({ ...bundleSettings, titlePrefix: e.target.value })}
+                      placeholder="e.g. Squad Memory"
+                      disabled={isBundleUploading}
+                    />
+                  </div>
+                  <div className="admin-input-group">
+                    <label>Location</label>
+                    <input 
+                      type="text" 
+                      value={bundleSettings.location} 
+                      onChange={(e) => setBundleSettings({ ...bundleSettings, location: e.target.value })}
+                      placeholder="e.g. Squad Sanctuary"
+                      disabled={isBundleUploading}
+                    />
+                  </div>
+                  <div className="admin-input-group">
+                    <label>Category</label>
+                    <select 
+                      value={bundleSettings.category} 
+                      onChange={(e) => setBundleSettings({ ...bundleSettings, category: e.target.value })}
+                      disabled={isBundleUploading}
+                    >
+                      <option value="Adventures">Adventures</option>
+                      <option value="Milestones">Milestones</option>
+                      <option value="Reunions">Reunions</option>
+                      <option value="Daily Laughs">Daily Laughs</option>
+                      <option value="Moment">Moment</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Selected Files Queue */}
+            {bundleFiles.length > 0 && (
+              <div className="admin-bundle-queue-section">
+                <div className="admin-bundle-queue-header">
+                  <div className="admin-bundle-queue-count">
+                    <Layers size={16} />
+                    <span><strong>{bundleFiles.length}</strong> photos queued for upload</span>
+                  </div>
+                  {!isBundleUploading && (
+                    <button 
+                      type="button" 
+                      onClick={handleClearBundle} 
+                      className="admin-clear-bundle-btn"
+                    >
+                      Clear List
+                    </button>
+                  )}
+                </div>
+
+                <div className="admin-bundle-items-grid">
+                  {bundleFiles.map((item) => (
+                    <div key={item.id} className={`admin-bundle-chip ${item.status}`}>
+                      <img src={item.previewUrl} alt={item.name} className="admin-bundle-thumb" />
+                      <div className="admin-bundle-chip-info">
+                        <span className="admin-bundle-file-name" title={item.name}>{item.name}</span>
+                        <span className="admin-bundle-file-size">{(item.size / 1024).toFixed(0)} KB</span>
+                        {item.status === 'uploading' && (
+                          <span className="admin-bundle-status-badge uploading">
+                            <Loader2 size={11} className="spin-icon" /> Uploading...
+                          </span>
+                        )}
+                        {item.status === 'done' && (
+                          <span className="admin-bundle-status-badge done">
+                            <Check size={11} /> Uploaded to R2
+                          </span>
+                        )}
+                        {item.status === 'error' && (
+                          <span className="admin-bundle-status-badge error" title={item.error}>
+                            <AlertCircle size={11} /> Failed
+                          </span>
+                        )}
+                        {item.status === 'pending' && (
+                          <span className="admin-bundle-status-badge pending">
+                            Ready
+                          </span>
+                        )}
+                      </div>
+                      {!isBundleUploading && item.status !== 'done' && (
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveBundleItem(item.id)}
+                          className="admin-bundle-remove-btn"
+                          title="Remove from batch"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload Progress Bar */}
+            {(isBundleUploading || bundleProgress > 0) && (
+              <div className="admin-bundle-progress-wrap">
+                <div className="admin-bundle-progress-header">
+                  <span>
+                    {isBundleUploading ? (
+                      <>Uploading photo <strong>{bundleCurrentIndex}</strong> of <strong>{bundleFiles.length}</strong> to Cloudflare R2...</>
+                    ) : (
+                      <>Batch upload completed!</>
+                    )}
+                  </span>
+                  <span className="admin-bundle-progress-pct">{bundleProgress}%</span>
+                </div>
+                <div className="admin-upload-progress-bar">
+                  <div className="admin-progress-fill" style={{ width: `${bundleProgress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="admin-modal-actions">
+              <button 
+                type="button" 
+                onClick={() => {
+                  setIsBundleModalOpen(false);
+                  handleClearBundle();
+                }} 
+                disabled={isBundleUploading} 
+                className="admin-cancel-btn"
+              >
+                {bundleFiles.some(f => f.status === 'done') ? 'Done' : 'Cancel'}
+              </button>
+
+              <button 
+                type="button" 
+                onClick={handleStartBundleUpload} 
+                disabled={isBundleUploading || bundleFiles.length === 0 || bundleFiles.every(f => f.status === 'done')} 
+                className="admin-primary-btn"
+              >
+                {isBundleUploading ? (
+                  <>
+                    <Loader2 size={16} className="spin-icon" />
+                    <span>Uploading Batch ({bundleCurrentIndex}/{bundleFiles.length})...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    <span>Start Batch Upload ({bundleFiles.length} Photos)</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
