@@ -36,7 +36,7 @@ Adhukkapparam third year summer leave-la vandha andha one-month Bangalore intern
 
 Fourth year ippo namma journey-la odittu irukku. Indha year Symposium event-la campaign-ku join pannom; enga HOD namma group-a repeated-ah target panninaalum, adhellaam thaandi ellarum onna serndhu campaign pannom. Campaign-nu aarambichadhu, Yelagiri varaikkum poi, anga ellarum serndhu oru crazy ride-la poi, bayam, excitement, screams, laughter-nu semma memories create pannina oru unforgettable journey-a maariduchu. Ippo fourth year poittu irukku… aana namma story inga mudiyala. Innum neraya days, neraya trips, neraya celebrations, neraya sandai, neraya sirippu, neraya memories namakkaaga wait pannittu irukku.
 
-College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Gopika, Maithreyan-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru. Namma friendship-ku oru beginning irukku… aana ending kedaiyadhu. Because this is not just a friends gang, this is our little family — Natpe Thunai. ❤️🫂✨`;
+College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Maithreyan, Gopika-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru. Namma friendship-ku oru beginning irukku… aana ending kedaiyadhu. Because this is not just a friends gang, this is our little family — Natpe Thunai. ❤️🫂✨`;
 
 export default function SquadStory() {
   const [activeLang, setActiveLang] = useState('tanglish'); // 'tanglish' | 'english'
@@ -271,7 +271,7 @@ export default function SquadStory() {
                 </p>
 
                 <p className="prose-body">
-                  College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Gopika, Maithreyan-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru.
+                  College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Maithreyan, Gopika-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru.
                 </p>
 
                 {/* SQUAD FAMILY NAMES ROLL CALL */}
@@ -391,7 +391,7 @@ export default function SquadStory() {
                 </p>
 
                 <p className="prose-body">
-                  College days will pass, lecture halls will empty, and daily schedules will shift. But this brotherhood that sparked at Limra has not only thrived all the way to our final year, but will continue long after graduation day. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Gopika, and Maithreyan — these aren’t just names; they are the living milestones of our youth.
+                  College days will pass, lecture halls will empty, and daily schedules will shift. But this brotherhood that sparked at Limra has not only thrived all the way to our final year, but will continue long after graduation day. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar,, and Maithreyan, Gopika — these aren’t just names; they are the living milestones of our youth.
                 </p>
 
                 {/* SQUAD FAMILY NAMES ROLL CALL */}
