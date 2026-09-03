@@ -53,10 +53,8 @@ export default function App() {
       (window.location.hash === '#album' || window.location.hash === '#/album');
   });
 
-
-  // Data States — start with empty arrays, R2 will populate them live
-  const [members, setMembers]   = useState([]);
-
+  // Data States — R2 will populate them live
+  const [members, setMembers]   = useState(getStoredMembers());
   const [memories, setMemories] = useState([]);
   const [posts, setPosts]       = useState([]);
   const [events, setEvents]     = useState([]);
@@ -152,7 +150,6 @@ export default function App() {
   };
 
   // ── Live R2 data subscriptions — public website always shows latest admin data ──
-
   useEffect(() => {
     bootR2Database().catch(() => {});
     const unsubMembers   = subscribeToMembersR2(setMembers);
@@ -359,6 +356,18 @@ export default function App() {
       <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
 
       {/* ── MODALS ── */}
+      <CreatePostModal 
+        isOpen={isCreatePostOpen}
+        onClose={() => setIsCreatePostOpen(false)}
+        onSave={handleSavePost}
+        currentUser={currentUser}
+      />
+
+      <AddEventModal 
+        isOpen={isAddEventOpen}
+        onClose={() => setIsAddEventOpen(false)}
+        onSave={handleSaveEvent}
+      />
       <LightboxModal 
         isOpen={Boolean(lightboxMemory)}
         onClose={() => setLightboxMemory(null)}
