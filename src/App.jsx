@@ -5,17 +5,12 @@ import {
   SquadStory,
   FriendshipJourney, 
   SquadMembers, 
-  MemoryTimeline, 
   MemoryReel, 
-  SquadAlbum,
+  SquadAlbum, 
   AlbumMarqueeSection,
   FloatingChatWidget,
-  CommunitySection, 
-  GroupChat, 
   Footer, 
   FriendModal,
-  CreatePostModal, 
-  AddEventModal, 
   LightboxModal, 
   SignInModal,
   AdminPortal
@@ -29,10 +24,11 @@ import {
   savePostR2,
   saveEventR2,
   bootR2Database,
-} from './services/r2Database';
-import { reactToMemory, addCommentToMemory, likePost, toggleEventRsvp, getStoredMembers } from './services';
+import { getStoredMembers, reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
+
 import { onAuthChange, signInWithGoogle, logOut } from './firebase';
 import './App.css';
+
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
