@@ -386,10 +386,10 @@ export default function AdminPortal({ onExit, currentUser }) {
       if (user) {
         if (isAuthorizedAdmin(user)) {
           setIsAuthenticated(true);
-          triggerToast(`Welcome back, Admin! 🛡️`);
+          triggerToast(`Welcome back, ${user.displayName || 'Admin'}! 🛡️`);
         } else {
           setIsAuthenticated(false);
-          setAuthError(`Access Denied: ${user.email} is not on the authorized administrator list.`);
+          setAuthError('Access Denied: This Google account is not authorized to access the Admin Sanctuary Console.');
           await logOut();
         }
       }
@@ -399,7 +399,7 @@ export default function AdminPortal({ onExit, currentUser }) {
         // User closed popup, don't show error
         setAuthError('');
       } else if (err.code === 'auth/unauthorized-account' || err.message?.includes('Access Denied')) {
-        setAuthError(err.message || 'Access Denied: This Google account is not on the authorized administrator list.');
+        setAuthError('Access Denied: This Google account is not authorized to access the Admin Sanctuary Console.');
       } else if (err.code === 'auth/popup-blocked') {
         setAuthError('Pop-up was blocked by your browser. Redirecting to Google...');
       } else if (err.message && err.message.toLowerCase().includes('database is closing')) {
@@ -752,30 +752,13 @@ export default function AdminPortal({ onExit, currentUser }) {
               className="admin-google-sign-in-btn"
             >
               <GoogleIcon />
-              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google (farish.sharieef@gmail.com)'}</span>
-            </button>
-
-            <button 
-              type="button"
-              onClick={() => {
-                setIsAuthenticated(true);
-                triggerToast('Welcome back, Farish! 🛡️');
-              }}
-              className="admin-google-sign-in-btn"
-              style={{
-                marginTop: '10px',
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25))',
-                borderColor: 'rgba(99, 102, 241, 0.45)',
-                color: '#fff'
-              }}
-            >
-              <Shield size={18} />
-              <span>Enter Console as Farish (Direct Access)</span>
+              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
             </button>
           </div>
 
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '14px', textAlign: 'center' }}>
-            Authorized Administrator: <strong>farish.sharieef@gmail.com</strong>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '14px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+            <Shield size={13} />
+            <span>Restricted Sanctuary Administration Console</span>
           </p>
 
           <button onClick={onExit} className="admin-exit-btn">
@@ -814,12 +797,12 @@ export default function AdminPortal({ onExit, currentUser }) {
         <div className="admin-header-actions">
           <div className="admin-user-pill">
             <img 
-              src={(currentUser && currentUser.photoURL) || r2Photo('farish.jpg')} 
+              src={(currentUser && currentUser.photoURL) || brandLogo} 
               alt="" 
               className="admin-user-avatar" 
               referrerPolicy="no-referrer" 
             />
-            <span className="admin-user-name">{(currentUser && currentUser.displayName) || 'Farish Sharif'}</span>
+            <span className="admin-user-name">{(currentUser && currentUser.displayName) || 'Sanctuary Admin'}</span>
           </div>
           <button onClick={onExit} className="admin-nav-btn admin-exit-btn-top">
             <ArrowLeft size={16} /> Public Website

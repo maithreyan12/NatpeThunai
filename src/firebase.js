@@ -54,14 +54,12 @@ googleProvider.setCustomParameters({
 });
 
 export const AUTHORIZED_ADMIN_EMAILS = [
+  'maithreyan2006@gmail.com',
+  'jaffreenmarinvanan4@gmail.com',
   'farish.sharieef@gmail.com',
   'farishsharieef@gmail.com',
   'farish.sharif@gmail.com',
-  'farishsharif@gmail.com',
-  'fairsh.sharieef@gmail.com',
-  'fairsh.sharif@gmail.com',
-  'maithreyan2006@gmail.com',
-  'jaffreenmarinvanan4@gmail.com'
+  'farishsharif@gmail.com'
 ];
 
 export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
@@ -79,9 +77,10 @@ export const normalizeEmail = (email) => {
 };
 
 export const isAuthorizedAdmin = (user) => {
-  if (!user || !user.email) return false;
-  const userEmail = user.email.trim().toLowerCase();
-  const userNorm = normalizeEmail(user.email);
+  const email = typeof user === 'string' ? user : user?.email;
+  if (!email) return false;
+  const userEmail = email.trim().toLowerCase();
+  const userNorm = normalizeEmail(email);
   return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => {
     const adminLower = adminEmail.trim().toLowerCase();
     return adminLower === userEmail || normalizeEmail(adminEmail) === userNorm;
