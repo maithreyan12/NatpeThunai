@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, 
   Pause, 
@@ -10,13 +9,30 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
+import { subscribeToReelsR2, INITIAL_REELS } from '../../services/r2Database';
 import './MemoryReel.css';
 
-export default function MemoryReel({ memories = [] }) {
-  // Extract all memories that have valid media
-  const safeMemories = Array.isArray(memories) ? memories : [];
-  const reelItems = safeMemories.filter(m => m && typeof m.mediaUrl === 'string' && m.mediaUrl.trim().length > 0);
+export default function MemoryReel({ reels: propReels, memories = [] }) {
+  const [internalReels, setInternalReels] = useState(INITIAL_REELS);
+
+  useEffect(() => {
+    if (propReels && propReels.length > 0) {
+      setInternalReels(propReels);
+      return;
+    }
+    const unsub = subscribeToReelsR2((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setInternalReels(data);
+      }
+    });
+    return () => unsub();
+  }, [propReels]);
+
+  // Extract reel items strictly from the reels collection — 100% isolated from memories
+  const sourceReels = Array.isArray(propReels) && propReels.length > 0 ? propReels : internalReels;
+  const reelItems = sourceReels.filter(r => r && typeof r.mediaUrl === 'string' && r.mediaUrl.trim().length > 0);
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(true); // Automatically starts slideshow
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);

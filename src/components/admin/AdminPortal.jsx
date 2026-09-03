@@ -13,8 +13,10 @@ import {
   subscribeToEventsR2, saveEventR2, deleteEventR2,
   subscribeToJourneyR2, saveJourneyMilestoneR2,
   subscribeToSpiralR2, saveSpiralItemR2, deleteSpiralItemR2,
+  subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS,
   bootR2Database,
 } from '../../services/r2Database';
+
 
 import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
@@ -110,8 +112,10 @@ export default function AdminPortal({ onExit, currentUser }) {
   });
 
   // ── Reels (Cinematic Archive) States ──
+  const [reelItems, setReelItems] = useState(INITIAL_REELS);
   const [editingReel, setEditingReel] = useState(null);
   const [isReelModalOpen, setIsReelModalOpen] = useState(false);
+
   const [reelPhotoUploading, setReelPhotoUploading] = useState(false);
   const [reelForm, setReelForm] = useState({
     title: '',
@@ -258,24 +262,39 @@ export default function AdminPortal({ onExit, currentUser }) {
 
         const publicUrl = uploadResult?.publicUrl;
 
-        // If auto-create memories is checked, add it as a live memory chapter to R2 database
+        // If auto-create items is checked, add to the respective active section (reels or memories)
         if (bundleSettings.autoCreateMemories && publicUrl) {
           const cleanedName = item.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
           const title = bundleSettings.titlePrefix 
             ? `${bundleSettings.titlePrefix} - ${cleanedName}`
             : cleanedName;
 
-          await saveMemoryR2({
-            title,
-            year: bundleSettings.year || 'Chapter 5',
-            date: bundleSettings.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            location: bundleSettings.location || 'Squad Sanctuary',
-            mediaUrl: publicUrl,
-            mediaType: item.file.type.startsWith('video/') ? 'video' : 'image',
-            category: bundleSettings.category || 'Adventures',
-            description: `Captured squad moment: ${item.name}`,
-          });
+          if (activeTab === 'reels') {
+            await saveReelR2({
+              title,
+              category: bundleSettings.category || 'Adventures',
+              date: bundleSettings.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              location: bundleSettings.location || 'Squad Sanctuary',
+              mediaUrl: publicUrl,
+              mediaType: item.file.type.startsWith('video/') ? 'video' : 'image',
+              description: `Cinematic reel slide: ${item.name}`,
+              isReel: true,
+            });
+          } else {
+            await saveMemoryR2({
+              title,
+              year: bundleSettings.year || 'Chapter 5',
+              date: bundleSettings.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              location: bundleSettings.location || 'Squad Sanctuary',
+              mediaUrl: publicUrl,
+              mediaType: item.file.type.startsWith('video/') ? 'video' : 'image',
+              category: bundleSettings.category || 'Adventures',
+              description: `Captured squad moment: ${item.name}`,
+              isReel: false,
+            });
+          }
         }
+
 
         setBundleFiles(prev => prev.map((x, idx) => idx === i ? { ...x, status: 'done', publicUrl } : x));
         successCount++;
@@ -389,6 +408,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     // Subscribe to live data from R2 CDN
     const unsubMembers   = subscribeToMembersR2(setMembers);
     const unsubMemories  = subscribeToMemoriesR2(setMemories);
+    const unsubReels     = subscribeToReelsR2(setReelItems);
     const unsubPosts     = subscribeToPostsR2(setPosts);
     const unsubEvents    = subscribeToEventsR2(setEvents);
     const unsubJourney   = subscribeToJourneyR2(setJourneyMilestones);
@@ -397,11 +417,13 @@ export default function AdminPortal({ onExit, currentUser }) {
     return () => {
       unsubMembers();
       unsubMemories();
+      unsubReels();
       unsubPosts();
       unsubEvents();
       unsubJourney();
       unsubSpiral();
     };
+
   }, []);
 
 
@@ -595,12 +617,12 @@ export default function AdminPortal({ onExit, currentUser }) {
         : {
             id: `reel_${Date.now()}`,
             ...reelForm,
-            year: reelForm.category || 'Adventures',
+            category: reelForm.category || 'Adventures',
             isReel: true,
             timestamp: Date.now()
           };
-      // ⚡ Instant optimistic update
-      setMemories(prev => {
+      // ⚡ Instant optimistic update to REELS only (never touches memories!)
+      setReelItems(prev => {
         const idx = prev.findIndex(m => m.id === payload.id);
         if (idx >= 0) {
           const arr = [...prev];
@@ -609,7 +631,7 @@ export default function AdminPortal({ onExit, currentUser }) {
         }
         return [payload, ...prev];
       });
-      await saveMemoryR2(payload);
+      await saveReelR2(payload);
       triggerToast(editingReel ? `Updated Reel slide! 🎬` : `New Reel slide published to Cinematic Archive! 🎬`);
       setEditingReel(null);
     } catch (err) {
@@ -619,12 +641,13 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeleteReel = async (id, title) => {
     if (window.confirm(`Delete reel slide "${title || 'this slide'}" from Cinematic Archive?`)) {
-      // ⚡ Instant optimistic deletion
-      setMemories(prev => prev.filter(m => m.id !== id));
+      // ⚡ Instant optimistic deletion from REELS only (never touches memories!)
+      setReelItems(prev => prev.filter(m => m.id !== id));
       triggerToast(`Reel slide removed 🗑️`);
-      deleteMemoryR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
+      deleteReelR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
+
 
   // ── Friendship Journey Milestones CRUD ──
   const openEditMilestone = (milestone) => {
@@ -936,9 +959,9 @@ export default function AdminPortal({ onExit, currentUser }) {
     m.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Cinematic Memory Reel Items
-  const reelItems = memories.filter(m => m.mediaUrl || m.isReel);
+  // Cinematic Memory Reel Items (strictly isolated from memories)
   const filteredReels = reelItems.filter(r => {
+
     const q = searchQuery.toLowerCase();
     return (
       (r.title || '').toLowerCase().includes(q) ||
@@ -1079,8 +1102,9 @@ export default function AdminPortal({ onExit, currentUser }) {
               className={`admin-nav-tab ${activeTab === 'memories' ? 'active' : ''}`}
               onClick={() => setActiveTab('memories')}
             >
-              <BookOpen size={18} /> Memory Chapters ({memories.length})
+              <BookOpen size={18} /> Memory Chapters ({memories.filter(m => !m.isReel).length})
             </button>
+
             <button
               className={`admin-nav-tab ${activeTab === 'posts' ? 'active' : ''}`}
               onClick={() => setActiveTab('posts')}
@@ -1152,16 +1176,17 @@ export default function AdminPortal({ onExit, currentUser }) {
               </div>
 
 
-              <div className="admin-stat-card">
+              <div className="admin-stat-card" onClick={() => setActiveTab('memories')} style={{ cursor: 'pointer' }}>
                 <div className="admin-stat-icon-wrap from-pink">
                   <BookOpen size={24} />
                 </div>
                 <div>
-                  <h3 className="admin-stat-number">{memories.length}</h3>
+                  <h3 className="admin-stat-number">{memories.filter(m => !m.isReel).length}</h3>
                   <p className="admin-stat-label">Memory Chapters</p>
                   <span className="admin-stat-meta">Chronological Journey</span>
                 </div>
               </div>
+
 
 
               <div className="admin-stat-card">
@@ -1485,8 +1510,9 @@ export default function AdminPortal({ onExit, currentUser }) {
               </div>
 
               <div className="admin-cards-grid">
-                {memories.map((mem) => (
+                {memories.filter(m => !m.isReel).map((mem) => (
                   <div key={mem.id} className="admin-card-item">
+
                     {mem.mediaUrl && (
                       <img src={mem.mediaUrl} alt={mem.title} className="admin-card-img" />
                     )}

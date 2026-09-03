@@ -22,7 +22,9 @@ export const COLLECTIONS = {
   EVENTS:   'events',
   JOURNEY:  'journey',
   SPIRAL:   'spiral',
+  REELS:    'reels',
 };
+
 
 
 // ── Fast in-memory + localStorage cache ────────────────────────────
@@ -258,14 +260,17 @@ export function subscribeToMemoriesR2(callback) {
   const cacheKey = COLLECTIONS.MEMORIES;
 
   const cached = cache.get(cacheKey);
-  if (cached) callback(cached);
+  if (cached && Array.isArray(cached)) {
+    callback(cached.filter(m => !m.isReel));
+  }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data)) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const cleanMemories = data.filter(m => !m.isReel);
+        cache.set(cacheKey, cleanMemories);
+        callback(cleanMemories);
       }
     } catch (err) {
       console.warn('[R2 DB] Memories fetch failed:', err.message);
@@ -276,6 +281,7 @@ export function subscribeToMemoriesR2(callback) {
   const interval = setInterval(refresh, 20000);
   return () => clearInterval(interval);
 }
+
 
 /**
  * Subscribe to live posts from R2.
@@ -383,7 +389,9 @@ export async function saveMemoryR2(memoryData) {
       ? memoryData.people
       : (memoryData.people || '').split(',').map(s => s.trim()).filter(Boolean),
     category: memoryData.category || 'Moment',
+    isReel: false,
     reactions: memoryData.reactions || { '❤️': 1, '✨': 0, '🫂': 0, '😂': 0 },
+
     comments: memoryData.comments || [],
     createdAt: memoryData.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -584,8 +592,121 @@ export async function deleteSpiralItemR2(itemId) {
   await callAPI({ collection: COLLECTIONS.SPIRAL, action: 'delete', id: itemId });
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  CINEMATIC REELS (Dedicated Collection — 100% Isolated from Memories)
+// ═══════════════════════════════════════════════════════════════════
+
+export const INITIAL_REELS = [
+  {
+    id: "reel-01",
+    title: "The Genesis Dawn & First Spark",
+    category: "Milestone",
+    date: "August 14",
+    location: "Campus Common & Café",
+    mediaUrl: r2Photo('Gracee.jpg'),
+    mediaType: "image",
+    description: "The very first day our squad bonded over chai and shared goals at the canteen.",
+    isReel: true
+  },
+  {
+    id: "reel-02",
+    title: "Midnight Highway Drive",
+    category: "Adventures",
+    date: "April 22",
+    location: "Highway Beats & Zero Sleep",
+    mediaUrl: r2Photo('Heenuuu.jpg'),
+    mediaType: "image",
+    description: "High-volume Tamil bangers in Farish's car and turning ordinary nights into pure cinema.",
+    isReel: true
+  },
+  {
+    id: "reel-03",
+    title: "Unbreakable Friendship Sanctuary",
+    category: "Celebration",
+    date: "November 18",
+    location: "Beachside Sunset Gathering",
+    mediaUrl: r2Photo('Divyaa.jpg'),
+    mediaType: "image",
+    description: "Celebrating shared wins, laughter, and lifelong trust together.",
+    isReel: true
+  },
+  {
+    id: "reel-04",
+    title: "Squad Strong Forever",
+    category: "Sanctuary",
+    date: "Always & Forever",
+    location: "Natpe Thunai Sanctuary",
+    mediaUrl: r2Photo('Puppy.jpg'),
+    mediaType: "image",
+    description: "More than friends — family by choice. Natpe Thunai forever.",
+    isReel: true
+  }
+];
+
+export function subscribeToReelsR2(callback) {
+  const cacheKey = COLLECTIONS.REELS;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.length > 0) {
+    callback(cached);
+  } else {
+    callback(INITIAL_REELS);
+  }
+
+  const refresh = async () => {
+    try {
+      const data = await fetchFromCDN(cacheKey);
+      if (Array.isArray(data) && data.length > 0) {
+        cache.set(cacheKey, data);
+        callback(data);
+      }
+    } catch (err) {
+      console.warn('[R2 DB] Reels fetch warning:', err.message);
+    }
+  };
+
+  refresh();
+  const interval = setInterval(refresh, 15000);
+  return () => clearInterval(interval);
+}
+
+export async function saveReelR2(reelData) {
+  const id = reelData.id || `reel-${Date.now()}`;
+  const item = {
+    id,
+    title: reelData.title || 'Cinematic Squad Moment',
+    category: reelData.category || 'Adventures',
+    date: reelData.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    location: reelData.location || 'Squad Sanctuary',
+    description: reelData.description || '',
+    mediaUrl: reelData.mediaUrl,
+    mediaType: reelData.mediaType || 'image',
+    isReel: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  const current = cache.get(COLLECTIONS.REELS) || INITIAL_REELS;
+  const existingIdx = current.findIndex(r => r.id === item.id);
+  const updated = existingIdx >= 0
+    ? current.map(r => r.id === item.id ? item : r)
+    : [item, ...current];
+
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.REELS, updated);
+  await callAPI({ collection: COLLECTIONS.REELS, action: 'upsert', item });
+  return item;
+}
+
+export async function deleteReelR2(reelId) {
+  const current = cache.get(COLLECTIONS.REELS) || INITIAL_REELS;
+  const updated = current.filter(r => r.id !== reelId);
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.REELS, updated);
+  await callAPI({ collection: COLLECTIONS.REELS, action: 'delete', id: reelId });
+}
+
 // Force refresh cache for a specific collection (call after admin write)
 export function invalidateCache(collection) {
   delete mem[collection];
 }
+
 

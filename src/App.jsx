@@ -19,6 +19,7 @@ import {
 import {
   subscribeToMembersR2,
   subscribeToMemoriesR2,
+  subscribeToReelsR2,
   subscribeToPostsR2,
   subscribeToEventsR2,
   saveMemoryR2,
@@ -26,6 +27,7 @@ import {
   saveEventR2,
   bootR2Database,
 } from './services/r2Database';
+
 import { getStoredMembers, reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
 
 
@@ -57,6 +59,8 @@ export default function App() {
   const [memories, setMemories] = useState([]);
   const [posts, setPosts]       = useState([]);
   const [events, setEvents]     = useState([]);
+  const [reels, setReels]       = useState([]);
+
 
   // Filter States
   const [activeMemberFilter, setActiveMemberFilter] = useState('All');
@@ -153,15 +157,18 @@ export default function App() {
     bootR2Database().catch(() => {});
     const unsubMembers   = subscribeToMembersR2(setMembers);
     const unsubMemories  = subscribeToMemoriesR2(setMemories);
+    const unsubReels     = subscribeToReelsR2(setReels);
     const unsubPosts     = subscribeToPostsR2(setPosts);
     const unsubEvents    = subscribeToEventsR2(setEvents);
     return () => {
       unsubMembers();
       unsubMemories();
+      unsubReels();
       unsubPosts();
       unsubEvents();
     };
   }, []);
+
 
 
   // Scroll to section helper
@@ -326,10 +333,11 @@ export default function App() {
         <MemoriesSpiral currentUser={currentUser} />
 
 
-        {/* 7. Cinematic Memory Reel */}
+        {/* 7. Cinematic Memory Reel (Dedicated Collection — 100% Isolated from Memories) */}
         <MemoryReel 
-          memories={memories}
+          reels={reels}
         />
+
 
         {/* 7. Footer */}
         <Footer 
