@@ -306,7 +306,7 @@ export default function App() {
         <SquadStory />
 
         {/* 3. Friendship Journey Animation */}
-        <FriendshipJourney />
+        <FriendshipJourney currentUser={currentUser} />
 
         {/* 4. Dedicated Squad Sanctuary Showcase */}
         <SquadMembers 
@@ -323,7 +323,8 @@ export default function App() {
         />
 
         {/* 6. Infinite Spiral Memories Gallery */}
-        <MemoriesSpiral />
+        <MemoriesSpiral currentUser={currentUser} />
+
 
         {/* 7. Cinematic Memory Reel */}
         <MemoryReel 

@@ -3,6 +3,7 @@ import { Edit3 } from 'lucide-react';
 import InfiniteSpiral from '../ui/InfiniteSpiral';
 import { r2Photo } from '../../services/r2Assets';
 import { subscribeToSpiralR2, INITIAL_SPIRAL_ITEMS } from '../../services/r2Database';
+import { isAuthorizedAdmin, onAuthChange } from '../../firebase';
 import './MemoriesSpiral.css';
 
 // Fallback initial squad photos
@@ -18,11 +19,24 @@ const FALLBACK_SPIRAL_IMAGES = [
   { id: 'maithreyan', src: r2Photo('maithreyan.jpg'),  alt: 'Maithreyan' },
 ];
 
-export default function MemoriesSpiral() {
+export default function MemoriesSpiral({ currentUser }) {
+  const [isAdmin, setIsAdmin] = useState(() => isAuthorizedAdmin(currentUser));
   const [spiralItems, setSpiralItems] = useState(INITIAL_SPIRAL_ITEMS || FALLBACK_SPIRAL_IMAGES);
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 768
   );
+
+  // Sync auth state: only authorized admins can see the edit button
+  useEffect(() => {
+    if (currentUser !== undefined) {
+      setIsAdmin(isAuthorizedAdmin(currentUser));
+      return;
+    }
+    const unsub = onAuthChange(user => {
+      setIsAdmin(isAuthorizedAdmin(user));
+    });
+    return () => unsub();
+  }, [currentUser]);
 
   useEffect(() => {
     const unsub = subscribeToSpiralR2((data) => {
@@ -46,18 +60,21 @@ export default function MemoriesSpiral() {
       <div className="memories-spiral__header">
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
           <span className="memories-spiral__badge">✨ Memories Vault</span>
-          <a
-            href="#admin"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'spiral' } }));
-            }}
-            className="admin-section-edit-trigger"
-            title="Edit Spiral Photos in Admin Console"
-          >
-            <Edit3 size={13} />
-            <span>Edit Spiral</span>
-          </a>
+          {isAdmin && (
+            <a
+              href="#admin"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'spiral' } }));
+              }}
+              className="admin-section-edit-trigger"
+              title="Edit Spiral Photos in Admin Console"
+            >
+              <Edit3 size={13} />
+              <span>Edit Spiral</span>
+            </a>
+          )}
         </div>
+
         <h2 className="memories-spiral__title">Our Infinite Spiral</h2>
         <p className="memories-spiral__subtitle">
           Every face, every frame — spinning through the moments that made us who we are.

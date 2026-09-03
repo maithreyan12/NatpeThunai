@@ -2,12 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Play, Pause, ChevronLeft, ChevronRight, Sparkles, Edit3 } from 'lucide-react';
 import { r2Photo } from '../../services';
 import { subscribeToJourneyR2, INITIAL_JOURNEY_MILESTONES } from '../../services/r2Database';
+import { isAuthorizedAdmin, onAuthChange } from '../../firebase';
 import './FriendshipJourney.css';
 
-export default function FriendshipJourney() {
+export default function FriendshipJourney({ currentUser }) {
+  const [isAdmin, setIsAdmin] = useState(() => isAuthorizedAdmin(currentUser));
   const [milestones, setMilestones] = useState(INITIAL_JOURNEY_MILESTONES);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // Sync auth state: only authorized admins can see the edit pencil
+  useEffect(() => {
+    if (currentUser !== undefined) {
+      setIsAdmin(isAuthorizedAdmin(currentUser));
+      return;
+    }
+    const unsub = onAuthChange(user => {
+      setIsAdmin(isAuthorizedAdmin(user));
+    });
+    return () => unsub();
+  }, [currentUser]);
 
   // Live sync with Cloudflare R2
   useEffect(() => {
@@ -47,18 +61,21 @@ export default function FriendshipJourney() {
             <Sparkles size={14} />
             <span>THE SQUAD EVOLUTION</span>
           </div>
-          <a
-            href="#admin"
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
-            }}
-            className="admin-section-edit-trigger"
-            title="Edit Journey Milestones in Admin Console"
-          >
-            <Edit3 size={13} />
-            <span>Edit Eras</span>
-          </a>
+          {isAdmin && (
+            <a
+              href="#admin"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
+              }}
+              className="admin-section-edit-trigger"
+              title="Edit Journey Milestones in Admin Console"
+            >
+              <Edit3 size={13} />
+              <span>Edit Eras</span>
+            </a>
+          )}
         </div>
+
         <h2 className="section-title">
           Our Friendship Journey
         </h2>
@@ -101,16 +118,19 @@ export default function FriendshipJourney() {
                 alt={currentMilestone.title}
                 className="journey-milestone-img"
               />
-              <a
-                href="#admin"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
-                }}
-                className="admin-card-edit-floating-pencil"
-                title={`Edit ${currentMilestone.stepLabel} in Admin Console`}
-              >
-                <Edit3 size={14} />
-              </a>
+              {isAdmin && (
+                <a
+                  href="#admin"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
+                  }}
+                  className="admin-card-edit-floating-pencil"
+                  title={`Edit ${currentMilestone.stepLabel} in Admin Console`}
+                >
+                  <Edit3 size={14} />
+                </a>
+              )}
+
               <div className="journey-floating-year-badge">
                 <span>{currentMilestone.stepLabel}</span>
               </div>
