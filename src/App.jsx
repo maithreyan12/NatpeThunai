@@ -24,7 +24,9 @@ import {
   savePostR2,
   saveEventR2,
   bootR2Database,
+} from './services/r2Database';
 import { getStoredMembers, reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
+
 
 import { onAuthChange, signInWithGoogle, logOut } from './firebase';
 import './App.css';
@@ -319,18 +321,7 @@ export default function App() {
           memories={memories}
         />
 
-        {/* 6. Chronological Memory Timeline with 3D Spiral & Filters */}
-        <MemoryTimeline 
-          memories={memories}
-          members={members}
-          activeMemberFilter={activeMemberFilter}
-          onSelectMemberFilter={setActiveMemberFilter}
-          onReact={handleReactMemory}
-          onAddComment={handleAddComment}
-          onOpenLightbox={(m) => setLightboxMemory(m)}
-          onUploadPhotos={handleUploadPhotos}
-          currentUser={currentUser}
-        />
+
 
         {/* 7. Cinematic Memory Reel */}
         <MemoryReel 
