@@ -211,13 +211,15 @@ export default function AdminPortal({ onExit, currentUser }) {
       }
     } catch (err) {
       console.warn('Google Sign In:', err);
-      if (err.code === 'auth/popup-closed-by-user') {
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
         // User closed popup, don't show error
         setAuthError('');
+      } else if (err.code === 'auth/unauthorized-account' || err.message?.includes('Access Denied')) {
+        setAuthError('Access Denied: This Google account is not on the authorized administrator list.');
       } else if (err.message && err.message.toLowerCase().includes('database is closing')) {
         setAuthError('Browser session refreshed. Please click "Continue with Google" once more.');
       } else {
-        setAuthError('Sign in could not be completed. Please try again.');
+        setAuthError(err.message || 'Sign in could not be completed. Please try again.');
       }
     } finally {
       setIsSigningIn(false);

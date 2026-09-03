@@ -56,7 +56,11 @@ googleProvider.setCustomParameters({
 
 export const AUTHORIZED_ADMIN_EMAILS = [
   'maithreyan2006@gmail.com',
-  'jaffreenmarinvanan4@gmail.com'
+  'jaffreenmarinvanan4@gmail.com',
+  'farish.sharieef@gmail.com',
+  'farish.sharif@gmail.com',
+  'farishsharif@gmail.com',
+  'fairsh.sharif@gmail.com'
 ];
 
 export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
