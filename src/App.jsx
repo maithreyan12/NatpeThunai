@@ -7,13 +7,16 @@ import {
   SquadMembers, 
   MemoryTimeline, 
   MemoryReel, 
+  SquadAlbum,
+  AlbumMarqueeSection,
+  FloatingChatWidget,
   CommunitySection, 
   GroupChat, 
   Footer, 
   FriendModal,
   CreatePostModal, 
   AddEventModal, 
-  LightboxModal,
+  LightboxModal, 
   SignInModal,
   AdminPortal
 } from './components';
@@ -44,8 +47,19 @@ export default function App() {
       (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin');
   });
 
+<<<<<<< HEAD
   // Data States — start with empty arrays, R2 will populate them live
   const [members, setMembers]   = useState([]);
+=======
+  // Album Overlay State (in-page full-screen overlay without URL redirect)
+  const [isAlbumOpen, setIsAlbumOpen] = useState(() => {
+    return typeof window !== 'undefined' && 
+      (window.location.hash === '#album' || window.location.hash === '#/album');
+  });
+
+  // Data States
+  const [members, setMembers] = useState(getStoredMembers());
+>>>>>>> 100d6b0 (changes)
   const [memories, setMemories] = useState([]);
   const [posts, setPosts]       = useState([]);
   const [events, setEvents]     = useState([]);
@@ -105,6 +119,10 @@ export default function App() {
     const handleUrlChange = () => {
       const isAdmin = window.location.pathname.startsWith('/admin') || window.location.hash === '#admin';
       setIsAdminRoute(isAdmin);
+
+      if (window.location.hash === '#album' || window.location.hash === '#/album') {
+        setIsAlbumOpen(true);
+      }
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -125,7 +143,22 @@ export default function App() {
     setIsAdminRoute(false);
   };
 
+<<<<<<< HEAD
   // ── Live R2 data subscriptions — public website always shows latest admin data ──
+=======
+  const handleOpenAlbum = () => {
+    setIsAlbumOpen(true);
+  };
+
+  const handleCloseAlbum = () => {
+    setIsAlbumOpen(false);
+    if (window.location.hash === '#album' || window.location.hash === '#/album') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  };
+
+  // Listen to real-time Memories
+>>>>>>> 100d6b0 (changes)
   useEffect(() => {
     bootR2Database().catch(() => {});
     const unsubMembers   = subscribeToMembersR2(setMembers);
@@ -139,6 +172,7 @@ export default function App() {
       unsubEvents();
     };
   }, []);
+
 
   // Scroll to section helper
   const scrollToSection = (sectionId) => {
@@ -157,7 +191,7 @@ export default function App() {
 
   // Scroll spy observer
   useEffect(() => {
-    const sections = ['hero', 'story', 'journey', 'members', 'timeline', 'reel', 'community', 'chat'];
+    const sections = ['hero', 'story', 'journey', 'members', 'timeline', 'reel'];
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200;
       for (const sectionId of sections) {
@@ -291,7 +325,14 @@ export default function App() {
           onFilterByMember={handleFilterMemories}
         />
 
-        {/* 5. Chronological Memory Timeline with Scrollable Filter */}
+        {/* 5. Interactive Album Marquee Teaser Strip */}
+        <AlbumMarqueeSection 
+          onOpenAlbum={handleOpenAlbum}
+          members={members}
+          memories={memories}
+        />
+
+        {/* 6. Chronological Memory Timeline with Scrollable Filter */}
         <MemoryTimeline 
           memories={memories}
           members={members}
@@ -304,29 +345,14 @@ export default function App() {
           currentUser={currentUser}
         />
 
+
+
         {/* 6. Cinematic Memory Reel */}
         <MemoryReel 
           memories={memories}
         />
 
-        {/* 7. Group Community Hub (Posts & Events) */}
-        <CommunitySection 
-          posts={posts}
-          onLikePost={handleLikePost}
-          onOpenCreatePost={() => setIsCreatePostOpen(true)}
-          events={events}
-          onToggleRsvp={handleToggleRsvp}
-          onOpenAddEvent={() => setIsAddEventOpen(true)}
-          onSelectMember={(member) => setSelectedFriend(member)}
-          members={members}
-          currentUser={currentUser}
-          onOpenSignIn={() => setIsSignInOpen(true)}
-        />
-
-        {/* 8. Live Group Chat & AI Story Enclave */}
-        <GroupChat onOpenSignIn={() => setIsSignInOpen(true)} />
-
-        {/* 9. Footer */}
+        {/* 7. Footer */}
         <Footer 
           onScrollTop={() => scrollToSection('hero')} 
           onOpenSignIn={() => setIsSignInOpen(true)}
@@ -335,7 +361,11 @@ export default function App() {
         />
       </main>
 
+      {/* ── CORNER FLOATING MESSAGE & AI CHAT WIDGET ── */}
+      <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
+
       {/* ── MODALS ── */}
+<<<<<<< HEAD
       <CreatePostModal 
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
@@ -347,6 +377,16 @@ export default function App() {
         isOpen={isAddEventOpen}
         onClose={() => setIsAddEventOpen(false)}
         onSave={handleSaveEvent}
+=======
+      <AddMemberModal 
+        isOpen={isAddMemberOpen}
+        onClose={() => {
+          setIsAddMemberOpen(false);
+          setEditingMember(null);
+        }}
+        onSave={handleSaveMember}
+        existingMember={editingMember}
+>>>>>>> 100d6b0 (changes)
       />
 
       <LightboxModal 
@@ -369,6 +409,15 @@ export default function App() {
         onSignOut={logOut}
       />
 
+      {/* Full-Screen Interactive Squad Album Overlay */}
+      {isAlbumOpen && (
+        <SquadAlbum 
+          onBackHome={handleCloseAlbum} 
+          members={members} 
+          memories={memories} 
+        />
+      )}
+
       {/* Non-intrusive Toast Notification */}
       {toastMessage && (
         <div className="toast-notification" role="status">
@@ -376,5 +425,7 @@ export default function App() {
         </div>
       )}
     </div>
+
+
   );
 }

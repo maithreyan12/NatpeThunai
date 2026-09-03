@@ -5,7 +5,7 @@ import './FriendshipJourney.css';
 
 const JOURNEY_MILESTONES = [
   {
-    stepLabel: "Chapter 1",
+    stepLabel: "First Year",
     tagline: "Where strangers met over canteen chai",
     title: "The Canteen Dawn & First Spark",
     description: "Spontaneous canteen tea conversations, awkward classroom ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
@@ -25,7 +25,7 @@ const JOURNEY_MILESTONES = [
     remainingCount: 8
   },
   {
-    stepLabel: "Chapter 2",
+    stepLabel: "Second Year",
     tagline: "Full tank, loud music, zero sleep",
     title: "Midnight Drives & Exam Chaos",
     description: "Countless midnight highway drives, high-volume Tamil bangers in Farish's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
@@ -45,7 +45,7 @@ const JOURNEY_MILESTONES = [
     remainingCount: 8
   },
   {
-    stepLabel: "Chapter 3",
+    stepLabel: "Third Year",
     tagline: "When life got real, friendship was our sanctuary",
     title: "The Unbreakable Bond & Milestones",
     description: "Through individual triumphs, tough semesters, career milestones, and quiet moments when someone just needed a listening ear — friends stood side by side.",
@@ -65,7 +65,7 @@ const JOURNEY_MILESTONES = [
     remainingCount: 8
   },
   {
-    stepLabel: "Chapter 4",
+    stepLabel: "Final Year",
     tagline: "Still here. Still squad strong.",
     title: "Eternal Natpe Thunai Sanctuary",
     description: "Our bond continues to deepen every single day. Distance or busy careers mean nothing; whenever we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",

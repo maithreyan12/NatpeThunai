@@ -81,7 +81,7 @@ export default function Hero({
                   e.target.src = '/photos/hanuu.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 01</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Haniya</span>
@@ -102,7 +102,7 @@ export default function Hero({
                   e.target.src = '/photos/kafil.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 02</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Kafil..KK</span>
@@ -124,7 +124,7 @@ export default function Hero({
                   e.target.src = '/photos/jaffreen.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 03</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Jaffreen</span>
@@ -145,7 +145,7 @@ export default function Hero({
                   e.target.src = '/photos/Gracee.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 04</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Grace</span>
@@ -166,7 +166,7 @@ export default function Hero({
                   e.target.src = '/photos/samuel.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 05</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Samuel</span>
@@ -188,10 +188,10 @@ export default function Hero({
                   e.target.src = '/photos/farish.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 06</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
-              <span className="caption-heading">Farish Sharif</span>
+              <span className="caption-heading">Farish </span>
               <span className="caption-sub">The Mastermind 🧠</span>
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function Hero({
                   e.target.src = '/photos/Divyaa.jpg';
                 }}
               />
-              <span className="polaroid-year-tag">Core 07</span>
+              <span className="polaroid-year-tag">Core </span>
             </div>
             <div className="polaroid-caption">
               <span className="caption-heading">Divyaa</span>

@@ -9,7 +9,8 @@ import {
   LogOut,
   Heart,
   Menu,
-  X
+  X,
+  Images
 } from 'lucide-react';
 import { signInWithGoogle, logOut } from '../../firebase';
 import { r2Photo } from '../../services';
@@ -81,18 +82,18 @@ export default function Navbar({
     }
   };
 
-  // Determine active states for the 5 core tabs
+  // Determine active states for the core tabs
   const isSquadActive = activeSection === 'members' || activeSection === 'journey';
   const isMemoriesActive = activeSection === 'timeline' || activeSection === 'reel';
-  const isChatActive = activeSection === 'chat' || activeSection === 'community';
 
   const navLinks = [
     { id: 'hero', label: 'Home', icon: Sparkles, isActive: activeSection === 'hero' },
     { id: 'story', label: 'Story', icon: Heart, isActive: activeSection === 'story' },
     { id: 'members', label: 'Members', icon: Users, isActive: isSquadActive },
-    { id: 'timeline', label: 'Album', icon: Film, isActive: isMemoriesActive },
-    { id: 'chat', label: 'Dashboard', icon: MessageCircle, isActive: isChatActive },
+    { id: 'timeline', label: 'Memories', icon: Film, isActive: isMemoriesActive },
   ];
+
+
 
   return (
     <>
