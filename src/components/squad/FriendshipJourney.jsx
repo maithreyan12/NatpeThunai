@@ -1,121 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, Sparkles, Edit3 } from 'lucide-react';
 import { r2Photo } from '../../services';
+import { subscribeToJourneyR2, INITIAL_JOURNEY_MILESTONES } from '../../services/r2Database';
 import './FriendshipJourney.css';
 
-const JOURNEY_MILESTONES = [
-  {
-    stepLabel: "First Year",
-    tagline: "Where strangers met over canteen chai",
-    title: "The Canteen Dawn & First Spark",
-    description: "Spontaneous canteen tea conversations, awkward classroom ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
-    quote: "Sometimes the strangers you meet in the hallway become the family you cannot imagine life without.",
-    photo: r2Photo('Gracee.jpg'),
-    badge: "Year 1 • Genesis",
-    colorKey: "lavender",
-    gangCount: "Squad Circle",
-    attendees: [
-      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
-      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') },
-      { name: "Kafil", role: "The Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
-      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
-      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
-      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') }
-    ],
-    remainingCount: 8
-  },
-  {
-    stepLabel: "Second Year",
-    tagline: "Full tank, loud music, zero sleep",
-    title: "Midnight Drives & Exam Chaos",
-    description: "Countless midnight highway drives, high-volume Tamil bangers in Farish's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
-    quote: "We didn't realize we were making lifelong history; we just knew we were laughing together.",
-    photo: r2Photo('Heenuuu.jpg'),
-    badge: "Year 2 • Chaos & Memories",
-    colorKey: "blue",
-    gangCount: "Squad Circle",
-    attendees: [
-      { name: "Heenuuu", role: "The Spark & Heart 💖", photo: r2Photo('Heenuuu.jpg') },
-      { name: "Samuel", role: "The Joyful Soul 🌟", photo: r2Photo('samuel.jpg') },
-      { name: "Afnaaan", role: "The Energy Dynamo ⚡", photo: r2Photo('affu.jpg') },
-      { name: "Meshak", role: "Silent Strength 🛡️", photo: r2Photo('meshak.jpg') },
-      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') },
-      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') }
-    ],
-    remainingCount: 8
-  },
-  {
-    stepLabel: "Third Year",
-    tagline: "When life got real, friendship was our sanctuary",
-    title: "The Unbreakable Bond & Milestones",
-    description: "Through individual triumphs, tough semesters, career milestones, and quiet moments when someone just needed a listening ear — friends stood side by side.",
-    quote: "True friends don't just celebrate your sunny days; they stand with you through every unexpected storm.",
-    photo: r2Photo('Divyaa.jpg'),
-    badge: "Year 3 • Lifelong Trust",
-    colorKey: "pink",
-    gangCount: "Squad Circle",
-    attendees: [
-      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
-      { name: "Harshitha", role: "Radiant Sunshine 🌻", photo: r2Photo('harshuuu.jpg') },
-      { name: "Maithreyan", role: "Tech & Vibe Pilot 🚀", initial: "MA" },
-      { name: "Gopika", role: "Graceful Heart 🌸", initial: "GO" },
-      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
-      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
-    ],
-    remainingCount: 8
-  },
-  {
-    stepLabel: "Final Year",
-    tagline: "Still here. Still squad strong.",
-    title: "Eternal Natpe Thunai Sanctuary",
-    description: "Our bond continues to deepen every single day. Distance or busy careers mean nothing; whenever we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",
-    quote: "Namma friendship perfect illa, aana romba real. Squad strong for infinity. ❤️🫂♾️",
-    photo: r2Photo('Puppy.jpg'),
-    badge: "Year 4 & Forever",
-    colorKey: "peach",
-    gangCount: "Squad Family",
-    attendees: [
-      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
-      { name: "Heenuuu", role: "The Heart 💖", photo: r2Photo('Heenuuu.jpg') },
-      { name: "Kafil", role: "Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
-      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
-      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
-      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
-    ],
-    remainingCount: 8
-  }
-];
-
 export default function FriendshipJourney() {
+  const [milestones, setMilestones] = useState(INITIAL_JOURNEY_MILESTONES);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // Live sync with Cloudflare R2
+  useEffect(() => {
+    const unsub = subscribeToJourneyR2((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setMilestones(data);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     if (!isPlaying) return;
     const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % JOURNEY_MILESTONES.length);
+      setCurrentIndex(prev => (prev + 1) % (milestones.length || 1));
     }, 5500);
     return () => clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, milestones.length]);
 
-  const currentMilestone = JOURNEY_MILESTONES[currentIndex];
+  const currentMilestone = milestones[currentIndex] || milestones[0] || INITIAL_JOURNEY_MILESTONES[0];
 
   const handlePrev = () => {
     setIsPlaying(false);
-    setCurrentIndex(prev => (prev - 1 + JOURNEY_MILESTONES.length) % JOURNEY_MILESTONES.length);
+    setCurrentIndex(prev => (prev - 1 + milestones.length) % milestones.length);
   };
 
   const handleNext = () => {
     setIsPlaying(false);
-    setCurrentIndex(prev => (prev + 1) % JOURNEY_MILESTONES.length);
+    setCurrentIndex(prev => (prev + 1) % milestones.length);
   };
 
   return (
     <section id="journey" className="journey-section">
       <div className="section-header">
-        <div className="badge-pill">
-          <Sparkles size={14} />
-          <span>THE SQUAD EVOLUTION</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+          <div className="badge-pill">
+            <Sparkles size={14} />
+            <span>THE SQUAD EVOLUTION</span>
+          </div>
+          <a
+            href="#admin"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
+            }}
+            className="admin-section-edit-trigger"
+            title="Edit Journey Milestones in Admin Console"
+          >
+            <Edit3 size={13} />
+            <span>Edit Eras</span>
+          </a>
         </div>
         <h2 className="section-title">
           Our Friendship Journey
@@ -128,12 +70,12 @@ export default function FriendshipJourney() {
       <div className="journey-stage-card">
         {/* Top Stepper Scrubber */}
         <div className="journey-stepper-bar">
-          {JOURNEY_MILESTONES.map((m, idx) => {
+          {milestones.map((m, idx) => {
             const isActive = idx === currentIndex;
             const isPassed = idx < currentIndex;
             return (
               <button
-                key={m.stepLabel}
+                key={m.stepLabel || idx}
                 className={`stepper-step ${isActive ? 'active' : ''} ${isPassed ? 'passed' : ''}`}
                 onClick={() => { setCurrentIndex(idx); setIsPlaying(false); }}
               >
@@ -153,12 +95,22 @@ export default function FriendshipJourney() {
         <div className="journey-display-viewport">
           {/* Left Column: Photo Presentation */}
           <div className="journey-photo-col">
-            <div className="journey-photo-frame">
+            <div className="journey-photo-frame" style={{ position: 'relative' }}>
               <img 
                 src={currentMilestone.photo} 
                 alt={currentMilestone.title}
                 className="journey-milestone-img"
               />
+              <a
+                href="#admin"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
+                }}
+                className="admin-card-edit-floating-pencil"
+                title={`Edit ${currentMilestone.stepLabel} in Admin Console`}
+              >
+                <Edit3 size={14} />
+              </a>
               <div className="journey-floating-year-badge">
                 <span>{currentMilestone.stepLabel}</span>
               </div>
@@ -167,6 +119,7 @@ export default function FriendshipJourney() {
               </div>
             </div>
           </div>
+
 
           {/* Right Column: Emotional Narrative */}
           <div className="journey-narrative-col" key={`narrative-${currentMilestone.stepLabel}`}>

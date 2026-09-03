@@ -15,12 +15,15 @@ const CDN = (import.meta.env.VITE_R2_PUBLIC_DOMAIN || 'https://pub-5eb58baa7fba4
 const API = '/api/r2/data';
 
 // ── Collection names ────────────────────────────────────────────────
-const COLLECTIONS = {
+export const COLLECTIONS = {
   MEMBERS:  'members',
   MEMORIES: 'memories',
   POSTS:    'posts',
   EVENTS:   'events',
+  JOURNEY:  'journey',
+  SPIRAL:   'spiral',
 };
+
 
 // ── Fast in-memory + localStorage cache ────────────────────────────
 const mem = {};
@@ -75,6 +78,103 @@ async function seedCollection(collection, initialData) {
   }
 }
 
+export const INITIAL_JOURNEY_MILESTONES = [
+  {
+    id: "journey-1",
+    stepLabel: "First Year",
+    tagline: "Where strangers met over canteen chai",
+    title: "The Canteen Dawn & First Spark",
+    description: "Spontaneous canteen tea conversations, awkward classroom ice-breakers, and the very first late-night laughs that unexpectedly formed the foundation of our circle.",
+    quote: "Sometimes the strangers you meet in the hallway become the family you cannot imagine life without.",
+    photo: r2Photo('Gracee.jpg'),
+    badge: "Year 1 • Genesis",
+    colorKey: "lavender",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
+      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') },
+      { name: "Kafil", role: "The Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
+      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
+      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') }
+    ],
+    remainingCount: 8
+  },
+  {
+    id: "journey-2",
+    stepLabel: "Second Year",
+    tagline: "Full tank, loud music, zero sleep",
+    title: "Midnight Drives & Exam Chaos",
+    description: "Countless midnight highway drives, high-volume Tamil bangers in Farish's car, exam panic group study sessions, and turning everyday college routines into pure adventure.",
+    quote: "We didn't realize we were making lifelong history; we just knew we were laughing together.",
+    photo: r2Photo('Heenuuu.jpg'),
+    badge: "Year 2 • Chaos & Memories",
+    colorKey: "blue",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Heenuuu", role: "The Spark & Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Samuel", role: "The Joyful Soul 🌟", photo: r2Photo('samuel.jpg') },
+      { name: "Afnaaan", role: "The Energy Dynamo ⚡", photo: r2Photo('affu.jpg') },
+      { name: "Meshak", role: "Silent Strength 🛡️", photo: r2Photo('meshak.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') },
+      { name: "Farish", role: "The Mastermind 🧠", photo: r2Photo('farish.jpg') }
+    ],
+    remainingCount: 8
+  },
+  {
+    id: "journey-3",
+    stepLabel: "Third Year",
+    tagline: "When life got real, friendship was our sanctuary",
+    title: "The Unbreakable Bond & Milestones",
+    description: "Through individual triumphs, tough semesters, career milestones, and quiet moments when someone just needed a listening ear — friends stood side by side.",
+    quote: "True friends don't just celebrate your sunny days; they stand with you through every unexpected storm.",
+    photo: r2Photo('Divyaa.jpg'),
+    badge: "Year 3 • Lifelong Trust",
+    colorKey: "pink",
+    gangCount: "Squad Circle",
+    attendees: [
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
+      { name: "Harshitha", role: "Radiant Sunshine 🌻", photo: r2Photo('harshuuu.jpg') },
+      { name: "Maithreyan", role: "Tech & Vibe Pilot 🚀", initial: "MA" },
+      { name: "Gopika", role: "Graceful Heart 🌸", initial: "GO" },
+      { name: "Jaffreen", role: "The Sweet Heart 💖", photo: r2Photo('jaffreen.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
+    ],
+    remainingCount: 8
+  },
+  {
+    id: "journey-4",
+    stepLabel: "Final Year",
+    tagline: "Still here. Still squad strong.",
+    title: "Eternal Natpe Thunai Sanctuary",
+    description: "Our bond continues to deepen every single day. Distance or busy careers mean nothing; whenever we reconnect, it's as if zero seconds have passed. Natpe Thunai forever.",
+    quote: "Namma friendship perfect illa, aana romba real. Squad strong for infinity. ❤️🫂♾️",
+    photo: r2Photo('Puppy.jpg'),
+    badge: "Year 4 & Forever",
+    colorKey: "peach",
+    gangCount: "Squad Family",
+    attendees: [
+      { name: "Grace", role: "The Spark ✨", photo: r2Photo('Gracee.jpg') },
+      { name: "Heenuuu", role: "The Heart 💖", photo: r2Photo('Heenuuu.jpg') },
+      { name: "Kafil", role: "Creative Soul 🎨", photo: r2Photo('kafil.jpg') },
+      { name: "Divyaaa", role: "The Sunshine ☀️", photo: r2Photo('Divyaa.jpg') },
+      { name: "Haniya", role: "The Chill Sloth 🦥", photo: r2Photo('hanuu.jpg') },
+      { name: "Puppy", role: "The Chill Vibe 🎯", photo: r2Photo('Puppy.jpg') }
+    ],
+    remainingCount: 8
+  }
+];
+
+export const INITIAL_SPIRAL_ITEMS = [
+  { id: 'spiral-1', src: r2Photo('friend1.jpg'), alt: 'Squad Memory 1', title: 'Mountain Lake Vibes' },
+  { id: 'spiral-2', src: r2Photo('friend2.jpg'), alt: 'Squad Memory 2', title: 'Forest Trail Hangout' },
+  { id: 'spiral-3', src: r2Photo('friend3.jpg'), alt: 'Squad Memory 3', title: 'Summit Sunset View' },
+  { id: 'spiral-4', src: r2Photo('friend4.jpg'), alt: 'Squad Memory 4', title: 'Beachside Laughs' },
+  { id: 'spiral-5', src: r2Photo('farish.jpg'),  alt: 'Farish Sharif', title: 'Farish in White Hoodie' },
+  { id: 'spiral-6', src: r2Photo('kafil.jpg'),   alt: 'Kafil K',       title: 'Kafil by the Water' },
+  { id: 'spiral-7', src: r2Photo('hanuu.jpg'),   alt: 'Haniya Hanu',   title: 'Hanu Chill Smiles' },
+];
+
 // ═══════════════════════════════════════════════════════════════════
 //  BOOT: Seed all collections on first load if they don't exist
 // ═══════════════════════════════════════════════════════════════════
@@ -94,8 +194,11 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
     seedCollection(COLLECTIONS.MEMORIES, initialMemories),
     seedCollection(COLLECTIONS.POSTS, initialPosts),
     seedCollection(COLLECTIONS.EVENTS, initialEvents),
+    seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES),
+    seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS),
   ]);
 }
+
 
 // ═══════════════════════════════════════════════════════════════════
 //  SUBSCRIBE HELPERS — React state sync
@@ -256,8 +359,11 @@ export async function saveMemberR2(memberData) {
 }
 
 export async function deleteMemberR2(memberId) {
+  // ⚡ Instant optimistic cache update
+  const current = cache.get(COLLECTIONS.MEMBERS) || [];
+  cache.set(COLLECTIONS.MEMBERS, current.filter(m => m.id !== memberId));
   const result = await callAPI({ collection: COLLECTIONS.MEMBERS, action: 'delete', id: memberId });
-  if (result.data) {
+  if (result?.data) {
     cache.set(COLLECTIONS.MEMBERS, arrangeWithDuoAtEnd(result.data));
   }
 }
@@ -282,14 +388,27 @@ export async function saveMemoryR2(memoryData) {
     createdAt: memoryData.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+  // ⚡ Instant optimistic cache update
+  const current = cache.get(COLLECTIONS.MEMORIES) || [];
+  const idx = current.findIndex(m => m.id === id);
+  if (idx >= 0) {
+    const updated = [...current];
+    updated[idx] = item;
+    cache.set(COLLECTIONS.MEMORIES, updated);
+  } else {
+    cache.set(COLLECTIONS.MEMORIES, [item, ...current]);
+  }
   const result = await callAPI({ collection: COLLECTIONS.MEMORIES, action: 'upsert', item });
-  if (result.data) cache.set(COLLECTIONS.MEMORIES, result.data);
+  if (result?.data) cache.set(COLLECTIONS.MEMORIES, result.data);
   return item;
 }
 
 export async function deleteMemoryR2(memoryId) {
+  // ⚡ Instant optimistic cache update
+  const current = cache.get(COLLECTIONS.MEMORIES) || [];
+  cache.set(COLLECTIONS.MEMORIES, current.filter(m => m.id !== memoryId));
   const result = await callAPI({ collection: COLLECTIONS.MEMORIES, action: 'delete', id: memoryId });
-  if (result.data) cache.set(COLLECTIONS.MEMORIES, result.data);
+  if (result?.data) cache.set(COLLECTIONS.MEMORIES, result.data);
 }
 
 export async function savePostR2(postData, user) {
@@ -305,14 +424,26 @@ export async function savePostR2(postData, user) {
     createdAt: postData.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+  const current = cache.get(COLLECTIONS.POSTS) || [];
+  const idx = current.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    const updated = [...current];
+    updated[idx] = item;
+    cache.set(COLLECTIONS.POSTS, updated);
+  } else {
+    cache.set(COLLECTIONS.POSTS, [item, ...current]);
+  }
   const result = await callAPI({ collection: COLLECTIONS.POSTS, action: 'upsert', item });
-  if (result.data) cache.set(COLLECTIONS.POSTS, result.data);
+  if (result?.data) cache.set(COLLECTIONS.POSTS, result.data);
   return item;
 }
 
 export async function deletePostR2(postId) {
+  // ⚡ Instant optimistic cache update
+  const current = cache.get(COLLECTIONS.POSTS) || [];
+  cache.set(COLLECTIONS.POSTS, current.filter(p => p.id !== postId));
   const result = await callAPI({ collection: COLLECTIONS.POSTS, action: 'delete', id: postId });
-  if (result.data) cache.set(COLLECTIONS.POSTS, result.data);
+  if (result?.data) cache.set(COLLECTIONS.POSTS, result.data);
 }
 
 export async function saveEventR2(eventData) {
@@ -329,17 +460,128 @@ export async function saveEventR2(eventData) {
     createdAt: eventData.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+  const current = cache.get(COLLECTIONS.EVENTS) || [];
+  const idx = current.findIndex(e => e.id === id);
+  if (idx >= 0) {
+    const updated = [...current];
+    updated[idx] = item;
+    cache.set(COLLECTIONS.EVENTS, updated);
+  } else {
+    cache.set(COLLECTIONS.EVENTS, [item, ...current]);
+  }
   const result = await callAPI({ collection: COLLECTIONS.EVENTS, action: 'upsert', item });
-  if (result.data) cache.set(COLLECTIONS.EVENTS, result.data);
+  if (result?.data) cache.set(COLLECTIONS.EVENTS, result.data);
   return item;
 }
 
 export async function deleteEventR2(eventId) {
+  // ⚡ Instant optimistic cache update
+  const current = cache.get(COLLECTIONS.EVENTS) || [];
+  cache.set(COLLECTIONS.EVENTS, current.filter(e => e.id !== eventId));
   const result = await callAPI({ collection: COLLECTIONS.EVENTS, action: 'delete', id: eventId });
-  if (result.data) cache.set(COLLECTIONS.EVENTS, result.data);
+  if (result?.data) cache.set(COLLECTIONS.EVENTS, result.data);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  JOURNEY & SPIRAL — SUBSCRIPTIONS & CRUD
+// ═══════════════════════════════════════════════════════════════════
+
+export function subscribeToJourneyR2(callback) {
+  const cacheKey = COLLECTIONS.JOURNEY;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.length > 0) {
+    callback(cached);
+  } else {
+    callback(INITIAL_JOURNEY_MILESTONES);
+  }
+
+  const refresh = async () => {
+    try {
+      const data = await fetchFromCDN(cacheKey);
+      if (Array.isArray(data) && data.length > 0) {
+        cache.set(cacheKey, data);
+        callback(data);
+      }
+    } catch (err) {
+      console.warn('[R2 DB] Journey fetch warning:', err.message);
+    }
+  };
+
+  refresh();
+  const interval = setInterval(refresh, 15000);
+  return () => clearInterval(interval);
+}
+
+export async function saveJourneyMilestoneR2(milestoneData) {
+  const current = cache.get(COLLECTIONS.JOURNEY) || INITIAL_JOURNEY_MILESTONES;
+  const item = {
+    ...milestoneData,
+    updatedAt: new Date().toISOString()
+  };
+  const updated = current.map(m => (m.id === item.id || m.stepLabel === item.stepLabel) ? { ...m, ...item } : m);
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.JOURNEY, updated);
+  await callAPI({ collection: COLLECTIONS.JOURNEY, action: 'upsert', item });
+  return item;
+}
+
+export function subscribeToSpiralR2(callback) {
+  const cacheKey = COLLECTIONS.SPIRAL;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.length > 0) {
+    callback(cached);
+  } else {
+    callback(INITIAL_SPIRAL_ITEMS);
+  }
+
+  const refresh = async () => {
+    try {
+      const data = await fetchFromCDN(cacheKey);
+      if (Array.isArray(data) && data.length > 0) {
+        cache.set(cacheKey, data);
+        callback(data);
+      }
+    } catch (err) {
+      console.warn('[R2 DB] Spiral fetch warning:', err.message);
+    }
+  };
+
+  refresh();
+  const interval = setInterval(refresh, 15000);
+  return () => clearInterval(interval);
+}
+
+export async function saveSpiralItemR2(spiralData) {
+  const id = spiralData.id || `spiral-${Date.now()}`;
+  const item = {
+    id,
+    src: spiralData.src,
+    alt: spiralData.alt || 'Squad Memory',
+    title: spiralData.title || spiralData.alt || 'Squad Moment',
+    updatedAt: new Date().toISOString()
+  };
+  const current = cache.get(COLLECTIONS.SPIRAL) || INITIAL_SPIRAL_ITEMS;
+  const existingIdx = current.findIndex(s => s.id === item.id);
+  const updated = existingIdx >= 0
+    ? current.map(s => s.id === item.id ? item : s)
+    : [...current, item];
+
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.SPIRAL, updated);
+  await callAPI({ collection: COLLECTIONS.SPIRAL, action: 'upsert', item });
+  return item;
+}
+
+export async function deleteSpiralItemR2(itemId) {
+  const current = cache.get(COLLECTIONS.SPIRAL) || INITIAL_SPIRAL_ITEMS;
+  const updated = current.filter(s => s.id !== itemId);
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.SPIRAL, updated);
+  await callAPI({ collection: COLLECTIONS.SPIRAL, action: 'delete', id: itemId });
 }
 
 // Force refresh cache for a specific collection (call after admin write)
 export function invalidateCache(collection) {
   delete mem[collection];
 }
+

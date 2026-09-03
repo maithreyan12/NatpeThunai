@@ -22,7 +22,8 @@ function getR2Client() {
 }
 
 const BUCKET = process.env.R2_BUCKET_NAME || 'natpethunai';
-const ALLOWED = new Set(['members', 'memories', 'posts', 'events']);
+const ALLOWED = new Set(['members', 'memories', 'posts', 'events', 'journey', 'spiral']);
+
 
 // Read a JSON file from R2
 async function readData(client, collection) {

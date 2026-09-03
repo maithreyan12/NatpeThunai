@@ -3,7 +3,7 @@ import {
   Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
-  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film
+  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass
 } from 'lucide-react';
 
 import {
@@ -11,8 +11,11 @@ import {
   subscribeToMemoriesR2, saveMemoryR2, deleteMemoryR2,
   subscribeToPostsR2, savePostR2, deletePostR2,
   subscribeToEventsR2, saveEventR2, deleteEventR2,
+  subscribeToJourneyR2, saveJourneyMilestoneR2,
+  subscribeToSpiralR2, saveSpiralItemR2, deleteSpiralItemR2,
   bootR2Database,
 } from '../../services/r2Database';
+
 import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
@@ -119,6 +122,26 @@ export default function AdminPortal({ onExit, currentUser }) {
     mediaUrl: '',
     mediaType: 'image'
   });
+
+  // ── Friendship Journey States ──
+
+  const [journeyMilestones, setJourneyMilestones] = useState([]);
+  const [editingMilestone, setEditingMilestone] = useState(null);
+  const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
+  const [milestonePhotoUploading, setMilestonePhotoUploading] = useState(false);
+  const [milestoneForm, setMilestoneForm] = useState({
+    id: '', stepLabel: '', title: '', tagline: '', badge: '', quote: '', description: '', photo: ''
+  });
+
+  // ── Infinite Spiral States ──
+  const [spiralItems, setSpiralItems] = useState([]);
+  const [editingSpiralItem, setEditingSpiralItem] = useState(null);
+  const [isSpiralModalOpen, setIsSpiralModalOpen] = useState(false);
+  const [spiralPhotoUploading, setSpiralPhotoUploading] = useState(false);
+  const [spiralForm, setSpiralForm] = useState({
+    id: '', src: '', alt: 'Squad Memory', title: ''
+  });
+
 
   // Upload States
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -368,14 +391,19 @@ export default function AdminPortal({ onExit, currentUser }) {
     const unsubMemories  = subscribeToMemoriesR2(setMemories);
     const unsubPosts     = subscribeToPostsR2(setPosts);
     const unsubEvents    = subscribeToEventsR2(setEvents);
+    const unsubJourney   = subscribeToJourneyR2(setJourneyMilestones);
+    const unsubSpiral    = subscribeToSpiralR2(setSpiralItems);
 
     return () => {
       unsubMembers();
       unsubMemories();
       unsubPosts();
       unsubEvents();
+      unsubJourney();
+      unsubSpiral();
     };
   }, []);
+
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
@@ -459,12 +487,10 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeleteMember = async (id, name) => {
     if (window.confirm(`Remove ${name} from the squad list?`)) {
-      try {
-        await deleteMemberR2(id);
-        triggerToast(`Removed ${name}`);
-      } catch (err) {
-        triggerToast(`Delete failed: ${err.message}`);
-      }
+      // ⚡ Instant optimistic deletion
+      setMembers(prev => prev.filter(m => m.id !== id));
+      triggerToast(`Removed ${name} 🗑️`);
+      deleteMemberR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
 
@@ -498,7 +524,17 @@ export default function AdminPortal({ onExit, currentUser }) {
     try {
       const payload = editingMemory
         ? { ...editingMemory, ...memoryForm }
-        : memoryForm;
+        : { id: `mem-${Date.now()}`, ...memoryForm };
+      // ⚡ Instant optimistic update
+      setMemories(prev => {
+        const idx = prev.findIndex(m => m.id === payload.id);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = payload;
+          return arr;
+        }
+        return [payload, ...prev];
+      });
       await saveMemoryR2(payload);
       triggerToast(editingMemory ? `Updated memory "${memoryForm.title}"! ✅` : 'New memory chapter published to R2! 📸');
       setEditingMemory(null);
@@ -510,12 +546,10 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeleteMemory = async (id, title) => {
     if (window.confirm(`Delete memory chapter "${title || 'this chapter'}"?`)) {
-      try {
-        await deleteMemoryR2(id);
-        triggerToast(`Deleted memory "${title || id}" 🗑️`);
-      } catch (err) {
-        triggerToast(`Delete failed: ${err.message}`);
-      }
+      // ⚡ Instant optimistic deletion
+      setMemories(prev => prev.filter(m => m.id !== id));
+      triggerToast(`Deleted memory "${title || id}" 🗑️`);
+      deleteMemoryR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
 
@@ -565,6 +599,16 @@ export default function AdminPortal({ onExit, currentUser }) {
             isReel: true,
             timestamp: Date.now()
           };
+      // ⚡ Instant optimistic update
+      setMemories(prev => {
+        const idx = prev.findIndex(m => m.id === payload.id);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = payload;
+          return arr;
+        }
+        return [payload, ...prev];
+      });
       await saveMemoryR2(payload);
       triggerToast(editingReel ? `Updated Reel slide! 🎬` : `New Reel slide published to Cinematic Archive! 🎬`);
       setEditingReel(null);
@@ -575,15 +619,154 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeleteReel = async (id, title) => {
     if (window.confirm(`Delete reel slide "${title || 'this slide'}" from Cinematic Archive?`)) {
-      try {
-        await deleteMemoryR2(id);
-        triggerToast(`Reel slide removed 🗑️`);
-      } catch (err) {
-        triggerToast(`Delete failed: ${err.message}`);
-      }
+      // ⚡ Instant optimistic deletion
+      setMemories(prev => prev.filter(m => m.id !== id));
+      triggerToast(`Reel slide removed 🗑️`);
+      deleteMemoryR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
 
+  // ── Friendship Journey Milestones CRUD ──
+  const openEditMilestone = (milestone) => {
+    setEditingMilestone(milestone);
+    setMilestoneForm({
+      id: milestone.id || '',
+      stepLabel: milestone.stepLabel || '',
+      title: milestone.title || '',
+      tagline: milestone.tagline || '',
+      badge: milestone.badge || '',
+      quote: milestone.quote || '',
+      description: milestone.description || '',
+      photo: milestone.photo || '',
+      colorKey: milestone.colorKey || 'lavender',
+      gangCount: milestone.gangCount || 'Squad Circle',
+      attendees: milestone.attendees || []
+    });
+    setIsMilestoneModalOpen(true);
+  };
+
+  const handleMilestonePhotoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setMilestoneForm(prev => ({ ...prev, photo: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+
+    setMilestonePhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'memories');
+      if (result?.publicUrl) {
+        setMilestoneForm(prev => ({ ...prev, photo: result.publicUrl }));
+        triggerToast(`Milestone cover photo uploaded to R2! ☁️✨`);
+      }
+    } catch (err) {
+      console.warn("Milestone R2 Upload warning:", err);
+      triggerToast(`Photo selected for milestone`);
+    } finally {
+      setMilestonePhotoUploading(false);
+    }
+  };
+
+  const handleSaveMilestone = async (e) => {
+    e.preventDefault();
+    if (!milestoneForm.title.trim()) {
+      triggerToast('Please provide a milestone title');
+      return;
+    }
+    setIsMilestoneModalOpen(false);
+    // ⚡ Instant optimistic update
+    setJourneyMilestones(prev => prev.map(m => (m.id === milestoneForm.id || m.stepLabel === milestoneForm.stepLabel) ? { ...m, ...milestoneForm } : m));
+    triggerToast(`Updated "${milestoneForm.stepLabel}" milestone! 🚀`);
+    try {
+      await saveJourneyMilestoneR2(milestoneForm);
+    } catch (err) {
+      triggerToast(`Milestone save error: ${err.message}`);
+    }
+  };
+
+  // ── Infinite Spiral CRUD ──
+  const openAddSpiralItem = () => {
+    setEditingSpiralItem(null);
+    setSpiralForm({ id: '', src: '', alt: 'Squad Memory', title: '' });
+    setIsSpiralModalOpen(true);
+  };
+
+  const openEditSpiralItem = (item) => {
+    setEditingSpiralItem(item);
+    setSpiralForm({
+      id: item.id || '',
+      src: item.src || '',
+      alt: item.alt || '',
+      title: item.title || item.alt || ''
+    });
+    setIsSpiralModalOpen(true);
+  };
+
+  const handleSpiralPhotoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setSpiralForm(prev => ({ ...prev, src: ev.target.result }));
+    };
+    reader.readAsDataURL(file);
+
+    setSpiralPhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'memories');
+      if (result?.publicUrl) {
+        setSpiralForm(prev => ({ ...prev, src: result.publicUrl }));
+        triggerToast(`Spiral photo uploaded to Cloudflare R2! ☁️🌀`);
+      }
+    } catch (err) {
+      console.warn("Spiral R2 Upload warning:", err);
+      triggerToast(`Photo selected for spiral`);
+    } finally {
+      setSpiralPhotoUploading(false);
+    }
+  };
+
+  const handleSaveSpiralItem = async (e) => {
+    e.preventDefault();
+    if (!spiralForm.src) {
+      triggerToast('Please choose a photo or enter a photo URL');
+      return;
+    }
+    setIsSpiralModalOpen(false);
+    const payload = editingSpiralItem
+      ? { ...editingSpiralItem, ...spiralForm }
+      : { id: `spiral-${Date.now()}`, ...spiralForm };
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(prev => {
+      const idx = prev.findIndex(s => s.id === payload.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = payload;
+        return copy;
+      }
+      return [...prev, payload];
+    });
+    triggerToast(editingSpiralItem ? 'Updated spiral photo! 🌀' : 'Added new photo to Infinite Spiral! 🌀');
+    try {
+      await saveSpiralItemR2(payload);
+    } catch (err) {
+      triggerToast(`Spiral save error: ${err.message}`);
+    }
+  };
+
+  const handleDeleteSpiralItem = async (id, title) => {
+    if (window.confirm(`Remove photo "${title || 'this photo'}" from Infinite Spiral?`)) {
+      // ⚡ Instant optimistic update
+      setSpiralItems(prev => prev.filter(s => s.id !== id));
+      triggerToast('Spiral photo removed 🗑️');
+      deleteSpiralItemR2(id).catch(err => triggerToast(`Delete error: ${err.message}`));
+    }
+  };
 
   // Post CRUD
   const openAddPost = () => {
@@ -609,7 +792,17 @@ export default function AdminPortal({ onExit, currentUser }) {
     try {
       const payload = editingPost
         ? { ...editingPost, ...postForm }
-        : postForm;
+        : { id: `post-${Date.now()}`, ...postForm };
+      // ⚡ Instant optimistic update
+      setPosts(prev => {
+        const idx = prev.findIndex(p => p.id === payload.id);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = payload;
+          return arr;
+        }
+        return [payload, ...prev];
+      });
       await savePostR2(payload, currentUser || { displayName: 'Admin', photoURL: r2Photo('Gracee.jpg') });
       triggerToast(editingPost ? 'Post updated! ✅' : 'Post published live to squad! 📣');
       setEditingPost(null);
@@ -621,12 +814,10 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeletePost = async (id, snippet) => {
     if (window.confirm(`Delete post "${snippet || 'this post'}"?`)) {
-      try {
-        await deletePostR2(id);
-        triggerToast('Post deleted 🗑️');
-      } catch (err) {
-        triggerToast(`Delete failed: ${err.message}`);
-      }
+      // ⚡ Instant optimistic update
+      setPosts(prev => prev.filter(p => p.id !== id));
+      triggerToast('Post deleted 🗑️');
+      deletePostR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
 
@@ -657,7 +848,17 @@ export default function AdminPortal({ onExit, currentUser }) {
     try {
       const payload = editingEvent
         ? { ...editingEvent, ...eventForm }
-        : eventForm;
+        : { id: `evt-${Date.now()}`, ...eventForm };
+      // ⚡ Instant optimistic update
+      setEvents(prev => {
+        const idx = prev.findIndex(ev => ev.id === payload.id);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = payload;
+          return arr;
+        }
+        return [payload, ...prev];
+      });
       await saveEventR2(payload);
       triggerToast(editingEvent ? `Updated event "${eventForm.title}"! ✅` : `Event "${eventForm.title}" live on website! 🗓️`);
       setEditingEvent(null);
@@ -669,14 +870,13 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const handleDeleteEvent = async (id, title) => {
     if (window.confirm(`Delete event "${title || 'this event'}"?`)) {
-      try {
-        await deleteEventR2(id);
-        triggerToast(`Deleted event "${title || id}" 🗑️`);
-      } catch (err) {
-        triggerToast(`Delete failed: ${err.message}`);
-      }
+      // ⚡ Instant optimistic update
+      setEvents(prev => prev.filter(e => e.id !== id));
+      triggerToast(`Deleted event "${title || id}" 🗑️`);
+      deleteEventR2(id).catch(err => triggerToast(`Delete error: ${err.message}`));
     }
   };
+
 
   // R2 Direct File Upload
   const handleFileUpload = async (e) => {
@@ -832,6 +1032,18 @@ export default function AdminPortal({ onExit, currentUser }) {
               <Users size={18} /> Squad Members ({members.length})
             </button>
             <button
+              className={`admin-nav-tab ${activeTab === 'spiral' ? 'active' : ''}`}
+              onClick={() => setActiveTab('spiral')}
+            >
+              <Sparkles size={18} /> Infinite Spiral ({spiralItems.length})
+            </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'journey' ? 'active' : ''}`}
+              onClick={() => setActiveTab('journey')}
+            >
+              <Compass size={18} /> Friendship Journey ({journeyMilestones.length})
+            </button>
+            <button
               className={`admin-nav-tab ${activeTab === 'reels' ? 'active' : ''}`}
               onClick={() => setActiveTab('reels')}
             >
@@ -880,6 +1092,28 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
+              <div className="admin-stat-card" onClick={() => setActiveTab('spiral')} style={{ cursor: 'pointer' }}>
+                <div className="admin-stat-icon-wrap from-indigo">
+                  <Sparkles size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{spiralItems.length}</h3>
+                  <p className="admin-stat-label">Infinite Spiral</p>
+                  <span className="admin-stat-meta">Spinning 3D Vault Photos</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card" onClick={() => setActiveTab('journey')} style={{ cursor: 'pointer' }}>
+                <div className="admin-stat-icon-wrap from-cyan">
+                  <Compass size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{journeyMilestones.length}</h3>
+                  <p className="admin-stat-label">Friendship Journey</p>
+                  <span className="admin-stat-meta">4 Core Friendship Eras</span>
+                </div>
+              </div>
+
               <div className="admin-stat-card" onClick={() => setActiveTab('reels')} style={{ cursor: 'pointer' }}>
                 <div className="admin-stat-icon-wrap from-pink">
                   <Film size={24} />
@@ -890,6 +1124,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <span className="admin-stat-meta">Live in Our Memory Reel</span>
                 </div>
               </div>
+
 
               <div className="admin-stat-card">
                 <div className="admin-stat-icon-wrap from-pink">
@@ -1022,8 +1257,111 @@ export default function AdminPortal({ onExit, currentUser }) {
             </div>
           )}
 
+          {/* 2.1 INFINITE SPIRAL TAB */}
+          {activeTab === 'spiral' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Infinite Spiral Vault Gallery</h2>
+                  <p className="admin-section-sub">
+                    Manage the {spiralItems.length} photos rotating in the 3D Infinite Spiral on the homepage.
+                  </p>
+                </div>
+                <div className="admin-action-bar">
+                  <button onClick={openAddSpiralItem} className="admin-primary-btn">
+                    <Plus size={16} /> Add Spiral Photo
+                  </button>
+                </div>
+              </div>
+
+              {spiralItems.length === 0 ? (
+                <div className="admin-empty-pane" style={{ textAlign: 'center', padding: '60px 20px' }}>
+                  <Sparkles size={44} style={{ opacity: 0.4, margin: '0 auto 12px' }} />
+                  <h3>No spiral photos found</h3>
+                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Spiral Photo" to add photos to the 3D rotating spiral.</p>
+                </div>
+              ) : (
+                <div className="admin-cards-grid">
+                  {spiralItems.map((item, idx) => (
+                    <div key={item.id || idx} className="admin-card-item">
+                      <img src={item.src} alt={item.alt || item.title} className="admin-card-img" />
+                      <div className="admin-card-body">
+                        <div className="admin-card-header-row">
+                          <span className="admin-card-badge">Position #{idx + 1}</span>
+                          <div className="admin-row-actions">
+                            <button onClick={() => openEditSpiralItem(item)} className="admin-icon-action-btn" title="Edit Photo">
+                              <Edit3 size={15} />
+                            </button>
+                            <button onClick={() => handleDeleteSpiralItem(item.id, item.title || item.alt)} className="admin-icon-action-btn delete" title="Delete Photo">
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="admin-card-title">{item.title || item.alt || `Photo #${idx + 1}`}</h3>
+                        <p className="admin-card-desc">{item.alt ? `Alt: ${item.alt}` : 'Featured in Infinite Spiral'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 2.2 FRIENDSHIP JOURNEY TAB */}
+          {activeTab === 'journey' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Friendship Journey Milestones</h2>
+                  <p className="admin-section-sub">
+                    Edit the 4 core chronological milestones featured in "The Squad Evolution".
+                  </p>
+                </div>
+              </div>
+
+              <div className="admin-cards-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+                {journeyMilestones.map((milestone, idx) => (
+                  <div key={milestone.id || idx} className="admin-card-item" style={{ overflow: 'hidden' }}>
+                    <div style={{ position: 'relative' }}>
+                      <img src={milestone.photo} alt={milestone.title} className="admin-card-img" style={{ height: '190px', objectFit: 'cover' }} />
+                      <span className="admin-card-badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}>
+                        {milestone.stepLabel}
+                      </span>
+                    </div>
+                    <div className="admin-card-body">
+                      <div className="admin-card-header-row">
+                        <span className="admin-card-badge" style={{ background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8' }}>
+                          {milestone.badge || milestone.stepLabel}
+                        </span>
+                        <button
+                          onClick={() => openEditMilestone(milestone)}
+                          className="admin-primary-btn"
+                          style={{ padding: '4px 12px', fontSize: '0.8rem', height: 'auto' }}
+                          title="Edit Milestone"
+                        >
+                          <Edit3 size={14} /> Edit
+                        </button>
+                      </div>
+                      <h3 className="admin-card-title" style={{ marginTop: '8px' }}>{milestone.title}</h3>
+                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: '8px' }}>
+                        "{milestone.tagline}"
+                      </p>
+                      <p className="admin-card-desc">{milestone.description}</p>
+                      {milestone.quote && (
+                        <div style={{ marginTop: '10px', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', borderLeft: '3px solid #818cf8', fontSize: '0.8rem' }}>
+                          "{milestone.quote}"
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 2.5 REELS TAB */}
           {activeTab === 'reels' && (
+
             <div className="admin-section-block">
               <div className="admin-section-header">
                 <div>
@@ -1380,8 +1718,210 @@ export default function AdminPortal({ onExit, currentUser }) {
         </div>
       )}
 
+      {/* Friendship Journey Milestone Modal */}
+
+      {isMilestoneModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">Edit {milestoneForm.stepLabel} Milestone</h2>
+            <form onSubmit={handleSaveMilestone} className="admin-modal-form">
+              {/* Photo picker */}
+              <div className="admin-photo-upload-section">
+                <label className="admin-field-label">Milestone Cover Photo *</label>
+                <div className="admin-photo-picker-row">
+                  <div className="admin-photo-preview-box memory-preview">
+                    {milestoneForm.photo ? (
+                      <img src={milestoneForm.photo} alt="Preview" className="admin-photo-preview-img" />
+                    ) : (
+                      <div className="admin-photo-preview-placeholder">
+                        <Compass size={28} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="admin-photo-picker-controls">
+                    <label className="admin-file-pick-btn">
+                      <Camera size={16} />
+                      <span>{milestonePhotoUploading ? 'Uploading to R2...' : 'Choose Milestone Photo'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleMilestonePhotoFile}
+                        disabled={milestonePhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span className="admin-photo-hint">Directly uploaded to Cloudflare R2 bucket with live preview</span>
+                  </div>
+                </div>
+
+                <div className="admin-input-group" style={{ marginTop: '10px' }}>
+                  <label>Or Photo URL</label>
+                  <input
+                    type="text"
+                    value={milestoneForm.photo}
+                    onChange={(e) => setMilestoneForm({ ...milestoneForm, photo: e.target.value })}
+                    placeholder={`e.g. ${R2_BASE}/photos/...`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Step Label / Year *</label>
+                  <input
+                    type="text"
+                    value={milestoneForm.stepLabel}
+                    onChange={(e) => setMilestoneForm({ ...milestoneForm, stepLabel: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Badge Tag (e.g. Year 1 • Genesis)</label>
+                  <input
+                    type="text"
+                    value={milestoneForm.badge}
+                    onChange={(e) => setMilestoneForm({ ...milestoneForm, badge: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group">
+                <label>Milestone Title *</label>
+                <input
+                  type="text"
+                  value={milestoneForm.title}
+                  onChange={(e) => setMilestoneForm({ ...milestoneForm, title: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Tagline Subtitle</label>
+                <input
+                  type="text"
+                  value={milestoneForm.tagline}
+                  onChange={(e) => setMilestoneForm({ ...milestoneForm, tagline: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Memorable Quote</label>
+                <input
+                  type="text"
+                  value={milestoneForm.quote}
+                  onChange={(e) => setMilestoneForm({ ...milestoneForm, quote: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-input-group">
+                <label>Story Description</label>
+                <textarea
+                  rows="3"
+                  value={milestoneForm.description}
+                  onChange={(e) => setMilestoneForm({ ...milestoneForm, description: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsMilestoneModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn" disabled={milestonePhotoUploading}>
+                  Save Milestone
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Infinite Spiral Photo Modal */}
+      {isSpiralModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <h2 className="admin-modal-title">
+              {editingSpiralItem ? 'Edit Spiral Photo' : 'Add Spiral Photo'}
+            </h2>
+            <form onSubmit={handleSaveSpiralItem} className="admin-modal-form">
+              <div className="admin-photo-upload-section">
+                <label className="admin-field-label">Spiral Photo *</label>
+                <div className="admin-photo-picker-row">
+                  <div className="admin-photo-preview-box memory-preview">
+                    {spiralForm.src ? (
+                      <img src={spiralForm.src} alt="Preview" className="admin-photo-preview-img" />
+                    ) : (
+                      <div className="admin-photo-preview-placeholder">
+                        <Sparkles size={28} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="admin-photo-picker-controls">
+                    <label className="admin-file-pick-btn">
+                      <Camera size={16} />
+                      <span>{spiralPhotoUploading ? 'Uploading to R2...' : 'Choose Photo'}</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleSpiralPhotoFile}
+                        disabled={spiralPhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <span className="admin-photo-hint">Uploaded to Cloudflare R2 bucket with live preview</span>
+                  </div>
+                </div>
+
+                <div className="admin-input-group" style={{ marginTop: '10px' }}>
+                  <label>Or Photo URL *</label>
+                  <input
+                    type="text"
+                    value={spiralForm.src}
+                    onChange={(e) => setSpiralForm({ ...spiralForm, src: e.target.value })}
+                    placeholder={`e.g. ${R2_BASE}/photos/...`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Title / Label</label>
+                  <input
+                    type="text"
+                    value={spiralForm.title}
+                    onChange={(e) => setSpiralForm({ ...spiralForm, title: e.target.value })}
+                    placeholder="e.g. Farish in White Hoodie"
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Alt Text / Description</label>
+                  <input
+                    type="text"
+                    value={spiralForm.alt}
+                    onChange={(e) => setSpiralForm({ ...spiralForm, alt: e.target.value })}
+                    placeholder="e.g. Farish"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-modal-actions">
+                <button type="button" onClick={() => setIsSpiralModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn" disabled={spiralPhotoUploading}>
+                  {editingSpiralItem ? 'Save Changes' : 'Add to Spiral'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Reel Modal */}
       {isReelModalOpen && (
+
         <div className="admin-modal-backdrop">
           <div className="admin-modal-card">
             <h2 className="admin-modal-title">

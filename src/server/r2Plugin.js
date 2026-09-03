@@ -2,7 +2,8 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { loadEnv } from 'vite';
 
-const ALLOWED = new Set(['members', 'memories', 'posts', 'events']);
+const ALLOWED = new Set(['members', 'memories', 'posts', 'events', 'journey', 'spiral']);
+
 
 /**
  * Vite plugin that serves serverless-style API endpoints:
