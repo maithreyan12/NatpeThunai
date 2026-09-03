@@ -35,13 +35,22 @@ const cache = {
   },
 };
 
-// ── Read from CDN (public, no auth, globally cached) ───────────────
+// ── Read from CDN (production) or local API proxy (development) ────
 async function fetchFromCDN(collection) {
+  // In development, use the Vite dev server API to avoid CORS issues
+  if (import.meta.env.DEV) {
+    const res = await fetch(`/api/r2/data?collection=${collection}&_t=${Date.now()}`);
+    if (!res.ok) throw new Error(`API fetch failed: ${res.status}`);
+    const json = await res.json();
+    return json.data;
+  }
+  // In production, read directly from R2 CDN (fast, globally cached)
   const url = `${CDN}/data/${collection}.json?_t=${Date.now()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`CDN fetch failed: ${res.status}`);
   return res.json();
 }
+
 
 // ── Write via API (serverless → R2 with credentials) ───────────────
 async function callAPI(body) {
