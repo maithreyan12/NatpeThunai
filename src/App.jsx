@@ -5,6 +5,7 @@ import {
   SquadStory,
   FriendshipJourney, 
   SquadMembers, 
+  MemoryTimeline,
   MemoryReel, 
   SquadAlbum, 
   AlbumMarqueeSection,
@@ -321,7 +322,18 @@ export default function App() {
           memories={memories}
         />
 
-
+        {/* 6. Infinite Spiral Memory Vortex */}
+        <MemoryTimeline 
+          memories={memories}
+          members={members}
+          activeMemberFilter={activeMemberFilter}
+          onSelectMemberFilter={setActiveMemberFilter}
+          onReact={handleReactMemory}
+          onAddComment={handleAddComment}
+          onOpenLightbox={(m) => setLightboxMemory(m)}
+          onUploadPhotos={handleUploadPhotos}
+          currentUser={currentUser}
+        />
 
         {/* 7. Cinematic Memory Reel */}
         <MemoryReel 
