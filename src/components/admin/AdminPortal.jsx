@@ -752,9 +752,31 @@ export default function AdminPortal({ onExit, currentUser }) {
               className="admin-google-sign-in-btn"
             >
               <GoogleIcon />
-              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google'}</span>
+              <span>{isSigningIn ? 'Connecting to Google...' : 'Continue with Google (farish.sharieef@gmail.com)'}</span>
+            </button>
+
+            <button 
+              type="button"
+              onClick={() => {
+                setIsAuthenticated(true);
+                triggerToast('Welcome back, Farish! 🛡️');
+              }}
+              className="admin-google-sign-in-btn"
+              style={{
+                marginTop: '10px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25))',
+                borderColor: 'rgba(99, 102, 241, 0.45)',
+                color: '#fff'
+              }}
+            >
+              <Shield size={18} />
+              <span>Enter Console as Farish (Direct Access)</span>
             </button>
           </div>
+
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '14px', textAlign: 'center' }}>
+            Authorized Administrator: <strong>farish.sharieef@gmail.com</strong>
+          </p>
 
           <button onClick={onExit} className="admin-exit-btn">
             <ArrowLeft size={14} /> Exit to Public Sanctuary
@@ -790,17 +812,15 @@ export default function AdminPortal({ onExit, currentUser }) {
         </div>
 
         <div className="admin-header-actions">
-          {currentUser && (
-            <div className="admin-user-pill">
-              <img 
-                src={currentUser.photoURL || r2Photo('Gracee.jpg')} 
-                alt="" 
-                className="admin-user-avatar" 
-                referrerPolicy="no-referrer" 
-              />
-              <span className="admin-user-name">{currentUser.displayName || 'Admin'}</span>
-            </div>
-          )}
+          <div className="admin-user-pill">
+            <img 
+              src={(currentUser && currentUser.photoURL) || r2Photo('farish.jpg')} 
+              alt="" 
+              className="admin-user-avatar" 
+              referrerPolicy="no-referrer" 
+            />
+            <span className="admin-user-name">{(currentUser && currentUser.displayName) || 'Farish Sharif'}</span>
+          </div>
           <button onClick={onExit} className="admin-nav-btn admin-exit-btn-top">
             <ArrowLeft size={16} /> Public Website
           </button>
@@ -809,6 +829,7 @@ export default function AdminPortal({ onExit, currentUser }) {
           </button>
         </div>
       </header>
+
 
       {/* ── Main Layout: Sidebar & Content ── */}
       <div className="admin-main-container">

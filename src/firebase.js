@@ -54,21 +54,41 @@ googleProvider.setCustomParameters({
 });
 
 export const AUTHORIZED_ADMIN_EMAILS = [
-  'maithreyan2006@gmail.com',
-  'jaffreenmarinvanan4@gmail.com',
   'farish.sharieef@gmail.com',
+  'farishsharieef@gmail.com',
   'farish.sharif@gmail.com',
   'farishsharif@gmail.com',
-  'fairsh.sharif@gmail.com'
+  'fairsh.sharieef@gmail.com',
+  'fairsh.sharif@gmail.com',
+  'maithreyan2006@gmail.com',
+  'jaffreenmarinvanan4@gmail.com'
 ];
 
 export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
 
+// Normalizes Gmail addresses (ignores dots and case)
+export const normalizeEmail = (email) => {
+  if (!email) return '';
+  const parts = email.trim().toLowerCase().split('@');
+  if (parts.length !== 2) return email.trim().toLowerCase();
+  const [local, domain] = parts;
+  if (domain === 'gmail.com' || domain === 'googlemail.com') {
+    return `${local.replace(/\./g, '').split('+')[0]}@gmail.com`;
+  }
+  return `${local}@${domain}`;
+};
+
 export const isAuthorizedAdmin = (user) => {
   if (!user || !user.email) return false;
   const userEmail = user.email.trim().toLowerCase();
-  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => adminEmail.trim().toLowerCase() === userEmail);
+  const userNorm = normalizeEmail(user.email);
+  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => {
+    const adminLower = adminEmail.trim().toLowerCase();
+    return adminLower === userEmail || normalizeEmail(adminEmail) === userNorm;
+  });
 };
+
+
 
 // Check redirect result on app load if redirected
 export const checkRedirectResult = async () => {
