@@ -20,7 +20,23 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
+
+/* Portrait Card: authentic vertical mobile reel */
+.reel-theater-card.is-portrait {
+  max-width: 440px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 40px rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Landscape Card: widescreen cinematic theater */
+.reel-theater-card.is-landscape {
+  max-width: 900px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 
 .reel-theater-card.fullscreen-mode {
   max-width: 100vw;
@@ -82,7 +98,7 @@
   to { width: 100%; }
 }
 
-/* ── Media Stage ── */
+/* ── Media Stage — Adaptive Orientation ── */
 .reel-media-stage {
   position: relative;
   width: 100%;
@@ -95,6 +111,15 @@
   cursor: pointer;
   user-select: none;
   overflow: hidden;
+  transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reel-media-stage.stage-portrait {
+  height: clamp(520px, 72vh, 670px);
+}
+
+.reel-media-stage.stage-landscape {
+  height: clamp(380px, 50vw, 520px);
 }
 
 .fullscreen-mode .reel-media-stage {
@@ -102,12 +127,36 @@
   max-height: 100vh;
 }
 
+/* Ambient blurred background behind portrait video */
+.reel-ambient-backdrop {
+  position: absolute;
+  inset: -30px;
+  width: calc(100% + 60px);
+  height: calc(100% + 60px);
+  object-fit: cover;
+  filter: blur(32px) brightness(0.38) saturate(1.5);
+  opacity: 0.85;
+  transform: scale(1.15);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .reel-media-element {
+  position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   animation: reelMediaFade 0.4s ease-out;
+  z-index: 2;
 }
+
+.reel-media-element.media-portrait {
+  object-fit: contain;
+}
+
+.reel-media-element.media-landscape {
+  object-fit: contain;
+}
+
 
 
 @keyframes reelMediaFade {
@@ -196,6 +245,19 @@
   border-radius: var(--radius-pill);
   font-size: 0.72rem;
 }
+
+.reel-badge-orientation {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e0e7ff;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 
 .reel-item-title {
   font-family: var(--font-heading);

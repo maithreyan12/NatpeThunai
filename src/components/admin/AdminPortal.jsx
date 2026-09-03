@@ -343,10 +343,12 @@ export default function AdminPortal({ onExit, currentUser }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      triggerToast('Memory Chapters is strictly for photos! Please choose an image file (JPG/PNG/WebP) 📸');
+    const isImageFile = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif|avif|svg)$/i.test(file.name);
+    if (!isImageFile) {
+      triggerToast('Memory Chapters is strictly for photos! Please choose an image file (JPG/PNG/WebP/HEIC) 📸');
       return;
     }
+
 
     // Show instant preview
     const reader = new FileReader();
@@ -1754,11 +1756,12 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <span>{memberPhotoUploading ? 'Uploading to R2...' : 'Choose Photo File'}</span>
                       <input 
                         type="file" 
-                        accept="image/*" 
+                        accept="image/*,image/heic,image/heif,.heic,.heif" 
                         onChange={handleMemberPhotoFile}
                         disabled={memberPhotoUploading}
                         style={{ display: 'none' }}
                       />
+
                     </label>
                     <span className="admin-photo-hint">Select a photo from your phone/device or paste URL below</span>
                   </div>
@@ -1833,11 +1836,12 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <span>{milestonePhotoUploading ? 'Uploading to R2...' : 'Choose Milestone Photo'}</span>
                       <input 
                         type="file" 
-                        accept="image/*" 
+                        accept="image/*,image/heic,image/heif,.heic,.heif" 
                         onChange={handleMilestonePhotoFile}
                         disabled={milestonePhotoUploading}
                         style={{ display: 'none' }}
                       />
+
                     </label>
                     <span className="admin-photo-hint">Directly uploaded to Cloudflare R2 bucket with live preview</span>
                   </div>
@@ -1952,11 +1956,12 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <span>{spiralPhotoUploading ? 'Uploading to R2...' : 'Choose Photo'}</span>
                       <input 
                         type="file" 
-                        accept="image/*" 
+                        accept="image/*,image/heic,image/heif,.heic,.heif" 
                         onChange={handleSpiralPhotoFile}
                         disabled={spiralPhotoUploading}
                         style={{ display: 'none' }}
                       />
+
                     </label>
                     <span className="admin-photo-hint">Uploaded to Cloudflare R2 bucket with live preview</span>
                   </div>
@@ -2368,11 +2373,12 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <span>{memoryPhotoUploading ? 'Uploading to R2...' : 'Choose Chapter Photo'}</span>
                       <input 
                         type="file" 
-                        accept="image/*" 
+                        accept="image/*,image/heic,image/heif,.heic,.heif" 
                         onChange={handleMemoryPhotoFile}
                         disabled={memoryPhotoUploading}
                         style={{ display: 'none' }}
                       />
+
                     </label>
                     <span className="admin-photo-hint">Photos only (JPG, PNG, WebP) uploaded directly to Cloudflare R2</span>
 

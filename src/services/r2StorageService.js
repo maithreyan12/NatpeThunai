@@ -10,37 +10,64 @@ export const R2_BUDGET_LIMITS = {
 };
 
 const ALLOWED_TYPES = {
-  image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml'],
+  image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml', 'image/heic', 'image/heif'],
   video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'],
 };
 
 /**
  * Upload an image or video file to Cloudflare R2.
+ * Automatically converts iPhone HEIC/HEIF to universally supported JPEG.
  * Requests a presigned URL from /api/r2/presign, then streams the file directly.
  *
  * @param {File} file         - Browser File object
- * @param {string} category   - 'members' | 'memories' | 'posts'
+ * @param {string} category   - 'members' | 'memories' | 'posts' | 'reels'
  * @param {Function} onProgress - Callback(percentage 0-100)
  * @returns {Promise<{publicUrl, objectKey, fileType, sizeBytes}>}
  */
 export async function uploadToR2WithGuardrails(file, category = 'members', onProgress = null) {
   if (!file) throw new Error('No file provided.');
 
-  const isImage = ALLOWED_TYPES.image.includes(file.type) || file.type.startsWith('image/');
-  const isVideo = ALLOWED_TYPES.video.includes(file.type) || file.type.startsWith('video/');
+  let activeFile = file;
+
+  // ── Auto-convert Apple HEIC/HEIF photos to high-definition JPEG ──
+  const isHeic = file.name?.toLowerCase().endsWith('.heic') || 
+                 file.name?.toLowerCase().endsWith('.heif') || 
+                 file.type === 'image/heic' || 
+                 file.type === 'image/heif';
+
+  if (isHeic) {
+    try {
+      if (onProgress) onProgress(3);
+      const heic2any = (await import('heic2any')).default;
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.90,
+      });
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+      activeFile = new File([blob], newName, { type: 'image/jpeg' });
+    } catch (conversionErr) {
+      console.warn('[R2 Storage] HEIC conversion warning:', conversionErr);
+    }
+  }
+
+  const isImage = ALLOWED_TYPES.image.includes(activeFile.type) || activeFile.type.startsWith('image/') || isHeic;
+  const isVideo = ALLOWED_TYPES.video.includes(activeFile.type) || activeFile.type.startsWith('video/');
 
   if (!isImage && !isVideo) {
-    throw new Error(`Unsupported file type: ${file.type}. Only images and videos are allowed.`);
+    throw new Error(`Unsupported file type: ${activeFile.type || 'unknown'}. Only images and videos are allowed.`);
   }
 
   const fileType = isImage ? 'image' : 'video';
   const maxSize  = isImage ? R2_BUDGET_LIMITS.MAX_IMAGE_BYTES : R2_BUDGET_LIMITS.MAX_VIDEO_BYTES;
 
-  if (file.size > maxSize) {
+  if (activeFile.size > maxSize) {
     const maxMB  = (maxSize / (1024 * 1024)).toFixed(0);
-    const fileMB = (file.size / (1024 * 1024)).toFixed(2);
+    const fileMB = (activeFile.size / (1024 * 1024)).toFixed(2);
     throw new Error(`File too large: ${fileMB} MB. Maximum ${maxMB} MB for ${fileType}s.`);
   }
+
 
   if (onProgress) onProgress(5);
 
@@ -51,9 +78,9 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        filename: file.name,
-        mimeType: file.type || (isImage ? 'image/jpeg' : 'video/mp4'),
-        sizeBytes: file.size,
+        filename: activeFile.name,
+        mimeType: activeFile.type || (isImage ? 'image/jpeg' : 'video/mp4'),
+        sizeBytes: activeFile.size,
         category,
       }),
     });
@@ -62,7 +89,7 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
       const errData = await presignRes.json().catch(() => ({}));
       if (errData.missingConfig || presignRes.status === 503) {
         console.warn('[R2] Server credentials not configured — using local data URL.');
-        return await fallbackToDataUrl(file, fileType);
+        return await fallbackToDataUrl(activeFile, fileType);
       }
       throw new Error(errData.error || `Presign failed (${presignRes.status})`);
     }
@@ -73,7 +100,7 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
     objectKey = result.objectKey;
   } catch (err) {
     console.warn('[R2] Presign request failed, using local fallback:', err.message);
-    return await fallbackToDataUrl(file, fileType);
+    return await fallbackToDataUrl(activeFile, fileType);
   }
 
   if (onProgress) onProgress(15);
@@ -82,7 +109,7 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
   await new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', uploadUrl, true);
-    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.setRequestHeader('Content-Type', activeFile.type || 'application/octet-stream');
     xhr.setRequestHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
     if (onProgress && xhr.upload) {
@@ -102,10 +129,11 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
       }
     };
     xhr.onerror = () => reject(new Error('Network error uploading to Cloudflare R2.'));
-    xhr.send(file);
+    xhr.send(activeFile);
   });
 
-  return { publicUrl, objectKey, fileType, sizeBytes: file.size };
+  return { publicUrl, objectKey, fileType, sizeBytes: activeFile.size };
+
 }
 
 /**

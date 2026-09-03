@@ -53,10 +53,11 @@ export default function MemoryTimeline({
   };
 
   const processFiles = async (fileList) => {
-    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif|avif|svg)$/i.test(f.name));
     if (validFiles.length === 0) return;
     setIsUploading(true);
     setUploadProgress(10);
+
 
 
     const newMemories = [];
@@ -389,9 +390,10 @@ export default function MemoryTimeline({
       <input 
         ref={fileInputRef} 
         type="file" 
-        accept="image/*" 
+        accept="image/*,image/heic,image/heif,.heic,.heif" 
         multiple 
         style={{ display: 'none' }} 
+
         onChange={(e) => {
           if (e.target.files && e.target.files.length > 0) {
             processFiles(e.target.files);

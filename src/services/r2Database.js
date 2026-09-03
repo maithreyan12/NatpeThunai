@@ -613,50 +613,40 @@ export async function deleteSpiralItemR2(itemId) {
 
 export const INITIAL_REELS = [
   {
-    id: "reel-01",
-    title: "The Genesis Dawn & First Spark",
+    id: "reel-user-01",
+    title: "Ganggg Intro",
+    category: "Squad Vibe",
+    date: "First Year",
+    location: "Campus Common & Hallway",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/memories/2026-09/1788462046777-ks3ok7_ganggg_intro.mp4",
+    mediaType: "video",
+    description: "The squad stepping into the chapter together — pure unfiltered gang energy.",
+    isReel: true
+  },
+  {
+    id: "reel-user-02",
+    title: "First to Three Year Journey",
     category: "Milestone",
-    date: "August 14",
-    location: "Campus Common & Café",
-    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-1.mp4",
+    date: "Years 1 to 3",
+    location: "Squad Evolution",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/2026-09/1788462357125-3m258x_First_to_three_year.mp4",
     mediaType: "video",
-    description: "The very first day our squad bonded over chai and shared goals at the canteen.",
+    description: "From strangers in the classroom to an unbreakable family — our 3-year transformation.",
     isReel: true
   },
   {
-    id: "reel-02",
-    title: "Midnight Highway Roadtrip",
+    id: "reel-user-03",
+    title: "Life & Movie Day Out",
     category: "Adventures",
-    date: "April 22",
-    location: "Highway Beats & Zero Sleep",
-    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-2.mp4",
+    date: "Celebration",
+    location: "Movie Theater & Hangout",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/2026-09/1788462187886-54d1t9_life.mp4",
     mediaType: "video",
-    description: "High-volume Tamil tracks on the open road, turning ordinary nights into pure cinema.",
-    isReel: true
-  },
-  {
-    id: "reel-03",
-    title: "Squad Celebration & Pure Laughter",
-    category: "Celebration",
-    date: "November 18",
-    location: "Beachside Sunset Gathering",
-    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-3.webm",
-    mediaType: "video",
-    description: "Laughing until our stomachs hurt, celebrating every milestone together.",
-    isReel: true
-  },
-  {
-    id: "reel-04",
-    title: "Squad Strong Forever & Infinity",
-    category: "Sanctuary",
-    date: "Always & Forever",
-    location: "Natpe Thunai Sanctuary",
-    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-4.mp4",
-    mediaType: "video",
-    description: "More than friends — family by choice. Natpe Thunai forever and infinity.",
+    description: "Weekend theater runs, laughter, popcorn, and memories made for a lifetime.",
     isReel: true
   }
 ];
+
 
 
 

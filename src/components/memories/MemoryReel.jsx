@@ -39,12 +39,30 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [isPlaying, setIsPlaying] = useState(true); // Automatically starts slideshow
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isPortrait, setIsPortrait] = useState(false);
   const reelContainerRef = useRef(null);
   const videoRef = useRef(null);
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
   const currentDuration = 8000;
+
+  // Detect video dimensions and orientation
+  const handleLoadedMetadata = (e) => {
+    const { videoWidth, videoHeight } = e.target;
+    if (videoHeight && videoWidth) {
+      setIsPortrait(videoHeight > videoWidth);
+    }
+  };
+
+  // Sync orientation on index change
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid && vid.videoWidth && vid.videoHeight) {
+      setIsPortrait(vid.videoHeight > vid.videoWidth);
+    }
+  }, [safeIndex, activeItem?.mediaUrl]);
+
 
   // Ensure HTML5 video starts playing when slide changes or isPlaying changes
   useEffect(() => {
@@ -149,7 +167,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
         </div>
       ) : (
         <div 
-          className={`reel-theater-card ${isFullscreen ? 'fullscreen-mode' : ''}`}
+          className={`reel-theater-card ${isFullscreen ? 'fullscreen-mode' : ''} ${isPortrait ? 'is-portrait' : 'is-landscape'}`}
           ref={reelContainerRef}
         >
           {/* Slide Progress Bars */}
@@ -168,17 +186,34 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             ))}
           </div>
 
-          {/* Video Reel Viewport */}
-          <div className="reel-media-stage" onClick={togglePlay} title={isPlaying ? "Click to Pause" : "Click to Play"}>
+          {/* Video Reel Viewport — Dynamically Formats to Portrait or Landscape */}
+          <div 
+            className={`reel-media-stage ${isPortrait ? 'stage-portrait' : 'stage-landscape'}`} 
+            onClick={togglePlay} 
+            title={isPlaying ? "Click to Pause" : "Click to Play"}
+          >
+            {/* Ambient Blurred Video Glow for Portrait Framing */}
+            {isPortrait && (
+              <video 
+                src={activeItem.mediaUrl}
+                className="reel-ambient-backdrop"
+                muted
+                playsInline
+                aria-hidden="true"
+                key={`ambient-${activeItem.id || safeIndex}`}
+              />
+            )}
+
             <video 
               ref={videoRef}
               src={activeItem.mediaUrl} 
-              className="reel-media-element" 
+              className={`reel-media-element ${isPortrait ? 'media-portrait' : 'media-landscape'}`} 
               autoPlay={isPlaying}
               playsInline
               loop 
               muted={isMuted}
               preload="auto"
+              onLoadedMetadata={handleLoadedMetadata}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               key={activeItem.id || safeIndex}
@@ -207,6 +242,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             <div className="reel-caption-overlay">
               <div className="reel-caption-meta">
                 <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
+                <span className="reel-badge-orientation">{isPortrait ? "📱 Portrait Reel" : "🎬 Widescreen"}</span>
                 <span className="reel-date">{activeItem.date || ""}</span>
                 {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
               </div>
@@ -216,6 +252,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
               )}
             </div>
           </div>
+
 
           {/* Bottom Bar Controls */}
           <div className="reel-controls-bar">
