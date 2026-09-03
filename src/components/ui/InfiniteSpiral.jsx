@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import './InfiniteSpiral.css';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -25,7 +25,7 @@ const InfiniteSpiral = ({
   centerScale = 1.2,
   edgeFade = 0.3,
   edgeBlur = 6,
-  pauseOnHover = true,
+  pauseOnHover = false,
   imageFit = 'cover',
   grayscale = 0,
   className = '',
@@ -41,6 +41,11 @@ const InfiniteSpiral = ({
   const draggingRef = useRef(false);
   const lastPointerYRef = useRef(0);
   const dragMovedRef = useRef(false);
+
+  // 5-second photo freeze state on tap
+  const photoPausedUntilRef = useRef(0);
+  const pauseTimerRef = useRef(null);
+  const [activePausedIndex, setActivePausedIndex] = useState(null);
 
   const normalizedItems = useMemo(
     () =>
@@ -95,7 +100,8 @@ const InfiniteSpiral = ({
       previousTime = time;
 
       const autoEnabled = animationMode === 'auto' || animationMode === 'all';
-      const motionPaused = draggingRef.current || (pauseOnHover && hoveredRef.current);
+      const isPhotoPaused = Date.now() < photoPausedUntilRef.current;
+      const motionPaused = draggingRef.current || (pauseOnHover && hoveredRef.current) || isPhotoPaused;
       const directionMultiplier = direction === 'down' ? -1 : 1;
       const desiredAutoSpeed =
         autoEnabled && visibleRef.current && !reducedMotion.matches && !motionPaused
@@ -107,6 +113,7 @@ const InfiniteSpiral = ({
 
       const followBlend = 1 - Math.exp(-delta * (draggingRef.current ? 22 : 11));
       progressRef.current += (targetProgressRef.current - progressRef.current) * followBlend;
+
 
       const count = normalizedItems.length;
       const half = count / 2;
@@ -136,10 +143,12 @@ const InfiniteSpiral = ({
         const blur = edgeBlur * smoothstep(0.35, 1, edge);
         card.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${offset * verticalSpacing * fit}px, 0) rotateZ(${cardTilt}deg) scale(${visualScale})`;
         card.style.opacity = opacity.toFixed(3);
+
         card.style.filter = blur > 0.01 ? `blur(${blur.toFixed(2)}px)` : 'none';
         card.style.zIndex = String(Math.round(depth * 100000) + index);
         card.style.pointerEvents = opacity > 0.25 ? 'auto' : 'none';
       });
+
 
       frameId = requestAnimationFrame(render);
     };
@@ -151,6 +160,7 @@ const InfiniteSpiral = ({
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };
   }, [
     normalizedItems,
@@ -197,6 +207,14 @@ const InfiniteSpiral = ({
       ref={rootRef}
       className={`infinite-spiral ${className}`.trim()}
       style={rootStyle}
+      onClick={() => {
+        // Tapping anywhere outside the photos immediately resumes scrolling
+        if (photoPausedUntilRef.current > 0) {
+          if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+          photoPausedUntilRef.current = 0;
+          setActivePausedIndex(null);
+        }
+      }}
       onMouseEnter={() => {
         hoveredRef.current = true;
       }}
@@ -231,20 +249,36 @@ const InfiniteSpiral = ({
       <div className="infinite-spiral__stage" role="list" aria-label="Infinite spiral gallery">
         {normalizedItems.map((item, index) => {
           const Card = item.href ? 'a' : 'div';
+          const isCurrentPaused = activePausedIndex === index;
           return (
             <Card
               key={item.id ?? `${item.src}-${index}`}
               ref={node => {
                 cardRefs.current[index] = node;
               }}
-              className="infinite-spiral__item"
+              className={`infinite-spiral__item ${isCurrentPaused ? 'infinite-spiral__item--paused' : ''}`}
               style={{ width: cardWidth, height: cardHeight, borderRadius: cardRadius }}
               href={item.href}
               target={item.target}
               rel={item.target === '_blank' ? 'noreferrer' : undefined}
               role="listitem"
               aria-label={item.label ?? item.alt}
-              onClick={() => onItemClick && onItemClick(item, index)}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (dragMovedRef.current) return;
+
+                // Stop on this photo for exactly 5 seconds
+                if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+                photoPausedUntilRef.current = Date.now() + 5000;
+                setActivePausedIndex(index);
+
+                pauseTimerRef.current = setTimeout(() => {
+                  photoPausedUntilRef.current = 0;
+                  setActivePausedIndex(null);
+                }, 5000);
+
+                if (onItemClick) onItemClick(item, index);
+              }}
             >
               <img
                 className="infinite-spiral__image"
@@ -274,5 +308,6 @@ const InfiniteSpiral = ({
     </div>
   );
 };
+
 
 export default InfiniteSpiral;
