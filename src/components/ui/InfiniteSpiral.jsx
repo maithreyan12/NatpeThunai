@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import './InfiniteSpiral.css';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -29,7 +29,7 @@ const InfiniteSpiral = ({
   imageFit = 'cover',
   grayscale = 0,
   className = '',
-  onItemClick = null
+  onCardClick
 }) => {
   const rootRef = useRef(null);
   const cardRefs = useRef([]);
@@ -65,7 +65,7 @@ const InfiniteSpiral = ({
     let lastScrollY = window.scrollY;
 
     const resizeObserver = new ResizeObserver(() => {
-      if (root) bounds = root.getBoundingClientRect();
+      bounds = root.getBoundingClientRect();
     });
     resizeObserver.observe(root);
 
@@ -244,7 +244,7 @@ const InfiniteSpiral = ({
               rel={item.target === '_blank' ? 'noreferrer' : undefined}
               role="listitem"
               aria-label={item.label ?? item.alt}
-              onClick={() => onItemClick && onItemClick(item, index)}
+              onClick={() => onCardClick?.(item, index)}
             >
               <img
                 className="infinite-spiral__image"
@@ -252,12 +252,7 @@ const InfiniteSpiral = ({
                 alt={item.alt}
                 loading={index < 6 ? 'eager' : 'lazy'}
                 draggable={false}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  if (item.fallbackSrc && item.fallbackSrc !== e.target.src) {
-                    e.target.src = item.fallbackSrc;
-                  }
-                }}
+                onError={(e) => { e.target.style.display = 'none'; }}
                 style={{
                   width: cardWidth,
                   height: cardHeight,
