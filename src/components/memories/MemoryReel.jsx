@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, 
   Pause, 
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 import { subscribeToReelsR2, INITIAL_REELS, isVideoMedia } from '../../services/r2Database';
 import './MemoryReel.css';
+
 
 export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [internalReels, setInternalReels] = useState(INITIAL_REELS);
