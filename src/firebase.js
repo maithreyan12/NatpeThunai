@@ -5,7 +5,6 @@ import {
   initializeAuth, 
   browserLocalPersistence, 
   browserSessionPersistence, 
-  indexedDBLocalPersistence,
   browserPopupRedirectResolver, 
   GoogleAuthProvider, 
   signInWithPopup, 
@@ -41,7 +40,7 @@ const app = initializeApp(firebaseConfig);
 let auth;
 try {
   auth = initializeAuth(app, {
-    persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence],
+    persistence: [browserLocalPersistence, browserSessionPersistence],
     popupRedirectResolver: browserPopupRedirectResolver
   });
 } catch {
@@ -68,7 +67,7 @@ export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
 export const isAuthorizedAdmin = (user) => {
   if (!user || !user.email) return false;
   const userEmail = user.email.trim().toLowerCase();
-  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => adminEmail.trim().toLowerCase() === userEmail);
 };
 
 // Check redirect result on app load if redirected
@@ -78,7 +77,7 @@ export const checkRedirectResult = async () => {
     if (result?.user) {
       if (!isAuthorizedAdmin(result.user)) {
         await signOut(auth);
-        const err = new Error("Access Denied: Only the administrator is permitted to log in.");
+        const err = new Error(`Access Denied: ${result.user.email} is not permitted to log in.`);
         err.code = "auth/unauthorized-account";
         throw err;
       }
@@ -93,11 +92,11 @@ export const checkRedirectResult = async () => {
 // Auth functions
 export const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider, browserPopupRedirectResolver);
+    const result = await signInWithPopup(auth, googleProvider);
     if (result?.user) {
       if (!isAuthorizedAdmin(result.user)) {
         await signOut(auth);
-        const err = new Error("Access Denied: Only the administrator is permitted to log in.");
+        const err = new Error(`Access Denied: ${result.user.email} is not permitted to log in.`);
         err.code = "auth/unauthorized-account";
         throw err;
       }
@@ -117,8 +116,13 @@ export const signInWithGoogle = async () => {
       err.message?.toLowerCase().includes('indexeddb') || 
       err.message?.toLowerCase().includes('database')
     ) {
-      await signInWithRedirect(auth, googleProvider);
-      return null;
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      } catch (redirectErr) {
+        console.warn("Redirect sign in failed:", redirectErr);
+        throw redirectErr;
+      }
     }
     throw err;
   }

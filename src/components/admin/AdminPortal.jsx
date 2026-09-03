@@ -389,7 +389,7 @@ export default function AdminPortal({ onExit, currentUser }) {
           triggerToast(`Welcome back, Admin! 🛡️`);
         } else {
           setIsAuthenticated(false);
-          setAuthError('Access Denied. Only the authorized administrator can access this console.');
+          setAuthError(`Access Denied: ${user.email} is not on the authorized administrator list.`);
           await logOut();
         }
       }
@@ -399,9 +399,11 @@ export default function AdminPortal({ onExit, currentUser }) {
         // User closed popup, don't show error
         setAuthError('');
       } else if (err.code === 'auth/unauthorized-account' || err.message?.includes('Access Denied')) {
-        setAuthError('Access Denied: This Google account is not on the authorized administrator list.');
+        setAuthError(err.message || 'Access Denied: This Google account is not on the authorized administrator list.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setAuthError('Pop-up was blocked by your browser. Redirecting to Google...');
       } else if (err.message && err.message.toLowerCase().includes('database is closing')) {
-        setAuthError('Browser session refreshed. Please click "Continue with Google" once more.');
+        setAuthError('Session updated. Please click "Continue with Google" once more.');
       } else {
         setAuthError(err.message || 'Sign in could not be completed. Please try again.');
       }
