@@ -351,23 +351,12 @@ export default function App() {
       <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
 
       {/* ── MODALS ── */}
-      <CreatePostModal 
-        isOpen={isCreatePostOpen}
-        onClose={() => setIsCreatePostOpen(false)}
-        onSave={handleSavePost}
-        currentUser={currentUser}
-      />
-
-      <AddEventModal 
-        isOpen={isAddEventOpen}
-        onClose={() => setIsAddEventOpen(false)}
-        onSave={handleSaveEvent}
-      />
       <LightboxModal 
         isOpen={Boolean(lightboxMemory)}
         onClose={() => setLightboxMemory(null)}
         memory={lightboxMemory}
       />
+
 
 
       <FriendModal 
