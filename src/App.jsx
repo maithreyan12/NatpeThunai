@@ -182,7 +182,7 @@ export default function App() {
 
   // Scroll spy observer
   useEffect(() => {
-    const sections = ['hero', 'story', 'journey', 'members', 'timeline', 'reel'];
+    const sections = ['hero', 'story', 'journey', 'members', 'album-teaser', 'reel'];
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 200;
       for (const sectionId of sections) {
@@ -323,21 +323,6 @@ export default function App() {
           memories={memories}
         />
 
-        {/* 6. Chronological Memory Timeline with Scrollable Filter */}
-        <MemoryTimeline 
-          memories={memories}
-          members={members}
-          activeMemberFilter={activeMemberFilter}
-          onSelectMemberFilter={setActiveMemberFilter}
-          onReact={handleReactMemory}
-          onAddComment={handleAddComment}
-          onOpenLightbox={(m) => setLightboxMemory(m)}
-          onUploadPhotos={handleUploadPhotos}
-          currentUser={currentUser}
-        />
-
-
-
         {/* 6. Cinematic Memory Reel */}
         <MemoryReel 
           memories={memories}
@@ -350,6 +335,7 @@ export default function App() {
           onOpenAdmin={navigateToAdmin}
           currentUser={currentUser}
         />
+
       </main>
 
       {/* ── CORNER FLOATING MESSAGE & AI CHAT WIDGET ── */}
