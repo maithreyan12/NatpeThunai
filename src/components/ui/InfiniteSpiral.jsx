@@ -316,9 +316,13 @@ const InfiniteSpiral = ({
                   height: cardHeight,
                   maxWidth: 'none',
                   maxHeight: 'none',
-                  objectFit: imageFit,
+                  objectFit: item.objectFit || imageFit,
+                  objectPosition: item.objectPosition || 'center center',
+                  transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined,
+                  transformOrigin: item.objectPosition || 'center center',
                   filter: `grayscale(${Math.min(1, Math.max(0, grayscale))})`
                 }}
+
               />
             </Card>
           );

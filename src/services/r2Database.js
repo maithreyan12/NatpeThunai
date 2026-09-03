@@ -558,8 +558,12 @@ export async function saveSpiralItemR2(spiralData) {
     src: spiralData.src,
     alt: spiralData.alt || 'Squad Memory',
     title: spiralData.title || spiralData.alt || 'Squad Moment',
+    objectPosition: spiralData.objectPosition || 'center center',
+    objectFit: spiralData.objectFit || 'cover',
+    scale: Number(spiralData.scale) || 1,
     updatedAt: new Date().toISOString()
   };
+
   const current = cache.get(COLLECTIONS.SPIRAL) || INITIAL_SPIRAL_ITEMS;
   const existingIdx = current.findIndex(s => s.id === item.id);
   const updated = existingIdx >= 0

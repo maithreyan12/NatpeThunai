@@ -690,17 +690,42 @@ export default function AdminPortal({ onExit, currentUser }) {
   // ── Infinite Spiral CRUD ──
   const openAddSpiralItem = () => {
     setEditingSpiralItem(null);
-    setSpiralForm({ id: '', src: '', alt: 'Squad Memory', title: '' });
+    setSpiralForm({
+      id: '',
+      src: '',
+      alt: 'Squad Memory',
+      title: '',
+      positionY: 50,
+      objectPosition: 'center 50%',
+      objectFit: 'cover',
+      scale: 1
+    });
     setIsSpiralModalOpen(true);
   };
 
   const openEditSpiralItem = (item) => {
     setEditingSpiralItem(item);
+    let posY = 50;
+    if (item.positionY !== undefined) {
+      posY = Number(item.positionY);
+    } else if (item.objectPosition) {
+      if (item.objectPosition.includes('top')) posY = 15;
+      else if (item.objectPosition.includes('bottom')) posY = 85;
+      else {
+        const match = item.objectPosition.match(/(\d+)%/);
+        if (match) posY = parseInt(match[1], 10);
+      }
+    }
+
     setSpiralForm({
       id: item.id || '',
       src: item.src || '',
       alt: item.alt || '',
-      title: item.title || item.alt || ''
+      title: item.title || item.alt || '',
+      positionY: posY,
+      objectPosition: item.objectPosition || `center ${posY}%`,
+      objectFit: item.objectFit || 'cover',
+      scale: item.scale !== undefined ? Number(item.scale) : 1
     });
     setIsSpiralModalOpen(true);
   };
@@ -751,13 +776,14 @@ export default function AdminPortal({ onExit, currentUser }) {
       }
       return [...prev, payload];
     });
-    triggerToast(editingSpiralItem ? 'Updated spiral photo! 🌀' : 'Added new photo to Infinite Spiral! 🌀');
+    triggerToast(editingSpiralItem ? 'Updated spiral photo & framing! 🌀' : 'Added new photo to Infinite Spiral! 🌀');
     try {
       await saveSpiralItemR2(payload);
     } catch (err) {
       triggerToast(`Spiral save error: ${err.message}`);
     }
   };
+
 
   const handleDeleteSpiralItem = async (id, title) => {
     if (window.confirm(`Remove photo "${title || 'this photo'}" from Infinite Spiral?`)) {
@@ -1284,12 +1310,30 @@ export default function AdminPortal({ onExit, currentUser }) {
                 <div className="admin-cards-grid">
                   {spiralItems.map((item, idx) => (
                     <div key={item.id || idx} className="admin-card-item">
-                      <img src={item.src} alt={item.alt || item.title} className="admin-card-img" />
+                      <div style={{ position: 'relative', overflow: 'hidden', height: '170px', background: 'rgba(0,0,0,0.3)' }}>
+                        <img 
+                          src={item.src} 
+                          alt={item.alt || item.title} 
+                          className="admin-card-img" 
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: item.objectFit || 'cover',
+                            objectPosition: item.objectPosition || 'center center',
+                            transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined
+                          }}
+                        />
+                        {item.positionY !== undefined && item.positionY !== 50 && (
+                          <span style={{ position: 'absolute', bottom: '8px', right: '8px', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(0,0,0,0.7)', color: '#a5b4fc', backdropFilter: 'blur(4px)' }}>
+                            Focus: {item.positionY}%
+                          </span>
+                        )}
+                      </div>
                       <div className="admin-card-body">
                         <div className="admin-card-header-row">
                           <span className="admin-card-badge">Position #{idx + 1}</span>
                           <div className="admin-row-actions">
-                            <button onClick={() => openEditSpiralItem(item)} className="admin-icon-action-btn" title="Edit Photo">
+                            <button onClick={() => openEditSpiralItem(item)} className="admin-icon-action-btn" title="Edit Photo & Adjust Framing">
                               <Edit3 size={15} />
                             </button>
                             <button onClick={() => handleDeleteSpiralItem(item.id, item.title || item.alt)} className="admin-icon-action-btn delete" title="Delete Photo">
@@ -1303,6 +1347,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                     </div>
                   ))}
                 </div>
+
               )}
             </div>
           )}
@@ -1905,6 +1950,189 @@ export default function AdminPortal({ onExit, currentUser }) {
                   />
                 </div>
               </div>
+
+              {/* Live 3D Card Simulation Box */}
+              <div className="admin-input-group" style={{ marginTop: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontWeight: 600, color: '#c7d2fe' }}>Live 3D Spiral Card Preview</span>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                    Exact Card Aspect Ratio (195 × 145)
+                  </span>
+                </label>
+                <div style={{
+                  position: 'relative',
+                  width: '100%',
+                  maxWidth: '280px',
+                  height: '190px',
+                  margin: '4px auto 14px',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  border: '2px solid rgba(99, 102, 241, 0.45)',
+                  boxShadow: '0 14px 34px rgba(0, 0, 0, 0.45)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {spiralForm.src ? (
+                    <img
+                      src={spiralForm.src}
+                      alt="Card Live Preview"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: spiralForm.objectFit || 'cover',
+                        objectPosition: spiralForm.objectPosition || `center ${spiralForm.positionY ?? 50}%`,
+                        transform: spiralForm.scale && spiralForm.scale !== 1 ? `scale(${spiralForm.scale})` : undefined,
+                        transition: 'object-position 0.15s ease, transform 0.15s ease'
+                      }}
+                    />
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
+                      <Sparkles size={28} style={{ opacity: 0.4, margin: '0 auto 6px' }} />
+                      Choose or enter photo URL above
+                    </div>
+                  )}
+                  <span style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    left: '8px',
+                    fontSize: '0.68rem',
+                    padding: '3px 8px',
+                    borderRadius: '999px',
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    color: '#e0e7ff',
+                    backdropFilter: 'blur(6px)'
+                  }}>
+                    {spiralForm.objectFit === 'contain' ? 'Fit: Contain' : `Vertical Y: ${spiralForm.positionY ?? 50}%`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Portrait & Framing Adjustment Controls */}
+              <div style={{
+                background: 'rgba(99, 102, 241, 0.07)',
+                border: '1px solid rgba(99, 102, 241, 0.25)',
+                borderRadius: '12px',
+                padding: '14px',
+                marginBottom: '16px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#c7d2fe', margin: 0 }}>
+                    Portrait &amp; Framing Adjustment
+                  </label>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                    Adjust if heads or faces get cut off
+                  </span>
+                </div>
+
+                {/* Quick Presets for Vertical Alignment */}
+                <div style={{ marginBottom: '14px' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    Quick Focus Presets:
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {[
+                      { label: '👤 Top (Face Focus)', val: 10 },
+                      { label: '🎯 Upper (25%)', val: 25 },
+                      { label: '⚖️ Center (50%)', val: 50 },
+                      { label: '🔻 Lower (80%)', val: 80 },
+                    ].map(preset => {
+                      const isSelected = (spiralForm.positionY ?? 50) === preset.val;
+                      return (
+                        <button
+                          key={preset.val}
+                          type="button"
+                          onClick={() => {
+                            setSpiralForm(prev => ({
+                              ...prev,
+                              positionY: preset.val,
+                              objectPosition: `center ${preset.val}%`
+                            }));
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '0.78rem',
+                            borderRadius: '8px',
+                            border: isSelected ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.15)',
+                            background: isSelected ? '#6366f1' : 'rgba(255,255,255,0.06)',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            fontWeight: isSelected ? 600 : 400
+                          }}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Fine-tune Vertical Offset Slider */}
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
+                    <span>Fine-Tune Vertical Offset (Y-Axis)</span>
+                    <strong style={{ color: '#818cf8' }}>{spiralForm.positionY ?? 50}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="2"
+                    value={spiralForm.positionY ?? 50}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      setSpiralForm(prev => ({
+                        ...prev,
+                        positionY: val,
+                        objectPosition: `center ${val}%`
+                      }));
+                    }}
+                    style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <span>0% (Top / Head)</span>
+                    <span>50% (Center)</span>
+                    <span>100% (Bottom)</span>
+                  </div>
+                </div>
+
+                {/* Fit Mode & Zoom Scale */}
+                <div className="admin-form-row" style={{ marginTop: '10px' }}>
+                  <div className="admin-input-group" style={{ marginBottom: 0 }}>
+                    <label style={{ fontSize: '0.78rem' }}>Display Fit</label>
+                    <select
+                      value={spiralForm.objectFit || 'cover'}
+                      onChange={(e) => setSpiralForm(prev => ({ ...prev, objectFit: e.target.value }))}
+                      style={{ padding: '7px 10px', fontSize: '0.82rem' }}
+                    >
+                      <option value="cover">Cover (Fill card seamlessly)</option>
+                      <option value="contain">Contain (Full portrait, no crop)</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-input-group" style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
+                      <label style={{ margin: 0, fontSize: '0.78rem' }}>Zoom Scale</label>
+                      <span style={{ color: '#818cf8', fontWeight: 600 }}>{Math.round((spiralForm.scale || 1) * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.8"
+                      max="1.4"
+                      step="0.05"
+                      value={spiralForm.scale || 1}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setSpiralForm(prev => ({ ...prev, scale: val }));
+                      }}
+                      style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
 
               <div className="admin-modal-actions">
                 <button type="button" onClick={() => setIsSpiralModalOpen(false)} className="admin-cancel-btn">
