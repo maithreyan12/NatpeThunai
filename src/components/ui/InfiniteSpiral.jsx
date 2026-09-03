@@ -64,23 +64,36 @@ const InfiniteSpiral = ({
     let frameId;
     let previousTime = performance.now();
     let bounds = root.getBoundingClientRect();
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reducedMotion = (typeof window !== 'undefined' && window.matchMedia) 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)') 
+      : { matches: false };
     const scrollEnabled = animationMode === 'scroll' || animationMode === 'all';
     const scrollSpeedMultiplier = Math.max(speed, 0) / 0.55;
-    let lastScrollY = window.scrollY;
+    let lastScrollY = window.scrollY || 0;
 
-    const resizeObserver = new ResizeObserver(() => {
-      if (root) bounds = root.getBoundingClientRect();
-    });
-    resizeObserver.observe(root);
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        if (root) bounds = root.getBoundingClientRect();
+      });
+      resizeObserver.observe(root);
+    } else {
+      const handleWinResize = () => { if (root) bounds = root.getBoundingClientRect(); };
+      window.addEventListener('resize', handleWinResize);
+    }
 
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        visibleRef.current = entry.isIntersecting;
-      },
-      { threshold: 0.02 }
-    );
-    intersectionObserver.observe(root);
+    let intersectionObserver = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      intersectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          visibleRef.current = entry.isIntersecting;
+        },
+        { threshold: 0.02 }
+      );
+      intersectionObserver.observe(root);
+    } else {
+      visibleRef.current = true;
+    }
 
     const handleScroll = () => {
       const nextScrollY = window.scrollY;
@@ -157,8 +170,8 @@ const InfiniteSpiral = ({
 
     return () => {
       cancelAnimationFrame(frameId);
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
+      if (resizeObserver) resizeObserver.disconnect();
+      if (intersectionObserver) intersectionObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);
       if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
     };

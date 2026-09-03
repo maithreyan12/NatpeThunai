@@ -12,34 +12,38 @@ import {
 } from 'lucide-react';
 import './MemoryReel.css';
 
-export default function MemoryReel({ memories }) {
-  // Extract all memories that have media
-  const reelItems = memories.filter(m => m.mediaUrl);
+export default function MemoryReel({ memories = [] }) {
+  // Extract all memories that have valid media
+  const safeMemories = Array.isArray(memories) ? memories : [];
+  const reelItems = safeMemories.filter(m => m && typeof m.mediaUrl === 'string' && m.mediaUrl.trim().length > 0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const reelContainerRef = useRef(null);
 
-  const activeItem = reelItems[currentIndex];
+  const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
+  const activeItem = reelItems[safeIndex] || null;
 
   // Auto progression when playing
   useEffect(() => {
-    if (!isPlaying || reelItems.length === 0) return;
-    const duration = activeItem?.mediaType === 'video' ? 10000 : 5000;
+    if (!isPlaying || reelItems.length === 0 || !activeItem) return;
+    const duration = activeItem.mediaType === 'video' ? 10000 : 5000;
     const timer = setTimeout(() => {
       setCurrentIndex(prev => (prev + 1) % reelItems.length);
     }, duration);
     return () => clearTimeout(timer);
-  }, [isPlaying, currentIndex, reelItems.length, activeItem]);
+  }, [isPlaying, safeIndex, reelItems.length, activeItem]);
 
   const handlePrev = (e) => {
     e?.stopPropagation();
+    if (reelItems.length === 0) return;
     setCurrentIndex(prev => (prev - 1 + reelItems.length) % reelItems.length);
   };
 
   const handleNext = (e) => {
     e?.stopPropagation();
+    if (reelItems.length === 0) return;
     setCurrentIndex(prev => (prev + 1) % reelItems.length);
   };
 
@@ -68,7 +72,7 @@ export default function MemoryReel({ memories }) {
         </p>
       </div>
 
-      {reelItems.length === 0 ? (
+      {reelItems.length === 0 || !activeItem ? (
         <div className="empty-state-box">
           <div className="empty-state-icon">
             <Film size={26} />
@@ -87,12 +91,12 @@ export default function MemoryReel({ memories }) {
           <div className="reel-progress-indicators">
             {reelItems.map((item, idx) => (
               <div 
-                key={item.id} 
+                key={item?.id || `reel-track-${idx}`} 
                 className="progress-segment-track"
                 onClick={() => setCurrentIndex(idx)}
               >
                 <div 
-                  className={`progress-segment-fill ${idx === currentIndex ? (isPlaying ? 'animating' : 'active') : (idx < currentIndex ? 'completed' : '')}`}
+                  className={`progress-segment-fill ${idx === safeIndex ? (isPlaying ? 'animating' : 'active') : (idx < safeIndex ? 'completed' : '')}`}
                 />
               </div>
             ))}
@@ -107,14 +111,14 @@ export default function MemoryReel({ memories }) {
                 autoPlay={isPlaying}
                 loop 
                 muted={isMuted}
-                key={activeItem.id}
+                key={activeItem.id || safeIndex}
               />
             ) : (
               <img 
                 src={activeItem.mediaUrl} 
-                alt={activeItem.title} 
+                alt={activeItem.title || 'Squad Memory'} 
                 className="reel-media-element" 
-                key={activeItem.id}
+                key={activeItem.id || safeIndex}
               />
             )}
 
@@ -134,10 +138,10 @@ export default function MemoryReel({ memories }) {
             <div className="reel-caption-overlay">
               <div className="reel-caption-meta">
                 <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
-                <span className="reel-date">{activeItem.date}</span>
+                <span className="reel-date">{activeItem.date || ""}</span>
                 {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
               </div>
-              <h3 className="reel-item-title">{activeItem.title}</h3>
+              <h3 className="reel-item-title">{activeItem.title || "Squad Memory"}</h3>
               {activeItem.description && (
                 <p className="reel-item-desc">{activeItem.description}</p>
               )}
@@ -157,7 +161,7 @@ export default function MemoryReel({ memories }) {
               </button>
 
               <span className="reel-counter-text">
-                {currentIndex + 1} of {reelItems.length}
+                {safeIndex + 1} of {reelItems.length}
               </span>
             </div>
 
