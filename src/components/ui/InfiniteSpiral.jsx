@@ -287,9 +287,15 @@ const InfiniteSpiral = ({
                 loading={index < 6 ? 'eager' : 'lazy'}
                 draggable={false}
                 onError={(e) => {
-                  e.target.onerror = null;
-                  if (item.fallbackSrc && item.fallbackSrc !== e.target.src) {
+                  const currentSrc = e.target.src;
+                  if (item.fallbackSrc && currentSrc !== item.fallbackSrc && !currentSrc.endsWith(item.fallbackSrc)) {
                     e.target.src = item.fallbackSrc;
+                  } else {
+                    e.target.onerror = null;
+                    if (currentSrc.includes('r2.dev') || currentSrc.includes('pub-')) {
+                      const filename = currentSrc.split('/').pop().split('?')[0];
+                      e.target.src = `/photos/${filename}`;
+                    }
                   }
                 }}
                 style={{
