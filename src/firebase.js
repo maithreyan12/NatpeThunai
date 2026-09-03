@@ -54,10 +54,17 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-export const AUTHORIZED_ADMIN_EMAIL = 'maithreyan2006@gmail.com';
+export const AUTHORIZED_ADMIN_EMAILS = [
+  'maithreyan2006@gmail.com',
+  'jaffreenmarinvanan4@gmail.com'
+];
+
+export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
 
 export const isAuthorizedAdmin = (user) => {
-  return Boolean(user && user.email && user.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
+  if (!user || !user.email) return false;
+  const userEmail = user.email.trim().toLowerCase();
+  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === userEmail);
 };
 
 // Check redirect result on app load if redirected
