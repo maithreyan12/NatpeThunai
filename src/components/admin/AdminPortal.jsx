@@ -13,9 +13,10 @@ import {
   subscribeToEventsR2, saveEventR2, deleteEventR2,
   subscribeToJourneyR2, saveJourneyMilestoneR2,
   subscribeToSpiralR2, saveSpiralItemR2, deleteSpiralItemR2,
-  subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS,
+  subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS, isVideoMedia,
   bootR2Database,
 } from '../../services/r2Database';
+
 
 
 import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
@@ -337,15 +338,20 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
-  // Direct Photo File Upload for Memory
+  // Direct Photo File Upload for Memory (PHOTOS ONLY)
   const handleMemoryPhotoFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      triggerToast('Memory Chapters is strictly for photos! Please choose an image file (JPG/PNG/WebP) 📸');
+      return;
+    }
+
     // Show instant preview
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setMemoryForm(prev => ({ ...prev, mediaUrl: ev.target.result }));
+      setMemoryForm(prev => ({ ...prev, mediaUrl: ev.target.result, mediaType: 'image' }));
     };
     reader.readAsDataURL(file);
 
@@ -353,7 +359,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     try {
       const result = await uploadToR2WithGuardrails(file, 'memories');
       if (result?.publicUrl) {
-        setMemoryForm(prev => ({ ...prev, mediaUrl: result.publicUrl }));
+        setMemoryForm(prev => ({ ...prev, mediaUrl: result.publicUrl, mediaType: 'image' }));
         triggerToast(`Memory photo uploaded to R2! ☁️`);
       }
     } catch (err) {
@@ -364,40 +370,45 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
-  // Direct Photo/Video Upload for Reel Slide
+  // Direct Video Upload for Reel Slide (VIDEOS ONLY)
   const handleReelPhotoFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const isVideo = file.type.startsWith('video/');
+    if (!file.type.startsWith('video/')) {
+      triggerToast('Cinematic Reels is strictly for videos! Please choose an MP4, WebM, or MOV video 🎬');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       setReelForm(prev => ({
         ...prev,
         mediaUrl: ev.target.result,
-        mediaType: isVideo ? 'video' : 'image'
+        mediaType: 'video'
       }));
     };
     reader.readAsDataURL(file);
 
     setReelPhotoUploading(true);
     try {
-      const result = await uploadToR2WithGuardrails(file, 'memories');
+      const result = await uploadToR2WithGuardrails(file, 'reels');
       if (result?.publicUrl) {
         setReelForm(prev => ({
           ...prev,
           mediaUrl: result.publicUrl,
-          mediaType: isVideo ? 'video' : 'image'
+          mediaType: 'video'
         }));
-        triggerToast(`Reel media uploaded to Cloudflare R2! ☁️🎬`);
+        triggerToast(`Reel video uploaded to Cloudflare R2! ☁️🎬`);
       }
     } catch (err) {
       console.warn("R2 Upload warning:", err);
-      triggerToast(`Media selected for reel`);
+      triggerToast(`Video selected for reel`);
     } finally {
       setReelPhotoUploading(false);
     }
   };
+
 
 
   // ── Live R2 subscriptions — push updates to this component AND public website ──
@@ -508,13 +519,14 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   const handleDeleteMember = async (id, name) => {
-    if (window.confirm(`Remove ${name} from the squad list?`)) {
+    if (window.confirm(`Remove ${name} from the squad list? (This will ONLY remove from Squad Members and will NOT delete photos from any other sections or the database)`)) {
       // ⚡ Instant optimistic deletion
       setMembers(prev => prev.filter(m => m.id !== id));
       triggerToast(`Removed ${name} 🗑️`);
       deleteMemberR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
+
 
   // Memory CRUD
   const openAddMemory = () => {
@@ -567,7 +579,7 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   const handleDeleteMemory = async (id, title) => {
-    if (window.confirm(`Delete memory chapter "${title || 'this chapter'}"?`)) {
+    if (window.confirm(`Delete memory chapter "${title || 'this chapter'}" from Memory Chapters? (This will ONLY remove it from Memory Chapters and will NOT delete files from any other sections or the database)`)) {
       // ⚡ Instant optimistic deletion
       setMemories(prev => prev.filter(m => m.id !== id));
       triggerToast(`Deleted memory "${title || id}" 🗑️`);
@@ -575,7 +587,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
-  // ── Reel (Cinematic Archive) CRUD ──
+  // ── Reel (Cinematic Archive) CRUD — VIDEOS ONLY ──
   const openAddReel = () => {
     setEditingReel(null);
     setReelForm({
@@ -585,7 +597,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       location: 'Squad Sanctuary',
       description: '',
       mediaUrl: '',
-      mediaType: 'image'
+      mediaType: 'video'
     });
     setIsReelModalOpen(true);
   };
@@ -599,7 +611,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       location: reel.location || '',
       description: reel.description || '',
       mediaUrl: reel.mediaUrl || '',
-      mediaType: reel.mediaType || 'image'
+      mediaType: 'video'
     });
     setIsReelModalOpen(true);
   };
@@ -607,17 +619,18 @@ export default function AdminPortal({ onExit, currentUser }) {
   const handleSaveReel = async (e) => {
     e.preventDefault();
     if (!reelForm.mediaUrl) {
-      triggerToast('Please upload a photo or provide a media URL 📸');
+      triggerToast('Please upload a video or provide a video URL 🎬');
       return;
     }
     setIsReelModalOpen(false);
     try {
       const payload = editingReel
-        ? { ...editingReel, ...reelForm }
+        ? { ...editingReel, ...reelForm, mediaType: 'video' }
         : {
             id: `reel_${Date.now()}`,
             ...reelForm,
             category: reelForm.category || 'Adventures',
+            mediaType: 'video',
             isReel: true,
             timestamp: Date.now()
           };
@@ -632,7 +645,7 @@ export default function AdminPortal({ onExit, currentUser }) {
         return [payload, ...prev];
       });
       await saveReelR2(payload);
-      triggerToast(editingReel ? `Updated Reel slide! 🎬` : `New Reel slide published to Cinematic Archive! 🎬`);
+      triggerToast(editingReel ? `Updated Reel video slide! 🎬` : `New Reel video published to Cinematic Archive! 🎬`);
       setEditingReel(null);
     } catch (err) {
       triggerToast(`Reel save failed: ${err.message}`);
@@ -640,13 +653,14 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   const handleDeleteReel = async (id, title) => {
-    if (window.confirm(`Delete reel slide "${title || 'this slide'}" from Cinematic Archive?`)) {
+    if (window.confirm(`Delete reel slide "${title || 'this slide'}" from Cinematic Reels? (This will ONLY remove it from Cinematic Reels and will NOT delete files from any other sections or the database)`)) {
       // ⚡ Instant optimistic deletion from REELS only (never touches memories!)
       setReelItems(prev => prev.filter(m => m.id !== id));
-      triggerToast(`Reel slide removed 🗑️`);
+      triggerToast(`Reel video slide removed 🗑️`);
       deleteReelR2(id).catch(err => triggerToast(`Delete failed: ${err.message}`));
     }
   };
+
 
 
   // ── Friendship Journey Milestones CRUD ──
@@ -809,13 +823,14 @@ export default function AdminPortal({ onExit, currentUser }) {
 
 
   const handleDeleteSpiralItem = async (id, title) => {
-    if (window.confirm(`Remove photo "${title || 'this photo'}" from Infinite Spiral?`)) {
+    if (window.confirm(`Remove photo "${title || 'this photo'}" from Infinite Spiral only? (This will ONLY remove it from the spiral and will NOT delete files from other modules or the database)`)) {
       // ⚡ Instant optimistic update
       setSpiralItems(prev => prev.filter(s => s.id !== id));
       triggerToast('Spiral photo removed 🗑️');
       deleteSpiralItemR2(id).catch(err => triggerToast(`Delete error: ${err.message}`));
     }
   };
+
 
   // Post CRUD
   const openAddPost = () => {
@@ -862,7 +877,7 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   const handleDeletePost = async (id, snippet) => {
-    if (window.confirm(`Delete post "${snippet || 'this post'}"?`)) {
+    if (window.confirm(`Delete post "${snippet || 'this post'}"? (This will ONLY remove it from Community Posts and will NOT affect other modules)`)) {
       // ⚡ Instant optimistic update
       setPosts(prev => prev.filter(p => p.id !== id));
       triggerToast('Post deleted 🗑️');
@@ -918,13 +933,14 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
   const handleDeleteEvent = async (id, title) => {
-    if (window.confirm(`Delete event "${title || 'this event'}"?`)) {
+    if (window.confirm(`Delete event "${title || 'this event'}"? (This will ONLY remove it from Events & Trips and will NOT affect other modules)`)) {
       // ⚡ Instant optimistic update
       setEvents(prev => prev.filter(e => e.id !== id));
       triggerToast(`Deleted event "${title || id}" 🗑️`);
       deleteEventR2(id).catch(err => triggerToast(`Delete error: ${err.message}`));
     }
   };
+
 
 
   // R2 Direct File Upload
@@ -959,9 +975,8 @@ export default function AdminPortal({ onExit, currentUser }) {
     m.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Cinematic Memory Reel Items (strictly isolated from memories)
-  const filteredReels = reelItems.filter(r => {
-
+  // Cinematic Memory Reel Items (strictly isolated from memories — VIDEOS ONLY)
+  const filteredReels = reelItems.filter(r => isVideoMedia(r)).filter(r => {
     const q = searchQuery.toLowerCase();
     return (
       (r.title || '').toLowerCase().includes(q) ||
@@ -970,6 +985,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       (r.description || '').toLowerCase().includes(q)
     );
   });
+
 
 
   // If not authenticated, render Google Sign-In Gate
@@ -1096,14 +1112,15 @@ export default function AdminPortal({ onExit, currentUser }) {
               className={`admin-nav-tab ${activeTab === 'reels' ? 'active' : ''}`}
               onClick={() => setActiveTab('reels')}
             >
-              <Film size={18} /> Cinematic Reels ({reelItems.length})
+              <Film size={18} /> Cinematic Reels ({reelItems.filter(isVideoMedia).length})
             </button>
             <button
               className={`admin-nav-tab ${activeTab === 'memories' ? 'active' : ''}`}
               onClick={() => setActiveTab('memories')}
             >
-              <BookOpen size={18} /> Memory Chapters ({memories.filter(m => !m.isReel).length})
+              <BookOpen size={18} /> Memory Chapters ({memories.filter(m => !m.isReel && m.mediaType !== 'video').length})
             </button>
+
 
             <button
               className={`admin-nav-tab ${activeTab === 'posts' ? 'active' : ''}`}
@@ -1169,9 +1186,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <Film size={24} />
                 </div>
                 <div>
-                  <h3 className="admin-stat-number">{reelItems.length}</h3>
+                  <h3 className="admin-stat-number">{reelItems.filter(isVideoMedia).length}</h3>
                   <p className="admin-stat-label">Cinematic Reels</p>
-                  <span className="admin-stat-meta">Live in Our Memory Reel</span>
+                  <span className="admin-stat-meta">Live in Our Memory Reel (Videos Only)</span>
                 </div>
               </div>
 
@@ -1181,11 +1198,12 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <BookOpen size={24} />
                 </div>
                 <div>
-                  <h3 className="admin-stat-number">{memories.filter(m => !m.isReel).length}</h3>
+                  <h3 className="admin-stat-number">{memories.filter(m => !m.isReel && m.mediaType !== 'video').length}</h3>
                   <p className="admin-stat-label">Memory Chapters</p>
-                  <span className="admin-stat-meta">Chronological Journey</span>
+                  <span className="admin-stat-meta">Chronological Journey (Photos Only)</span>
                 </div>
               </div>
+
 
 
 
@@ -1435,9 +1453,9 @@ export default function AdminPortal({ onExit, currentUser }) {
             <div className="admin-section-block">
               <div className="admin-section-header">
                 <div>
-                  <h2 className="admin-section-title">Cinematic Memory Reels</h2>
+                  <h2 className="admin-section-title">Cinematic Video Reels</h2>
                   <p className="admin-section-sub">
-                    Manage slides featured in the live "Our Memory Reel" cinematic theater ({reelItems.length} active).
+                    Manage video clips featured in the live "Our Memory Reel" cinematic theater ({reelItems.filter(isVideoMedia).length} active videos).
                   </p>
                 </div>
                 <div className="admin-action-bar">
@@ -1445,7 +1463,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <FolderPlus size={16} /> Batch Upload
                   </button>
                   <button onClick={openAddReel} className="admin-primary-btn">
-                    <Plus size={16} /> Add Reel Slide
+                    <Plus size={16} /> Add Reel Video
                   </button>
                 </div>
               </div>
@@ -1453,18 +1471,15 @@ export default function AdminPortal({ onExit, currentUser }) {
               {filteredReels.length === 0 ? (
                 <div className="admin-empty-pane" style={{ textAlign: 'center', padding: '60px 20px' }}>
                   <Film size={44} style={{ opacity: 0.4, margin: '0 auto 12px' }} />
-                  <h3>No reel slides found</h3>
-                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Reel Slide" or upload photos to populate your cinematic theater.</p>
+                  <h3>No reel videos found</h3>
+                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Reel Video" to upload video clips to your cinematic theater.</p>
                 </div>
               ) : (
                 <div className="admin-cards-grid">
                   {filteredReels.map((reel) => (
                     <div key={reel.id} className="admin-card-item">
-                      {reel.mediaType === 'video' ? (
-                        <video src={reel.mediaUrl} className="admin-card-img" muted />
-                      ) : (
-                        <img src={reel.mediaUrl} alt={reel.title} className="admin-card-img" />
-                      )}
+                      <video src={reel.mediaUrl} className="admin-card-img" muted playsInline />
+
                       <div className="admin-card-body">
                         <div className="admin-card-header-row">
                           <span className="admin-card-badge">
@@ -1496,8 +1511,10 @@ export default function AdminPortal({ onExit, currentUser }) {
             <div className="admin-section-block">
               <div className="admin-section-header">
                 <div>
-                  <h2 className="admin-section-title">Memory Chapters & Timeline</h2>
-                  <p className="admin-section-sub">Publish new chapters or edit milestone memories.</p>
+                  <h2 className="admin-section-title">Memory Chapters (Photos Only)</h2>
+                  <p className="admin-section-sub">
+                    Publish new photo chapters or edit milestone memories ({memories.filter(m => !m.isReel && m.mediaType !== 'video').length} active chapters).
+                  </p>
                 </div>
                 <div className="admin-action-bar">
                   <button onClick={() => setIsBundleModalOpen(true)} className="admin-secondary-btn bundle-upload-btn">
@@ -1510,8 +1527,9 @@ export default function AdminPortal({ onExit, currentUser }) {
               </div>
 
               <div className="admin-cards-grid">
-                {memories.filter(m => !m.isReel).map((mem) => (
+                {memories.filter(m => !m.isReel && m.mediaType !== 'video').map((mem) => (
                   <div key={mem.id} className="admin-card-item">
+
 
                     {mem.mediaUrl && (
                       <img src={mem.mediaUrl} alt={mem.title} className="admin-card-img" />
@@ -2182,17 +2200,13 @@ export default function AdminPortal({ onExit, currentUser }) {
               {editingReel ? 'Edit Cinematic Reel Slide' : 'Add New Reel Slide'}
             </h2>
             <form onSubmit={handleSaveReel} className="admin-modal-form">
-              {/* Media Upload & Preview */}
+              {/* Media Upload & Preview — VIDEOS ONLY */}
               <div className="admin-photo-upload-section">
-                <label className="admin-field-label">Reel Media (Photo or Video) *</label>
+                <label className="admin-field-label">Reel Video (MP4 / WebM / MOV) *</label>
                 <div className="admin-photo-picker-row">
                   <div className="admin-photo-preview-box memory-preview">
                     {reelForm.mediaUrl ? (
-                      reelForm.mediaType === 'video' ? (
-                        <video src={reelForm.mediaUrl} className="admin-photo-preview-img" muted controls />
-                      ) : (
-                        <img src={reelForm.mediaUrl} alt="Preview" className="admin-photo-preview-img" />
-                      )
+                      <video src={reelForm.mediaUrl} className="admin-photo-preview-img" muted controls />
                     ) : (
                       <div className="admin-photo-preview-placeholder">
                         <Film size={28} />
@@ -2202,31 +2216,32 @@ export default function AdminPortal({ onExit, currentUser }) {
 
                   <div className="admin-photo-picker-controls">
                     <label className="admin-file-pick-btn">
-                      <Camera size={16} />
-                      <span>{reelPhotoUploading ? 'Uploading to R2...' : 'Choose Media File'}</span>
+                      <Film size={16} />
+                      <span>{reelPhotoUploading ? 'Uploading Video to R2...' : 'Choose Video File'}</span>
                       <input 
                         type="file" 
-                        accept="image/*,video/*" 
+                        accept="video/*" 
                         onChange={handleReelPhotoFile}
                         disabled={reelPhotoUploading}
                         style={{ display: 'none' }}
                       />
                     </label>
-                    <span className="admin-photo-hint">Directly uploaded to Cloudflare R2 bucket with live preview</span>
+                    <span className="admin-photo-hint">Videos only (MP4, WebM, MOV) uploaded directly to Cloudflare R2</span>
                   </div>
                 </div>
 
                 <div className="admin-input-group" style={{ marginTop: '10px' }}>
-                  <label>Or Media URL *</label>
+                  <label>Or Video URL *</label>
                   <input
                     type="text"
                     value={reelForm.mediaUrl}
-                    onChange={(e) => setReelForm({ ...reelForm, mediaUrl: e.target.value })}
-                    placeholder={`e.g. ${R2_BASE}/photos/...`}
+                    onChange={(e) => setReelForm({ ...reelForm, mediaUrl: e.target.value, mediaType: 'video' })}
+                    placeholder="https://.../video.mp4"
                     required
                   />
                 </div>
               </div>
+
 
               <div className="admin-form-row">
                 <div className="admin-input-group">
@@ -2353,13 +2368,14 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <span>{memoryPhotoUploading ? 'Uploading to R2...' : 'Choose Chapter Photo'}</span>
                       <input 
                         type="file" 
-                        accept="image/*,video/*" 
+                        accept="image/*" 
                         onChange={handleMemoryPhotoFile}
                         disabled={memoryPhotoUploading}
                         style={{ display: 'none' }}
                       />
                     </label>
-                    <span className="admin-photo-hint">Select a photo from device or paste CDN URL below</span>
+                    <span className="admin-photo-hint">Photos only (JPG, PNG, WebP) uploaded directly to Cloudflare R2</span>
+
                   </div>
                 </div>
 

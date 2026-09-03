@@ -29,17 +29,21 @@ export default function SquadAlbum({ onBackHome, memories = [], members = [] }) 
     const pool = [];
     const seen = new Set();
 
-    // 1. Add valid memories with direct image URLs
+    // 1. Add valid memories with direct image URLs (strictly photos only — exclude videos)
     memories.forEach(m => {
-      if (m && m.mediaUrl && typeof m.mediaUrl === 'string' && m.mediaUrl.startsWith('http') && !seen.has(m.mediaUrl)) {
-        seen.add(m.mediaUrl);
-        pool.push({
-          id: `mem-${m.id}`,
-          url: m.mediaUrl,
-          caption: m.title || m.description || 'Squad Memory'
-        });
+      if (m && !m.isReel && m.mediaType !== 'video' && m.mediaUrl && typeof m.mediaUrl === 'string' && m.mediaUrl.startsWith('http') && !seen.has(m.mediaUrl)) {
+        const u = m.mediaUrl.toLowerCase();
+        if (!u.endsWith('.mp4') && !u.endsWith('.webm') && !u.endsWith('.mov') && !u.endsWith('.m4v')) {
+          seen.add(m.mediaUrl);
+          pool.push({
+            id: `mem-${m.id}`,
+            url: m.mediaUrl,
+            caption: m.title || m.description || 'Squad Memory'
+          });
+        }
       }
     });
+
 
     // 2. Add member photos with valid URLs
     members.forEach(mbr => {

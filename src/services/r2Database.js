@@ -259,16 +259,28 @@ export function subscribeToMembersR2(callback) {
 export function subscribeToMemoriesR2(callback) {
   const cacheKey = COLLECTIONS.MEMORIES;
 
+  // Memories must strictly be PHOTOS ONLY (exclude any videos and reel items)
+  const isPhotoOnly = (m) => {
+    if (!m) return false;
+    if (m.isReel) return false;
+    if (m.mediaType === 'video') return false;
+    if (typeof m.mediaUrl === 'string') {
+      const u = m.mediaUrl.toLowerCase();
+      if (u.endsWith('.mp4') || u.endsWith('.webm') || u.endsWith('.mov') || u.endsWith('.m4v')) return false;
+    }
+    return true;
+  };
+
   const cached = cache.get(cacheKey);
   if (cached && Array.isArray(cached)) {
-    callback(cached.filter(m => !m.isReel));
+    callback(cached.filter(isPhotoOnly));
   }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data)) {
-        const cleanMemories = data.filter(m => !m.isReel);
+        const cleanMemories = data.filter(isPhotoOnly);
         cache.set(cacheKey, cleanMemories);
         callback(cleanMemories);
       }
@@ -281,6 +293,7 @@ export function subscribeToMemoriesR2(callback) {
   const interval = setInterval(refresh, 20000);
   return () => clearInterval(interval);
 }
+
 
 
 /**
@@ -593,61 +606,71 @@ export async function deleteSpiralItemR2(itemId) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  CINEMATIC REELS (Dedicated Collection — 100% Isolated from Memories)
+//  CINEMATIC REELS (Dedicated Collection — VIDEOS ONLY)
 // ═══════════════════════════════════════════════════════════════════
 
 export const INITIAL_REELS = [
   {
     id: "reel-01",
-    title: "The Genesis Dawn & First Spark",
+    title: "Golden Hour Ocean Walk",
     category: "Milestone",
     date: "August 14",
-    location: "Campus Common & Café",
-    mediaUrl: r2Photo('Gracee.jpg'),
-    mediaType: "image",
-    description: "The very first day our squad bonded over chai and shared goals at the canteen.",
+    location: "Coastline Sanctuary",
+    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-group-of-friends-walking-on-a-beach-at-sunset-41481-large.mp4",
+    mediaType: "video",
+    description: "Spontaneous beach walks, ocean breeze, and the unforgettable laughs that bonded our squad.",
     isReel: true
   },
   {
     id: "reel-02",
-    title: "Midnight Highway Drive",
+    title: "Midnight Highway Roadtrip",
     category: "Adventures",
     date: "April 22",
-    location: "Highway Beats & Zero Sleep",
-    mediaUrl: r2Photo('Heenuuu.jpg'),
-    mediaType: "image",
-    description: "High-volume Tamil bangers in Farish's car and turning ordinary nights into pure cinema.",
+    location: "Highway Beats & Roadtrip",
+    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-walking-together-on-the-road-42767-large.mp4",
+    mediaType: "video",
+    description: "High-volume Tamil tracks on the open road, turning ordinary nights into pure cinema.",
     isReel: true
   },
   {
     id: "reel-03",
-    title: "Unbreakable Friendship Sanctuary",
+    title: "Squad Party & Celebration",
     category: "Celebration",
     date: "November 18",
-    location: "Beachside Sunset Gathering",
-    mediaUrl: r2Photo('Divyaa.jpg'),
-    mediaType: "image",
-    description: "Celebrating shared wins, laughter, and lifelong trust together.",
+    location: "Celebration Night",
+    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-laughing-and-enjoying-at-a-party-41484-large.mp4",
+    mediaType: "video",
+    description: "Laughing until our stomachs hurt, celebrating every milestone together.",
     isReel: true
   },
   {
     id: "reel-04",
-    title: "Squad Strong Forever",
+    title: "Campfire Nights & Brotherhood",
     category: "Sanctuary",
     date: "Always & Forever",
-    location: "Natpe Thunai Sanctuary",
-    mediaUrl: r2Photo('Puppy.jpg'),
-    mediaType: "image",
-    description: "More than friends — family by choice. Natpe Thunai forever.",
+    location: "Squad Sanctuary",
+    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-sitting-around-a-campfire-41480-large.mp4",
+    mediaType: "video",
+    description: "More than friends — family by choice. Natpe Thunai forever and infinity.",
     isReel: true
   }
 ];
 
+// Helper to ensure media is strictly video
+export const isVideoMedia = (item) => {
+  if (!item || !item.mediaUrl) return false;
+  if (item.mediaType === 'video') return true;
+  const url = String(item.mediaUrl).toLowerCase();
+  return url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') || url.endsWith('.m4v') || url.includes('video');
+};
+
 export function subscribeToReelsR2(callback) {
   const cacheKey = COLLECTIONS.REELS;
+
   const cached = cache.get(cacheKey);
-  if (cached && cached.length > 0) {
-    callback(cached);
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    const videoReels = cached.filter(isVideoMedia);
+    callback(videoReels.length > 0 ? videoReels : INITIAL_REELS);
   } else {
     callback(INITIAL_REELS);
   }
@@ -656,8 +679,10 @@ export function subscribeToReelsR2(callback) {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data) && data.length > 0) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const videoReels = data.filter(isVideoMedia);
+        const finalReels = videoReels.length > 0 ? videoReels : INITIAL_REELS;
+        cache.set(cacheKey, finalReels);
+        callback(finalReels);
       }
     } catch (err) {
       console.warn('[R2 DB] Reels fetch warning:', err.message);
@@ -673,13 +698,13 @@ export async function saveReelR2(reelData) {
   const id = reelData.id || `reel-${Date.now()}`;
   const item = {
     id,
-    title: reelData.title || 'Cinematic Squad Moment',
+    title: reelData.title || 'Cinematic Squad Reel',
     category: reelData.category || 'Adventures',
     date: reelData.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     location: reelData.location || 'Squad Sanctuary',
     description: reelData.description || '',
     mediaUrl: reelData.mediaUrl,
-    mediaType: reelData.mediaType || 'image',
+    mediaType: 'video', // Strictly video for reels!
     isReel: true,
     updatedAt: new Date().toISOString()
   };
@@ -691,10 +716,11 @@ export async function saveReelR2(reelData) {
     : [item, ...current];
 
   // ⚡ Instant optimistic cache update
-  cache.set(COLLECTIONS.REELS, updated);
+  cache.set(COLLECTIONS.REELS, updated.filter(isVideoMedia));
   await callAPI({ collection: COLLECTIONS.REELS, action: 'upsert', item });
   return item;
 }
+
 
 export async function deleteReelR2(reelId) {
   const current = cache.get(COLLECTIONS.REELS) || INITIAL_REELS;

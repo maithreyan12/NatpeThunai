@@ -9,7 +9,7 @@ import {
   Volume2, 
   VolumeX 
 } from 'lucide-react';
-import { subscribeToReelsR2, INITIAL_REELS } from '../../services/r2Database';
+import { subscribeToReelsR2, INITIAL_REELS, isVideoMedia } from '../../services/r2Database';
 import './MemoryReel.css';
 
 export default function MemoryReel({ reels: propReels, memories = [] }) {
@@ -28,9 +28,9 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     return () => unsub();
   }, [propReels]);
 
-  // Extract reel items strictly from the reels collection — 100% isolated from memories
+  // Extract reel items strictly from the reels collection — VIDEOS ONLY (photos filtered out)
   const sourceReels = Array.isArray(propReels) && propReels.length > 0 ? propReels : internalReels;
-  const reelItems = sourceReels.filter(r => r && typeof r.mediaUrl === 'string' && r.mediaUrl.trim().length > 0);
+  const reelItems = sourceReels.filter(r => r && isVideoMedia(r));
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(true); // Automatically starts slideshow
@@ -40,7 +40,8 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
-  const currentDuration = activeItem?.mediaType === 'video' ? 8000 : 3500;
+  const currentDuration = 8000;
+
 
   // Auto progression slideshow — advances automatically every 3.5s (or 8s for video)
   useEffect(() => {
@@ -119,26 +120,18 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             ))}
           </div>
 
-          {/* Media Viewport */}
+          {/* Video Reel Viewport */}
           <div className="reel-media-stage" onClick={() => setIsPlaying(prev => !prev)}>
-            {activeItem.mediaType === 'video' ? (
-              <video 
-                src={activeItem.mediaUrl} 
-                className="reel-media-element" 
-                autoPlay={isPlaying}
-                playsInline
-                loop 
-                muted={isMuted}
-                key={activeItem.id || safeIndex}
-              />
-            ) : (
-              <img 
-                src={activeItem.mediaUrl} 
-                alt={activeItem.title || 'Squad Memory'} 
-                className="reel-media-element" 
-                key={activeItem.id || safeIndex}
-              />
-            )}
+            <video 
+              src={activeItem.mediaUrl} 
+              className="reel-media-element" 
+              autoPlay={isPlaying}
+              playsInline
+              loop 
+              muted={isMuted}
+              key={activeItem.id || safeIndex}
+            />
+
 
             {/* Tap areas for left/right navigation */}
             <div className="reel-tap-area left" onClick={handlePrev}>

@@ -28,13 +28,17 @@ export default function AlbumMarqueeSection({ onOpenAlbum, members = [], memorie
     const list = [];
     const seen = new Set();
 
-    // From memories
+    // From memories (photos only — exclude videos)
     memories.forEach(m => {
-      if (m && m.mediaUrl && typeof m.mediaUrl === 'string' && m.mediaUrl.startsWith('http') && !seen.has(m.mediaUrl)) {
-        seen.add(m.mediaUrl);
-        list.push(m.mediaUrl);
+      if (m && !m.isReel && m.mediaType !== 'video' && m.mediaUrl && typeof m.mediaUrl === 'string' && m.mediaUrl.startsWith('http') && !seen.has(m.mediaUrl)) {
+        const u = m.mediaUrl.toLowerCase();
+        if (!u.endsWith('.mp4') && !u.endsWith('.webm') && !u.endsWith('.mov') && !u.endsWith('.m4v')) {
+          seen.add(m.mediaUrl);
+          list.push(m.mediaUrl);
+        }
       }
     });
+
 
     // From squad members
     members.forEach(mbr => {

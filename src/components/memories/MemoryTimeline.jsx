@@ -53,10 +53,11 @@ export default function MemoryTimeline({
   };
 
   const processFiles = async (fileList) => {
-    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
     if (validFiles.length === 0) return;
     setIsUploading(true);
     setUploadProgress(10);
+
 
     const newMemories = [];
     for (let i = 0; i < validFiles.length; i++) {
@@ -121,8 +122,19 @@ export default function MemoryTimeline({
     }
   };
 
-  // Filter memories by category, friend, and search
-  const filteredMemories = memories.filter(m => {
+  // Filter memories by category, friend, and search (PHOTOS ONLY — strictly exclude videos/reels)
+  const isPhotoOnly = (m) => {
+    if (!m) return false;
+    if (m.isReel) return false;
+    if (m.mediaType === 'video') return false;
+    if (typeof m.mediaUrl === 'string') {
+      const u = m.mediaUrl.toLowerCase();
+      if (u.endsWith('.mp4') || u.endsWith('.webm') || u.endsWith('.mov') || u.endsWith('.m4v')) return false;
+    }
+    return true;
+  };
+
+  const filteredMemories = memories.filter(isPhotoOnly).filter(m => {
     const matchesCategory = 
       selectedCategory === 'All Moments' || 
       (m.category && m.category.toLowerCase().includes(selectedCategory.toLowerCase())) ||
@@ -142,6 +154,7 @@ export default function MemoryTimeline({
 
     return matchesCategory && matchesMember && matchesSearch;
   });
+
 
   // Prepare dynamic spiral items with exact requested order: Maithreyan -> Gopika -> Squad Girls -> Squad Boys -> Memories
   const spiralItems = useMemo(() => {
