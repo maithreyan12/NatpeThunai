@@ -30,7 +30,7 @@ import {
   saveEventR2,
   bootR2Database,
 } from './services/r2Database';
-import { reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
+import { reactToMemory, addCommentToMemory, likePost, toggleEventRsvp, getStoredMembers } from './services';
 import { onAuthChange, signInWithGoogle, logOut } from './firebase';
 import './App.css';
 
