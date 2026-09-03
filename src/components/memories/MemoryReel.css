@@ -116,10 +116,12 @@
 
 .reel-media-stage.stage-portrait {
   height: clamp(520px, 72vh, 670px);
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.22) 0%, rgba(15, 23, 42, 0.95) 70%, #000000 100%);
 }
 
 .reel-media-stage.stage-landscape {
   height: clamp(380px, 50vw, 520px);
+  background: #000000;
 }
 
 .fullscreen-mode .reel-media-stage {
@@ -127,19 +129,6 @@
   max-height: 100vh;
 }
 
-/* Ambient blurred background behind portrait video */
-.reel-ambient-backdrop {
-  position: absolute;
-  inset: -30px;
-  width: calc(100% + 60px);
-  height: calc(100% + 60px);
-  object-fit: cover;
-  filter: blur(32px) brightness(0.38) saturate(1.5);
-  opacity: 0.85;
-  transform: scale(1.15);
-  pointer-events: none;
-  z-index: 1;
-}
 
 .reel-media-element {
   position: relative;

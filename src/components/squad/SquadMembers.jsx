@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Search, 
-  Grid, 
-  List, 
-  Camera, 
+import {
+  Users,
+  Search,
+  Grid,
+  List,
+  Camera,
   HeartHandshake,
   ArrowUpRight,
   CheckCircle2,
@@ -212,9 +212,9 @@ function MemberFlipCard({ member, onSelectMember, onFilterByMember }) {
   );
 }
 
-export default function SquadMembers({ 
-  members = [], 
-  onSelectMember, 
+export default function SquadMembers({
+  members = [],
+  onSelectMember,
   onFilterByMember
 }) {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -222,12 +222,12 @@ export default function SquadMembers({
   const [viewMode, setViewMode] = useState('grid');
 
   const filteredMembers = members.filter((member) => {
-    const matchesCategory = 
-      activeFilter === 'all' || 
+    const matchesCategory =
+      activeFilter === 'all' ||
       (member.category && member.category.toLowerCase() === activeFilter.toLowerCase()) ||
       (activeFilter === 'core' && !member.category);
 
-    const matchesSearch = 
+    const matchesSearch =
       !searchQuery.trim() ||
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (member.nickname && member.nickname.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -258,7 +258,7 @@ export default function SquadMembers({
         </p>
       </div>
 
-      {/* Scalable Squad Control Dock */}
+      {/* Scalable Squad Control Dock 
       <div className="squad-control-dock">
         <div className="squad-controls-main-row">
           <div className="squad-search-wrapper">
@@ -324,7 +324,7 @@ export default function SquadMembers({
             );
           })}
         </div>
-      </div>
+      </div>*/}
 
       {/* Member Display */}
       {filteredMembers.length === 0 ? (
@@ -334,9 +334,9 @@ export default function SquadMembers({
           </div>
           <h3>No squad members found</h3>
           <p>No squad mates matched "{searchQuery}". Try a different filter or search term!</p>
-          <button 
-            type="button" 
-            className="btn-outline" 
+          <button
+            type="button"
+            className="btn-outline"
             onClick={() => { setSearchQuery(''); setActiveFilter('all'); }}
           >
             Reset Filters
@@ -388,21 +388,21 @@ export default function SquadMembers({
           {filteredMembers.map((member) => {
             const isDuo = isDuoMember(member);
             return (
-              <div 
-                key={member.id} 
+              <div
+                key={member.id}
                 className={`roster-row-card interactive-slab ${isDuo ? 'roster-duo-card' : ''}`}
                 onClick={() => onSelectMember(member)}
               >
                 <div className="roster-avatar-box">
                   {member.photo ? (
-                    <img 
-                      src={member.photo} 
-                      alt={member.name} 
+                    <img
+                      src={member.photo}
+                      alt={member.name}
                       className="roster-avatar-img"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <div 
+                    <div
                       className="roster-avatar-initials"
                       style={{ background: member.avatarGradient || 'linear-gradient(135deg, #6366f1, #a855f7)' }}
                     >
@@ -422,16 +422,16 @@ export default function SquadMembers({
                 </div>
 
                 <div className="roster-actions-col">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn-secondary roster-btn"
                     onClick={(e) => { e.stopPropagation(); if (onFilterByMember) onFilterByMember(member.name); }}
                   >
                     <Camera size={13} />
                     <span>Memories</span>
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn-primary roster-btn"
                     onClick={(e) => { e.stopPropagation(); onSelectMember(member); }}
                   >

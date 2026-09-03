@@ -192,17 +192,8 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             onClick={togglePlay} 
             title={isPlaying ? "Click to Pause" : "Click to Play"}
           >
-            {/* Ambient Blurred Video Glow for Portrait Framing */}
-            {isPortrait && (
-              <video 
-                src={activeItem.mediaUrl}
-                className="reel-ambient-backdrop"
-                muted
-                playsInline
-                aria-hidden="true"
-                key={`ambient-${activeItem.id || safeIndex}`}
-              />
-            )}
+            {/* Ambient CSS backdrop glow is handled via CSS stage-portrait */}
+
 
             <video 
               ref={videoRef}

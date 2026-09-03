@@ -40,21 +40,62 @@ const cache = {
   },
 };
 
+// ── Request deduplication and Smart Poller ──────────────────────────
+const inflightRequests = {};
+
+function setupSmartPoll(refreshFn, intervalMs = 90000) {
+  const poll = () => {
+    if (typeof document !== 'undefined' && document.hidden) return;
+    refreshFn();
+  };
+  const interval = setInterval(poll, intervalMs);
+  const onFocus = () => {
+    if (typeof document !== 'undefined' && !document.hidden) {
+      refreshFn();
+    }
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('focus', onFocus);
+  }
+  return () => {
+    clearInterval(interval);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('focus', onFocus);
+    }
+  };
+}
+
 // ── Read from CDN (production) or local API proxy (development) ────
 async function fetchFromCDN(collection) {
-  // In development, use the Vite dev server API to avoid CORS issues
-  if (import.meta.env.DEV) {
-    const res = await fetch(`/api/r2/data?collection=${collection}&_t=${Date.now()}`);
-    if (!res.ok) throw new Error(`API fetch failed: ${res.status}`);
-    const json = await res.json();
-    return json.data;
+  if (inflightRequests[collection]) {
+    return inflightRequests[collection];
   }
-  // In production, read directly from R2 CDN (fast, globally cached)
-  const url = `${CDN}/data/${collection}.json?_t=${Date.now()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`CDN fetch failed: ${res.status}`);
-  return res.json();
+
+  const p = (async () => {
+    try {
+      // In development, use the Vite dev server API to avoid CORS issues
+      if (import.meta.env.DEV) {
+        const res = await fetch(`/api/r2/data?collection=${collection}&_t=${Date.now()}`);
+        if (!res.ok) throw new Error(`API fetch failed: ${res.status}`);
+        const json = await res.json();
+        return json.data;
+      }
+      // In production, read directly from R2 CDN (fast, globally cached)
+      const url = `${CDN}/data/${collection}.json?_t=${Date.now()}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`CDN fetch failed: ${res.status}`);
+      return res.json();
+    } finally {
+      setTimeout(() => {
+        delete inflightRequests[collection];
+      }, 3000);
+    }
+  })();
+
+  inflightRequests[collection] = p;
+  return p;
 }
+
 
 
 // ── Write via API (serverless → R2 with credentials) ───────────────
@@ -250,9 +291,8 @@ export function subscribeToMembersR2(callback) {
 
   refresh();
 
-  // 3. Poll every 15s for admin updates
-  const interval = setInterval(refresh, 15000);
-  return () => clearInterval(interval);
+  // 3. Smart relaxed polling (revalidates on tab focus)
+  return setupSmartPoll(refresh, 90000);
 }
 
 /**
@@ -292,8 +332,7 @@ export function subscribeToMemoriesR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 20000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
 
 
@@ -320,8 +359,7 @@ export function subscribeToPostsR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 20000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
 
 /**
@@ -346,9 +384,9 @@ export function subscribeToEventsR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 20000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
+
 
 // ═══════════════════════════════════════════════════════════════════
 //  WRITE OPERATIONS (Admin Only)
@@ -531,8 +569,7 @@ export function subscribeToJourneyR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 15000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
 
 export async function saveJourneyMilestoneR2(milestoneData) {
@@ -570,9 +607,9 @@ export function subscribeToSpiralR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 15000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
+
 
 export async function saveSpiralItemR2(spiralData) {
   const id = spiralData.id || `spiral-${Date.now()}`;
@@ -684,9 +721,9 @@ export function subscribeToReelsR2(callback) {
   };
 
   refresh();
-  const interval = setInterval(refresh, 15000);
-  return () => clearInterval(interval);
+  return setupSmartPoll(refresh, 90000);
 }
+
 
 export async function saveReelR2(reelData) {
   const id = reelData.id || `reel-${Date.now()}`;
