@@ -1,0 +1,98 @@
+.memories-spiral-section {
+  position: relative;
+  padding: 3.5rem 0 2.5rem;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* ── Section Header ── */
+.memories-spiral__header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 2;
+  padding: 0 1rem;
+}
+
+.memories-spiral__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1.1rem;
+  border-radius: 100px;
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(255, 111, 97, 0.12));
+  border: 1px solid rgba(255, 183, 77, 0.25);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent, #ffb74d);
+  margin-bottom: 0.8rem;
+}
+
+.memories-spiral__title {
+  font-family: 'Anek Tamil', 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, var(--text-primary, #2d2a3e), var(--color-accent, #ffb74d));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.memories-spiral__subtitle {
+  font-size: clamp(0.88rem, 1.4vw, 1.02rem);
+  color: var(--text-muted, #8b8598);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Spiral Container ── */
+.memories-spiral__container {
+  position: relative;
+  height: clamp(440px, 58vh, 560px);
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .memories-spiral-section {
+    padding: 2.5rem 0 1.5rem;
+  }
+
+  .memories-spiral__container {
+    height: clamp(420px, 55vh, 500px);
+  }
+}
+
+@media (max-width: 480px) {
+  .memories-spiral-section {
+    padding: 2rem 0 1rem;
+  }
+
+  .memories-spiral__container {
+    height: 440px;
+  }
+
+  .memories-spiral__header {
+    margin-bottom: 0.8rem;
+  }
+
+  .memories-spiral__subtitle {
+    font-size: 0.82rem;
+  }
+}
+
+/* ── Dark Theme ── */
+[data-theme="dark"] .memories-spiral__badge {
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.12), rgba(255, 111, 97, 0.08));
+  border-color: rgba(255, 183, 77, 0.2);
+}

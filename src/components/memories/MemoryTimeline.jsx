@@ -225,32 +225,31 @@ export default function MemoryTimeline({
         </p>
       </div>
 
-      {/* 3D Infinite Spiral Memory Vortex */}
+      {/* 3D Infinite Spiral Memory Vortex — Borderless Full-Screen Flow */}
       <div className="memory-spiral-fullscreen-stage">
         <InfiniteSpiral
           items={spiralItems}
-          animationMode="auto"
+          animationMode="all"
           speed={0.55}
-          radius={170}
-          cardWidth={128}
-          cardHeight={100}
-          verticalSpacing={60}
-          perspective={825}
-          cardRadius={15}
-          centerScale={1.32}
-          edgeBlur={5.75}
+          radius={225}
+          cardWidth={140}
+          cardHeight={175}
+          verticalSpacing={75}
+          perspective={860}
+          cardRadius={18}
+          centerScale={1.3}
+          edgeBlur={5}
           cardsPerTurn={7}
           pauseOnHover
           direction="up"
           rotation={0}
           cardTilt={0}
-          edgeFade={0.8}
+          edgeFade={0.75}
           imageFit="cover"
-          grayscale={0.2}
-          onCardClick={(item) => onOpenLightbox && onOpenLightbox({ mediaUrl: item.src, title: item.alt })}
+          grayscale={0}
+          onItemClick={(item) => onOpenLightbox && onOpenLightbox(item.src)}
         />
       </div>
-
 
       {/* Control Filter Bar */}
       <div className="timeline-filter-bar">

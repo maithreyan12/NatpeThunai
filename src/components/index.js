@@ -21,6 +21,7 @@ export { default as FriendshipJourney } from './squad/FriendshipJourney';
 export { default as MemoryTimeline } from './memories/MemoryTimeline';
 export { default as MemoryCard } from './memories/MemoryCard';
 export { default as MemoryReel } from './memories/MemoryReel';
+export { default as MemoriesSpiral } from './memories/MemoriesSpiral';
 export { default as SquadAlbum } from './album/SquadAlbum';
 export { default as AlbumMarqueeSection } from './album/AlbumMarqueeSection';
 
