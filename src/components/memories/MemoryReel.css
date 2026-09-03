@@ -250,6 +250,12 @@
   transform: translateY(-2px);
 }
 
+.reel-control-btn.play-btn.is-playing {
+  background: var(--gradient-brand);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.4);
+}
+
 .reel-counter-text {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.70);

@@ -23,7 +23,7 @@ const SQUAD_NAMES = [
   "Jeysha", "Kafil", "Jeffrin", "Farish",
   "Divya", "Afnaan", "Haniya", "Sham",
   "Meshak", "Talha", "Harshitha", "Jeevitha",
-  "Heena", "Garnett", "Sham Sundhar", , "Maithreyan", "Gopika",
+  "Heena", "Garnett", "Sham Sundhar", "Maithreyan", "Gopika"
 ];
 
 const FULL_STORY_TEXT = `2023 first year first sem-la, oru chemistry lab-la start aana oru chinna friendship, konjam konjama oru azhagana gang-aa maaruchu. Backbench-la irundha boys, girls-nu aarambichu, lunch share pannadhu, class-la pesinadhu, birthday celebrations, namma friendship-oda first outing-aa class cut panni Limra-ku poi saapittu, anga ukkandhu dare games, double meaning games-nu solli sirichu, dare pannitu, full-ah fun pannina andha naal namma gang-oda first official outing-aa marakka mudiyadha memory-a pochu. Adhe first year-la class cut panni ellarum serndhu movies-ku pona moments-um thani level memories. Adhukkapparam Jeevitha thopukku poi, oru full day ellarum serndhu samayal panni, biriyani seithu, oru periya ilai-la full-ah biriyani parappi ukkandhu saapittathu, anga irundha nature-oda serndhu full-ah enjoy pannadhu, pasanga kinarukulla poi kuthichu vilaiyaadinadhu, andha memories ellam innum special. First year-la class cut panni Green Thunder poi semma fun pannadhu, swimming theriyama kooda pool-la kuthichu vilaiyaadinadhu, adhe nerathula mazhai vandhu swimming pool-la mazhaiyoda serndhu enjoy pannadhu, HOD room munnadi ninnu panna attagasam-nu… first year full-ah memories-ku panjam-e illa. Oru naal Chennai-ku train-la poi, unforgettable-aana andha journey-lendhu, Ooty IV trip-la ellarum serndhu panna crazy memories varaikkum, ovvoru naalum oru pudhu story.
@@ -391,7 +391,7 @@ export default function SquadStory() {
                 </p>
 
                 <p className="prose-body">
-                  College days will pass, lecture halls will empty, and daily schedules will shift. But this brotherhood that sparked at Limra has not only thrived all the way to our final year, but will continue long after graduation day. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar,, and Maithreyan, Gopika — these aren’t just names; they are the living milestones of our youth.
+                  College days will pass, lecture halls will empty, and daily schedules will shift. But this brotherhood that sparked at Limra has not only thrived all the way to our final year, but will continue long after graduation day. Jeysha, Kafil, Jeffrin, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Maithreyan, and Gopika — these aren’t just names; they are the living milestones of our youth.
                 </p>
 
                 {/* SQUAD FAMILY NAMES ROLL CALL */}
