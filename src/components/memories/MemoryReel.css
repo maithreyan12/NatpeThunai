@@ -260,6 +260,40 @@
   box-shadow: 0 4px 14px rgba(91, 76, 219, 0.4);
 }
 
+.reel-control-btn.play-btn.is-paused {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.reel-paused-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  pointer-events: none;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(99, 102, 241, 0.35);
+  animation: pulsePause 1.6s infinite ease-in-out;
+  z-index: 6;
+}
+
+@keyframes pulsePause {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.92; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+
 .reel-counter-text {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.70);

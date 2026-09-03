@@ -194,12 +194,14 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
   await Promise.allSettled([
     seedCollection(COLLECTIONS.MEMBERS, arrangedMembers),
     seedCollection(COLLECTIONS.MEMORIES, initialMemories),
+    seedCollection(COLLECTIONS.REELS, INITIAL_REELS),
     seedCollection(COLLECTIONS.POSTS, initialPosts),
     seedCollection(COLLECTIONS.EVENTS, initialEvents),
     seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES),
     seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS),
   ]);
 }
+
 
 
 // ═══════════════════════════════════════════════════════════════════
@@ -612,13 +614,13 @@ export async function deleteSpiralItemR2(itemId) {
 export const INITIAL_REELS = [
   {
     id: "reel-01",
-    title: "Golden Hour Ocean Walk",
+    title: "The Genesis Dawn & First Spark",
     category: "Milestone",
     date: "August 14",
-    location: "Coastline Sanctuary",
-    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-group-of-friends-walking-on-a-beach-at-sunset-41481-large.mp4",
+    location: "Campus Common & Café",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-1.mp4",
     mediaType: "video",
-    description: "Spontaneous beach walks, ocean breeze, and the unforgettable laughs that bonded our squad.",
+    description: "The very first day our squad bonded over chai and shared goals at the canteen.",
     isReel: true
   },
   {
@@ -626,35 +628,37 @@ export const INITIAL_REELS = [
     title: "Midnight Highway Roadtrip",
     category: "Adventures",
     date: "April 22",
-    location: "Highway Beats & Roadtrip",
-    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-walking-together-on-the-road-42767-large.mp4",
+    location: "Highway Beats & Zero Sleep",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-2.mp4",
     mediaType: "video",
     description: "High-volume Tamil tracks on the open road, turning ordinary nights into pure cinema.",
     isReel: true
   },
   {
     id: "reel-03",
-    title: "Squad Party & Celebration",
+    title: "Squad Celebration & Pure Laughter",
     category: "Celebration",
     date: "November 18",
-    location: "Celebration Night",
-    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-laughing-and-enjoying-at-a-party-41484-large.mp4",
+    location: "Beachside Sunset Gathering",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-3.webm",
     mediaType: "video",
     description: "Laughing until our stomachs hurt, celebrating every milestone together.",
     isReel: true
   },
   {
     id: "reel-04",
-    title: "Campfire Nights & Brotherhood",
+    title: "Squad Strong Forever & Infinity",
     category: "Sanctuary",
     date: "Always & Forever",
-    location: "Squad Sanctuary",
-    mediaUrl: "https://assets.mixkit.co/videos/preview/mixkit-friends-sitting-around-a-campfire-41480-large.mp4",
+    location: "Natpe Thunai Sanctuary",
+    mediaUrl: "https://pub-5eb58baa7fba49158317c089031c3d49.r2.dev/reels/reel-4.mp4",
     mediaType: "video",
     description: "More than friends — family by choice. Natpe Thunai forever and infinity.",
     isReel: true
   }
 ];
+
+
 
 // Helper to ensure media is strictly video
 export const isVideoMedia = (item) => {

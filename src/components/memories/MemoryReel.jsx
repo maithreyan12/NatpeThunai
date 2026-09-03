@@ -32,20 +32,47 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
 
   // Extract reel items strictly from the reels collection — VIDEOS ONLY (photos filtered out)
   const sourceReels = Array.isArray(propReels) && propReels.length > 0 ? propReels : internalReels;
-  const reelItems = sourceReels.filter(r => r && isVideoMedia(r));
+  const validReels = sourceReels.filter(r => r && isVideoMedia(r));
+  const reelItems = validReels.length > 0 ? validReels : INITIAL_REELS;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(true); // Automatically starts slideshow
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const reelContainerRef = useRef(null);
+  const videoRef = useRef(null);
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
   const currentDuration = 8000;
 
+  // Ensure HTML5 video starts playing when slide changes or isPlaying changes
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    if (isPlaying) {
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // Autoplay policy prevented playback, ensure muted and retry
+          vid.muted = true;
+          setIsMuted(true);
+          vid.play().catch(() => {});
+        });
+      }
+    } else {
+      vid.pause();
+    }
+  }, [isPlaying, safeIndex, activeItem?.mediaUrl]);
 
-  // Auto progression slideshow — advances automatically every 3.5s (or 8s for video)
+  // Sync mute changes directly with the video DOM element
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
+  // Auto progression slideshow — advances automatically every 8s
   useEffect(() => {
     if (!isPlaying || reelItems.length <= 1 || !activeItem) return;
     const timer = setTimeout(() => {
@@ -54,7 +81,26 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     return () => clearTimeout(timer);
   }, [isPlaying, safeIndex, reelItems.length, activeItem, currentDuration]);
 
+
+  // Explicit play/pause toggle that directly commands the HTML5 video element
+  const togglePlay = (e) => {
+    e?.stopPropagation?.();
+    setIsPlaying(prev => {
+      const nextState = !prev;
+      const vid = videoRef.current;
+      if (vid) {
+        if (nextState) {
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      }
+      return nextState;
+    });
+  };
+
   const handlePrev = (e) => {
+
     e?.stopPropagation();
     if (reelItems.length === 0) return;
     setCurrentIndex(prev => (prev - 1 + reelItems.length) % reelItems.length);
@@ -123,17 +169,27 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
           </div>
 
           {/* Video Reel Viewport */}
-          <div className="reel-media-stage" onClick={() => setIsPlaying(prev => !prev)}>
+          <div className="reel-media-stage" onClick={togglePlay} title={isPlaying ? "Click to Pause" : "Click to Play"}>
             <video 
+              ref={videoRef}
               src={activeItem.mediaUrl} 
               className="reel-media-element" 
               autoPlay={isPlaying}
               playsInline
               loop 
               muted={isMuted}
+              preload="auto"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
               key={activeItem.id || safeIndex}
             />
 
+            {/* Paused State Floating Overlay */}
+            {!isPlaying && (
+              <div className="reel-paused-indicator" title="Paused - Click to Play">
+                <Play size={34} style={{ marginLeft: 3 }} />
+              </div>
+            )}
 
             {/* Tap areas for left/right navigation */}
             <div className="reel-tap-area left" onClick={handlePrev}>
@@ -165,13 +221,14 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
           <div className="reel-controls-bar">
             <div className="controls-left">
               <button 
-                className={`reel-control-btn play-btn ${isPlaying ? 'is-playing' : ''}`}
-                onClick={() => setIsPlaying(prev => !prev)}
-                title={isPlaying ? "Pause Slideshow" : "Play Slideshow"}
+                className={`reel-control-btn play-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
+                onClick={togglePlay}
+                title={isPlaying ? "Pause Slideshow (Stop)" : "Play Slideshow (Run)"}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
                 <span>{isPlaying ? "Pause Slideshow" : "Play Slideshow"}</span>
               </button>
+
 
               <span className="reel-counter-text">
                 {safeIndex + 1} of {reelItems.length}
