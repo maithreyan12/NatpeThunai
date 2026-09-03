@@ -81,22 +81,14 @@
 }
 
 .progress-segment-fill.completed {
-  width: 100%;
+  width: 100% !important;
 }
 
 .progress-segment-fill.active {
-  width: 100%;
+  /* Dynamic real-time width driven by video playback currentTime */
+  transition: width 0.1s linear;
 }
 
-.progress-segment-fill.animating {
-  width: 100%;
-  animation: reelProgress 5s linear forwards;
-}
-
-@keyframes reelProgress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
 
 /* ── Media Stage — Adaptive Orientation ── */
 .reel-media-stage {
@@ -233,18 +225,6 @@
   padding: 2px 8px;
   border-radius: var(--radius-pill);
   font-size: 0.72rem;
-}
-
-.reel-badge-orientation {
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #e0e7ff;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 0.72rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 

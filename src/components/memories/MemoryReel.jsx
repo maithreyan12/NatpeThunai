@@ -36,16 +36,16 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const reelItems = validReels.length > 0 ? validReels : INITIAL_REELS;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [isPlaying, setIsPlaying] = useState(true); // Automatically starts slideshow
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
   const reelContainerRef = useRef(null);
   const videoRef = useRef(null);
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
-  const currentDuration = 8000;
 
   // Detect video dimensions and orientation
   const handleLoadedMetadata = (e) => {
@@ -55,16 +55,16 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     }
   };
 
-  // Sync orientation on index change
+  // Sync orientation on index change and reset active progress
   useEffect(() => {
+    setProgressPercent(0);
     const vid = videoRef.current;
     if (vid && vid.videoWidth && vid.videoHeight) {
       setIsPortrait(vid.videoHeight > vid.videoWidth);
     }
   }, [safeIndex, activeItem?.mediaUrl]);
 
-
-  // Ensure HTML5 video starts playing when slide changes or isPlaying changes
+  // Ensure HTML5 video plays or pauses without resetting position
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -72,7 +72,6 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
       const p = vid.play();
       if (p !== undefined) {
         p.catch(() => {
-          // Autoplay policy prevented playback, ensure muted and retry
           vid.muted = true;
           setIsMuted(true);
           vid.play().catch(() => {});
@@ -90,15 +89,39 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     }
   }, [isMuted]);
 
-  // Auto progression slideshow — advances automatically every 8s
+  // Real-time video progress tracking — perfectly synced with current position
+  const handleTimeUpdate = () => {
+    const vid = videoRef.current;
+    if (vid && vid.duration && !isNaN(vid.duration) && vid.duration > 0) {
+      const pct = (vid.currentTime / vid.duration) * 100;
+      setProgressPercent(pct);
+    }
+  };
+
+  // When reel video finishes naturally, smoothly transition to next reel
+  const handleVideoEnded = () => {
+    if (reelItems.length > 1) {
+      setProgressPercent(0);
+      setCurrentIndex(prev => (prev + 1) % reelItems.length);
+    }
+  };
+
+  // Auto progression fallback for non-video items
   useEffect(() => {
     if (!isPlaying || reelItems.length <= 1 || !activeItem) return;
-    const timer = setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % reelItems.length);
-    }, currentDuration);
-    return () => clearTimeout(timer);
-  }, [isPlaying, safeIndex, reelItems.length, activeItem, currentDuration]);
+    if (activeItem.mediaType === 'video') return; // Handled directly by video onTimeUpdate / onEnded
 
+    const interval = setInterval(() => {
+      setProgressPercent(prev => {
+        if (prev >= 100) {
+          setCurrentIndex(curr => (curr + 1) % reelItems.length);
+          return 0;
+        }
+        return prev + 1.25;
+      });
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isPlaying, safeIndex, reelItems.length, activeItem]);
 
   // Explicit play/pause toggle that directly commands the HTML5 video element
   const togglePlay = (e) => {
@@ -118,17 +141,19 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   };
 
   const handlePrev = (e) => {
-
     e?.stopPropagation();
     if (reelItems.length === 0) return;
+    setProgressPercent(0);
     setCurrentIndex(prev => (prev - 1 + reelItems.length) % reelItems.length);
   };
 
   const handleNext = (e) => {
     e?.stopPropagation();
     if (reelItems.length === 0) return;
+    setProgressPercent(0);
     setCurrentIndex(prev => (prev + 1) % reelItems.length);
   };
+
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -170,17 +195,22 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
           className={`reel-theater-card ${isFullscreen ? 'fullscreen-mode' : ''} ${isPortrait ? 'is-portrait' : 'is-landscape'}`}
           ref={reelContainerRef}
         >
-          {/* Slide Progress Bars */}
+          {/* Slide Progress Bars — Synchronized to real-time playback */}
           <div className="reel-progress-indicators">
             {reelItems.map((item, idx) => (
               <div 
                 key={item?.id || `reel-track-${idx}`} 
                 className="progress-segment-track"
-                onClick={() => setCurrentIndex(idx)}
+                onClick={() => {
+                  setProgressPercent(0);
+                  setCurrentIndex(idx);
+                }}
               >
                 <div 
-                  className={`progress-segment-fill ${idx === safeIndex ? (isPlaying ? 'animating' : 'active') : (idx < safeIndex ? 'completed' : '')}`}
-                  style={idx === safeIndex && isPlaying ? { animationDuration: `${currentDuration}ms` } : undefined}
+                  className={`progress-segment-fill ${idx < safeIndex ? 'completed' : (idx === safeIndex ? 'active' : '')}`}
+                  style={{
+                    width: idx < safeIndex ? '100%' : (idx === safeIndex ? `${progressPercent}%` : '0%')
+                  }}
                 />
               </div>
             ))}
@@ -194,17 +224,17 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
           >
             {/* Ambient CSS backdrop glow is handled via CSS stage-portrait */}
 
-
             <video 
               ref={videoRef}
               src={activeItem.mediaUrl} 
               className={`reel-media-element ${isPortrait ? 'media-portrait' : 'media-landscape'}`} 
               autoPlay={isPlaying}
               playsInline
-              loop 
               muted={isMuted}
               preload="auto"
               onLoadedMetadata={handleLoadedMetadata}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleVideoEnded}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               key={activeItem.id || safeIndex}
@@ -233,7 +263,6 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             <div className="reel-caption-overlay">
               <div className="reel-caption-meta">
                 <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
-                <span className="reel-badge-orientation">{isPortrait ? "📱 Portrait Reel" : "🎬 Widescreen"}</span>
                 <span className="reel-date">{activeItem.date || ""}</span>
                 {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
               </div>
@@ -244,18 +273,18 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             </div>
           </div>
 
-
           {/* Bottom Bar Controls */}
           <div className="reel-controls-bar">
             <div className="controls-left">
               <button 
                 className={`reel-control-btn play-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
                 onClick={togglePlay}
-                title={isPlaying ? "Pause Slideshow (Stop)" : "Play Slideshow (Run)"}
+                title={isPlaying ? "Pause Reel" : "Play Reel"}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                <span>{isPlaying ? "Pause Slideshow" : "Play Slideshow"}</span>
+                <span>{isPlaying ? "Pause Reel" : "Play Reel"}</span>
               </button>
+
 
 
               <span className="reel-counter-text">
