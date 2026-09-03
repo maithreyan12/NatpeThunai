@@ -47,19 +47,16 @@ export default function App() {
       (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin');
   });
 
-<<<<<<< HEAD
-  // Data States — start with empty arrays, R2 will populate them live
-  const [members, setMembers]   = useState([]);
-=======
   // Album Overlay State (in-page full-screen overlay without URL redirect)
   const [isAlbumOpen, setIsAlbumOpen] = useState(() => {
     return typeof window !== 'undefined' && 
       (window.location.hash === '#album' || window.location.hash === '#/album');
   });
 
-  // Data States
-  const [members, setMembers] = useState(getStoredMembers());
->>>>>>> 100d6b0 (changes)
+
+  // Data States — start with empty arrays, R2 will populate them live
+  const [members, setMembers]   = useState([]);
+
   const [memories, setMemories] = useState([]);
   const [posts, setPosts]       = useState([]);
   const [events, setEvents]     = useState([]);
@@ -143,9 +140,6 @@ export default function App() {
     setIsAdminRoute(false);
   };
 
-<<<<<<< HEAD
-  // ── Live R2 data subscriptions — public website always shows latest admin data ──
-=======
   const handleOpenAlbum = () => {
     setIsAlbumOpen(true);
   };
@@ -157,8 +151,8 @@ export default function App() {
     }
   };
 
-  // Listen to real-time Memories
->>>>>>> 100d6b0 (changes)
+  // ── Live R2 data subscriptions — public website always shows latest admin data ──
+
   useEffect(() => {
     bootR2Database().catch(() => {});
     const unsubMembers   = subscribeToMembersR2(setMembers);
@@ -365,35 +359,12 @@ export default function App() {
       <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
 
       {/* ── MODALS ── */}
-<<<<<<< HEAD
-      <CreatePostModal 
-        isOpen={isCreatePostOpen}
-        onClose={() => setIsCreatePostOpen(false)}
-        onSave={handleSavePost}
-        currentUser={currentUser}
-      />
-
-      <AddEventModal 
-        isOpen={isAddEventOpen}
-        onClose={() => setIsAddEventOpen(false)}
-        onSave={handleSaveEvent}
-=======
-      <AddMemberModal 
-        isOpen={isAddMemberOpen}
-        onClose={() => {
-          setIsAddMemberOpen(false);
-          setEditingMember(null);
-        }}
-        onSave={handleSaveMember}
-        existingMember={editingMember}
->>>>>>> 100d6b0 (changes)
-      />
-
       <LightboxModal 
         isOpen={Boolean(lightboxMemory)}
         onClose={() => setLightboxMemory(null)}
         memory={lightboxMemory}
       />
+
 
       <FriendModal 
         friend={selectedFriend}
