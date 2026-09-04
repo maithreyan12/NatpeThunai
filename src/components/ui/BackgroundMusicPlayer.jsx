@@ -1,175 +1,141 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music, ExternalLink, Sparkles } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Sparkles } from 'lucide-react';
 import brandLogo from '../../assets/brand-logo.png';
 import './BackgroundMusicPlayer.css';
 
-const YOUTUBE_VIDEO_ID = 'QEPgBVStsMM';
+const AUDIO_SRC = '/audio/sonthamulla-vaazhkai.m4a';
 const SONG_TITLE_TAMIL = 'சொந்தமுள்ள வாழ்க்கை';
 const SONG_TITLE_ENG = 'Sonthamulla Vaazhkkai';
-const SONG_SUBTITLE = 'நட்பே துணை Official Soundtrack';
+const SONG_SUBTITLE = 'நட்பே துணை Special Song';
 
 export default function BackgroundMusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(80);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [volume, setVolume] = useState(85);
   const [hasStarted, setHasStarted] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showInteractionPrompt, setShowInteractionPrompt] = useState(true);
 
-  const playerRef = useRef(null);
+  const audioRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Initialize YouTube IFrame API
+  // Initialize native HTML5 audio with autoplay
   useEffect(() => {
-    let checkInterval = null;
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    const initPlayer = () => {
-      if (!window.YT || !window.YT.Player) return false;
+    audio.volume = volume / 100;
+    audio.loop = true;
 
+    // Attempt direct autoplay immediately on page open
+    const tryAutoplay = async () => {
       try {
-        playerRef.current = new window.YT.Player('hidden-yt-music-player', {
-          height: '1',
-          width: '1',
-          videoId: YOUTUBE_VIDEO_ID,
-          playerVars: {
-            autoplay: 1,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            loop: 1,
-            playlist: YOUTUBE_VIDEO_ID,
-            modestbranding: 1,
-            rel: 0,
-            playsinline: 1,
-            origin: window.location.origin
-          },
-          events: {
-            onReady: (event) => {
-              setIsLoaded(true);
-              try {
-                event.target.setVolume(volume);
-                event.target.playVideo();
-              } catch (e) {
-                console.log('[Music Player] Autoplay blocked by browser, waiting for user gesture:', e);
-              }
-            },
-            onStateChange: (event) => {
-              // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
-              if (event.data === 1) {
-                setIsPlaying(true);
-                setHasStarted(true);
-                setShowInteractionPrompt(false);
-              } else if (event.data === 2) {
-                setIsPlaying(false);
-              } else if (event.data === 0) {
-                // Loop back seamlessly
-                event.target.seekTo(0);
-                event.target.playVideo();
-              }
-            },
-            onError: (err) => {
-              console.warn('[Music Player] YouTube error:', err);
-            }
-          }
-        });
-        return true;
+        await audio.play();
+        setIsPlaying(true);
+        setHasStarted(true);
+        setShowInteractionPrompt(false);
       } catch (err) {
-        console.warn('[Music Player] Init error:', err);
-        return false;
+        // Browser blocked audio autoplay before user interaction
+        console.log('[Audio Player] Waiting for user gesture to unlock audio:', err.message);
+        setIsPlaying(false);
       }
     };
 
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    tryAutoplay();
 
-      window.onYouTubeIframeAPIReady = () => {
-        initPlayer();
-      };
-    } else {
-      if (!initPlayer()) {
-        checkInterval = setInterval(() => {
-          if (initPlayer()) {
-            clearInterval(checkInterval);
-          }
-        }, 300);
-      }
-    }
+    // Event listeners on native audio
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
 
     return () => {
-      if (checkInterval) clearInterval(checkInterval);
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
     };
   }, []);
 
-  // Seamless Autoplay fallback: Trigger on FIRST user interaction (click, touch, scroll)
+  // Seamless fallback: start audio on FIRST user interaction (tap, click, scroll, keydown)
   useEffect(() => {
     if (hasStarted) return;
 
-    const handleFirstInteraction = () => {
-      if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
-        try {
-          playerRef.current.unMute();
-          playerRef.current.setVolume(volume);
-          playerRef.current.playVideo();
-          setIsPlaying(true);
-          setHasStarted(true);
-          setShowInteractionPrompt(false);
-        } catch (e) {
-          console.warn('[Music Player] Interaction play failed:', e);
-        }
+    const handleFirstGesture = async () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      try {
+        audio.volume = volume / 100;
+        await audio.play();
+        setIsPlaying(true);
+        setHasStarted(true);
+        setShowInteractionPrompt(false);
+      } catch (err) {
+        console.warn('[Audio Player] Gesture play attempt:', err);
       }
     };
 
     const events = ['click', 'touchstart', 'scroll', 'keydown'];
     events.forEach(evt => {
-      window.addEventListener(evt, handleFirstInteraction, { once: true, passive: true });
+      window.addEventListener(evt, handleFirstGesture, { once: true, passive: true });
     });
 
     return () => {
       events.forEach(evt => {
-        window.removeEventListener(evt, handleFirstInteraction);
+        window.removeEventListener(evt, handleFirstGesture);
       });
     };
   }, [hasStarted, volume]);
 
   // Toggle Play / Pause
-  const togglePlay = () => {
-    if (!playerRef.current) return;
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      playerRef.current.pauseVideo();
+      audio.pause();
       setIsPlaying(false);
     } else {
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-      setHasStarted(true);
-      setShowInteractionPrompt(false);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+        setHasStarted(true);
+        setShowInteractionPrompt(false);
+      } catch (err) {
+        console.warn('[Audio Player] Play error:', err);
+      }
     }
   };
 
   // Toggle Mute
   const toggleMute = () => {
-    if (!playerRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isMuted) {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(volume);
+      audio.muted = false;
       setIsMuted(false);
     } else {
-      playerRef.current.mute();
+      audio.muted = true;
       setIsMuted(true);
     }
   };
 
-  // Adjust volume
+  // Adjust Volume
   const handleVolumeChange = (e) => {
     const val = parseInt(e.target.value, 10);
     setVolume(val);
-    if (playerRef.current) {
-      playerRef.current.setVolume(val);
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = val / 100;
       if (val > 0 && isMuted) {
-        playerRef.current.unMute();
+        audio.muted = false;
         setIsMuted(false);
       }
     }
@@ -177,24 +143,14 @@ export default function BackgroundMusicPlayer() {
 
   return (
     <>
-      {/* Hidden YouTube IFrame Audio Engine */}
-      <div
-        id="hidden-yt-music-player-container"
-        style={{
-          position: 'fixed',
-          top: '-9999px',
-          left: '-9999px',
-          width: '1px',
-          height: '1px',
-          opacity: 0,
-          pointerEvents: 'none',
-          visibility: 'hidden',
-          zIndex: -1
-        }}
-        aria-hidden="true"
-      >
-        <div id="hidden-yt-music-player" />
-      </div>
+      {/* Pure HTML5 Native Audio Element — ZERO Video */}
+      <audio
+        ref={audioRef}
+        src={AUDIO_SRC}
+        preload="auto"
+        loop
+        playsInline
+      />
 
       {/* Ambient Autoplay Prompt Pill (Disappears once music plays) */}
       {showInteractionPrompt && !isPlaying && (
@@ -257,7 +213,7 @@ export default function BackgroundMusicPlayer() {
             {/* Song Meta Information */}
             <div className="bg-music-info">
               <div className="bg-music-title-row">
-                <span className="bg-music-badge">BGM</span>
+                <span className="bg-music-badge">SONG</span>
                 <span className="bg-music-name-tamil">{SONG_TITLE_TAMIL}</span>
                 {isPlaying && (
                   <div className="bg-music-soundwave" aria-hidden="true">
@@ -309,18 +265,6 @@ export default function BackgroundMusicPlayer() {
                   aria-label="Volume Slider"
                 />
               </div>
-
-              {/* YouTube Source Link */}
-              <a
-                href={`https://youtu.be/${YOUTUBE_VIDEO_ID}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-music-ctrl-btn yt-link-btn"
-                title="Watch on YouTube"
-                aria-label="Watch Sonthamulla Vaazhkai on YouTube"
-              >
-                <ExternalLink size={13} />
-              </a>
             </div>
           </div>
         )}
