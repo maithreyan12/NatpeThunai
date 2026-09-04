@@ -1505,6 +1505,20 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .admin-top-header {
+    padding: 10px 16px;
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .admin-header-sub {
+    display: none;
+  }
+  .admin-header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   .admin-main-container {
     flex-direction: column;
   }
@@ -1517,13 +1531,18 @@
   .admin-nav-menu {
     flex-direction: row;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .admin-nav-menu::-webkit-scrollbar {
+    display: none;
   }
   .admin-nav-tab {
     white-space: nowrap;
     padding: 8px 14px;
   }
   .admin-content-pane {
-    padding: 18px;
+    padding: 18px 14px;
   }
   .admin-form-row {
     grid-template-columns: 1fr;
@@ -2314,6 +2333,40 @@
   }
   .admin-r2-hero-stats-panel {
     grid-template-columns: 1fr;
+  }
+  .admin-modal-backdrop {
+    padding: 10px;
+  }
+  .admin-modal-card {
+    padding: 22px 16px;
+    max-height: 94vh;
+    border-radius: var(--radius-xl);
+  }
+  .admin-modal-title {
+    font-size: 1.18rem;
+    margin-bottom: 16px;
+  }
+  .admin-content-pane {
+    padding: 14px 10px;
+  }
+  .admin-login-glass-card {
+    padding: 34px 18px;
+  }
+  .admin-action-bar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .admin-search-wrap {
+    width: 100%;
+  }
+  .admin-search-wrap input {
+    width: 100%;
+  }
+  .admin-primary-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Heart, ArrowUp } from 'lucide-react';
+import { Heart, ArrowUp, Shield } from 'lucide-react';
 import InstagramIcon from '../ui/InstagramIcon';
 import brandLogo from '../../assets/brand-logo.png';
+import { isAuthorizedAdmin } from '../../firebase';
 import './Footer.css';
 
-export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _currentUser }) {
+export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, currentUser }) {
+  const isAdmin = currentUser && isAuthorizedAdmin(currentUser);
+
   return (
     <footer className="community-footer-wrapper">
       <div className="footer-dock-bar">
@@ -24,8 +27,24 @@ export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _curren
           </p>
         </div>
 
-        {/* Action Controls: Social & Back to Top */}
+        {/* Action Controls: Social, Admin shortcut, & Back to Top */}
         <div className="footer-controls-group">
+          {isAdmin && (
+            <button
+              onClick={onOpenAdmin}
+              className="footer-round-btn"
+              title="Admin Sanctuary Console"
+              aria-label="Admin Sanctuary Console"
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                borderColor: 'rgba(239, 68, 68, 0.35)',
+                color: '#ef4444'
+              }}
+            >
+              <Shield size={16} />
+            </button>
+          )}
+
           <a
             href="https://instagram.com"
             target="_blank"
@@ -65,3 +84,4 @@ export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _curren
     </footer>
   );
 }
+

@@ -174,6 +174,10 @@ export default function App() {
 
   // Scroll to section helper
   const scrollToSection = (sectionId) => {
+    if (sectionId === 'admin') {
+      navigateToAdmin();
+      return;
+    }
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
