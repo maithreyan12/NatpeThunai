@@ -177,6 +177,83 @@ export function r2DevServerPlugin() {
           }
         }
 
+        // ── GET /api/r2/stats ─────────────────────────────────────
+        if (req.method === 'GET' && req.url === '/api/r2/stats') {
+          const { client, bucket, publicDomain, missing } = getClient();
+          if (missing) return json(503, { error: 'R2 not configured', missingConfig: true });
+          try {
+            const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+            const listResp = await client.send(new ListObjectsV2Command({ Bucket: bucket, MaxKeys: 1000 }));
+            const rawObjects = listResp.Contents || [];
+            const totalObjects = rawObjects.length;
+            const totalBytes = rawObjects.reduce((acc, o) => acc + (o.Size || 0), 0);
+            const R2_FREE_TIER_BYTES = 10 * 1024 * 1024 * 1024;
+            const percentUsed = Math.min(100, parseFloat(((totalBytes / R2_FREE_TIER_BYTES) * 100).toFixed(3)));
+
+            const formatBytes = (bytes) => {
+              if (!bytes || bytes === 0) return '0 B';
+              const k = 1024;
+              const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+              const i = Math.floor(Math.log(bytes) / Math.log(k));
+              return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+
+            const categories = {
+              photos:   { count: 0, bytes: 0, formatted: '0 B' },
+              memories: { count: 0, bytes: 0, formatted: '0 B' },
+              members:  { count: 0, bytes: 0, formatted: '0 B' },
+              data:     { count: 0, bytes: 0, formatted: '0 B' },
+              other:    { count: 0, bytes: 0, formatted: '0 B' }
+            };
+
+            const objects = rawObjects.map(obj => {
+              const key = obj.Key || '';
+              const size = obj.Size || 0;
+              const prefix = key.split('/')[0] || 'other';
+              if (categories[prefix]) {
+                categories[prefix].count += 1;
+                categories[prefix].bytes += size;
+              } else {
+                categories.other.count += 1;
+                categories.other.bytes += size;
+              }
+              return {
+                key,
+                size,
+                sizeFormatted: formatBytes(size),
+                lastModified: obj.LastModified ? obj.LastModified.toISOString() : null,
+                url: `${publicDomain}/${key}`,
+                category: categories[prefix] ? prefix : 'other'
+              };
+            }).sort((a, b) => new Date(b.lastModified || 0) - new Date(a.lastModified || 0));
+
+            Object.keys(categories).forEach(cat => {
+              categories[cat].formatted = formatBytes(categories[cat].bytes);
+            });
+
+            return json(200, {
+              success: true,
+              bucket,
+              publicDomain,
+              totalObjects,
+              totalBytes,
+              totalFormatted: formatBytes(totalBytes),
+              totalMB: parseFloat((totalBytes / (1024 * 1024)).toFixed(2)),
+              totalGB: parseFloat((totalBytes / (1024 * 1024 * 1024)).toFixed(4)),
+              freeTierLimit: '10 GB',
+              freeTierBytes: R2_FREE_TIER_BYTES,
+              remainingBytes: Math.max(0, R2_FREE_TIER_BYTES - totalBytes),
+              remainingFormatted: formatBytes(Math.max(0, R2_FREE_TIER_BYTES - totalBytes)),
+              percentUsed,
+              categories,
+              objects,
+              fetchedAt: new Date().toISOString()
+            });
+          } catch (err) {
+            return json(500, { error: err.message });
+          }
+        }
+
         next();
       });
     }

@@ -3,7 +3,8 @@ import {
   Shield, Users, Image as ImageIcon, BookOpen, MessageSquare,
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
-  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass
+  FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass,
+  Copy, Database, Server, BarChart3, FileCode, CheckCheck
 } from 'lucide-react';
 
 import {
@@ -153,9 +154,14 @@ export default function AdminPortal({ onExit, currentUser }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState('');
   const [recentUploads, setRecentUploads] = useState([]);
-  const [memberPhotoUploading, setMemberPhotoUploading] = useState(false);
-  const [memoryPhotoUploading, setMemoryPhotoUploading] = useState(false);
-
+  // Live Cloudflare R2 Storage Dashboard States
+  const [r2Stats, setR2Stats] = useState(null);
+  const [isLoadingR2Stats, setIsLoadingR2Stats] = useState(false);
+  const [r2FolderFilter, setR2FolderFilter] = useState('all');
+  const [r2SearchTerm, setR2SearchTerm] = useState('');
+  const [r2UploadCategory, setR2UploadCategory] = useState('memories');
+  const [deletingKey, setDeletingKey] = useState(null);
+  const [copiedKey, setCopiedKey] = useState(null);
 
   // Toast
   const [toast, setToast] = useState('');
@@ -309,6 +315,7 @@ export default function AdminPortal({ onExit, currentUser }) {
 
     setIsBundleUploading(false);
     triggerToast(`Batch complete: ${successCount} of ${total} photos uploaded to R2! 🎉`);
+    fetchR2Stats();
   };
 
   // Direct Photo File Upload for Member
@@ -412,11 +419,67 @@ export default function AdminPortal({ onExit, currentUser }) {
   };
 
 
+  // ── Live Cloudflare R2 Storage Metrics & File Management ──
+  const fetchR2Stats = async () => {
+    setIsLoadingR2Stats(true);
+    try {
+      const res = await fetch('/api/r2/stats');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data && data.success) {
+        setR2Stats(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch live R2 stats:', err);
+    } finally {
+      setIsLoadingR2Stats(false);
+    }
+  };
+
+  const handleDeleteR2Object = async (objectKey) => {
+    if (!window.confirm(`Are you sure you want to permanently delete "${objectKey}" from Cloudflare R2? This action cannot be undone.`)) {
+      return;
+    }
+    setDeletingKey(objectKey);
+    try {
+      const res = await fetch('/api/r2/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ objectKey }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerToast(`Deleted ${objectKey} from Cloudflare R2! 🗑️`);
+        await fetchR2Stats();
+      } else {
+        throw new Error(data.error || 'Failed to delete file');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      triggerToast(`Delete failed: ${err.message}`);
+    } finally {
+      setDeletingKey(null);
+    }
+  };
+
+  const handleCopyR2Url = async (url, key) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedKey(key);
+      triggerToast(`Copied CDN URL: ${url.split('/').pop()} 📋`);
+      setTimeout(() => setCopiedKey(null), 2500);
+    } catch (err) {
+      triggerToast(`CDN URL: ${url}`);
+    }
+  };
 
   // ── Live R2 subscriptions — push updates to this component AND public website ──
   useEffect(() => {
     // Boot: seed R2 if first time
     bootR2Database().catch(() => {});
+
+    // Fetch live storage metrics immediately
+    fetchR2Stats();
 
     // Subscribe to live data from R2 CDN
     const unsubMembers   = subscribeToMembersR2(setMembers);
@@ -952,16 +1015,17 @@ export default function AdminPortal({ onExit, currentUser }) {
 
     setIsUploading(true);
     setUploadProgress(10);
-    setUploadMessage('Preparing upload to Cloudflare R2...');
+    setUploadMessage(`Preparing upload to Cloudflare R2 (${r2UploadCategory}/)...`);
 
     try {
-      const result = await uploadToR2WithGuardrails(file, 'memories', (pct) => {
+      const result = await uploadToR2WithGuardrails(file, r2UploadCategory, (pct) => {
         setUploadProgress(pct);
       });
       setUploadProgress(100);
       setUploadMessage('Upload complete!');
       setRecentUploads(prev => [result, ...prev]);
-      triggerToast(`Uploaded ${file.name} to R2 CDN! ☁️`);
+      triggerToast(`Uploaded ${file.name} to R2 CDN (${r2UploadCategory})! ☁️`);
+      fetchR2Stats();
     } catch (err) {
       setUploadMessage(`Error: ${err.message}`);
       triggerToast(`Upload failed: ${err.message}`);
@@ -986,6 +1050,13 @@ export default function AdminPortal({ onExit, currentUser }) {
       (r.location || '').toLowerCase().includes(q) ||
       (r.description || '').toLowerCase().includes(q)
     );
+  });
+
+  // Live Cloudflare R2 Objects filtered by folder and search term
+  const filteredR2Objects = (r2Stats?.objects || []).filter(item => {
+    const matchesFilter = r2FolderFilter === 'all' || item.category === r2FolderFilter;
+    const matchesSearch = !r2SearchTerm || item.key.toLowerCase().includes(r2SearchTerm.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
 
 
@@ -1231,18 +1302,49 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
-              <div className="admin-stat-card full-span">
-                <div className="admin-r2-info-box">
-                  <div className="admin-stat-icon-wrap from-cyan">
-                    <HardDrive size={24} />
+              <div className="admin-stat-card full-span admin-r2-overview-card" onClick={() => setActiveTab('r2')} style={{ cursor: 'pointer' }}>
+                <div className="admin-r2-overview-inner">
+                  <div className="admin-r2-overview-left">
+                    <div className="admin-stat-icon-wrap from-cyan">
+                      <HardDrive size={26} />
+                    </div>
+                    <div>
+                      <div className="admin-r2-title-row">
+                        <h3>Cloudflare R2 Live Cloud Storage</h3>
+                        <span className="admin-live-pulse-badge">
+                          <span className="live-dot"></span> Live Sync
+                        </span>
+                      </div>
+                      <p className="admin-r2-sub">
+                        Bucket <code>{r2Stats?.bucket || 'natpethunai'}</code> · Fast edge delivery via Cloudflare CDN
+                      </p>
+                      <div className="admin-r2-quick-counters">
+                        <span className="admin-r2-counter-pill">
+                          📦 <strong>{r2Stats ? r2Stats.totalObjects : '...'}</strong> files
+                        </span>
+                        <span className="admin-r2-counter-pill">
+                          ⚡ <strong>{r2Stats ? r2Stats.totalFormatted : '...'}</strong> live used
+                        </span>
+                        <span className="admin-r2-counter-pill">
+                          🛡️ <strong>{r2Stats ? `${r2Stats.percentUsed}%` : '0%'}</strong> of 10 GB free quota
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="admin-r2-meta">
-                    <h3>Cloudflare R2 Media CDN Status</h3>
-                    <p>Connected to <code>natpethunai</code> bucket at <code>{R2_BASE}</code></p>
-                    <div className="admin-badge-strip">
-                      <span className="admin-status-pill green">● R2 Bucket Active</span>
-                      <span className="admin-status-pill blue">● 100% Free-Tier Safe</span>
-                      <span className="admin-status-pill purple">● 14 Members Live</span>
+
+                  <div className="admin-r2-overview-right">
+                    <div className="admin-r2-meter-label">
+                      <span>10 GB Free Tier Quota</span>
+                      <strong className="text-emerald-400">{r2Stats?.remainingFormatted ? `${r2Stats.remainingFormatted} free` : '100% Free Tier Safe'}</strong>
+                    </div>
+                    <div className="admin-r2-progress-track">
+                      <div
+                        className="admin-r2-progress-bar"
+                        style={{ width: `${Math.max(2, Math.min(100, (r2Stats?.percentUsed || 0.3) * 5))}%` }}
+                      />
+                    </div>
+                    <div className="admin-r2-cta-link">
+                      Open Live Storage Dashboard <ExternalLink size={13} />
                     </div>
                   </div>
                 </div>
@@ -1634,20 +1736,197 @@ export default function AdminPortal({ onExit, currentUser }) {
             </div>
           )}
 
-          {/* 6. R2 STORAGE TAB */}
+          {/* 6. R2 STORAGE TAB — LIVE CLOUDFLARE R2 DASHBOARD */}
           {activeTab === 'r2' && (
             <div className="admin-section-block">
-              <div className="admin-section-header">
+              {/* Header & Live Refresh */}
+              <div className="admin-section-header admin-r2-header-row">
                 <div>
-                  <h2 className="admin-section-title">Cloudflare R2 Media Center</h2>
-                  <p className="admin-section-sub">Direct file uploads to the <code>natpethunai</code> R2 bucket with automated CDN delivery.</p>
+                  <div className="admin-r2-title-badge-row">
+                    <h2 className="admin-section-title">Cloudflare R2 Live Cloud Storage</h2>
+                    <span className="admin-live-pulse-badge">
+                      <span className="live-dot"></span> Realtime Sync
+                    </span>
+                  </div>
+                  <p className="admin-section-sub">
+                    Live bucket metrics, 10 GB free-tier storage quota monitor, category breakdown, and interactive CDN file explorer.
+                  </p>
+                </div>
+                <div className="admin-r2-header-actions">
+                  <button
+                    onClick={fetchR2Stats}
+                    disabled={isLoadingR2Stats}
+                    className="admin-secondary-btn admin-refresh-r2-btn"
+                    title="Fetch latest metrics directly from Cloudflare R2 bucket"
+                  >
+                    <RefreshCw size={15} className={isLoadingR2Stats ? 'spin-icon' : ''} />
+                    <span>{isLoadingR2Stats ? 'Syncing...' : 'Refresh Live Metrics'}</span>
+                  </button>
                 </div>
               </div>
 
+              {/* HERO: Live Storage Meter & Quota */}
+              <div className="admin-r2-hero-card">
+                <div className="admin-r2-hero-grid">
+                  <div className="admin-r2-hero-main">
+                    <div className="admin-r2-hero-top-tag">
+                      <HardDrive size={16} className="text-cyan-400" />
+                      <span>LIVE CLOUDFLARE R2 STORAGE QUOTA</span>
+                    </div>
+
+                    <div className="admin-r2-hero-numbers">
+                      <span className="admin-r2-hero-used">{r2Stats ? r2Stats.totalFormatted : '...'}</span>
+                      <span className="admin-r2-hero-total">/ 10.00 GB Free Limit</span>
+                    </div>
+
+                    <div className="admin-r2-hero-bar-track">
+                      <div
+                        className="admin-r2-hero-bar-fill"
+                        style={{ width: `${Math.max(1.5, Math.min(100, (r2Stats?.percentUsed || 0.3) * 4))}%` }}
+                      />
+                    </div>
+
+                    <div className="admin-r2-hero-bar-meta">
+                      <span className="admin-r2-pct-badge">
+                        ⚡ {r2Stats ? `${r2Stats.percentUsed}%` : '0%'} Free Tier Used
+                      </span>
+                      <span className="admin-r2-remaining-badge text-emerald-400">
+                        ● {r2Stats?.remainingFormatted || '9.90 GB'} remaining (100% Free-Tier Safe)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="admin-r2-hero-stats-panel">
+                    <div className="admin-r2-stat-pill">
+                      <span className="pill-icon">📦</span>
+                      <div className="pill-content">
+                        <span className="pill-val">{r2Stats ? r2Stats.totalObjects : '...'}</span>
+                        <span className="pill-lbl">Total Stored Objects</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-r2-stat-pill">
+                      <span className="pill-icon">🪣</span>
+                      <div className="pill-content">
+                        <span className="pill-val">{r2Stats?.bucket || 'natpethunai'}</span>
+                        <span className="pill-lbl">Active R2 Bucket</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-r2-stat-pill">
+                      <span className="pill-icon">⚡</span>
+                      <div className="pill-content">
+                        <span className="pill-val text-emerald-400">$0.00 / mo</span>
+                        <span className="pill-lbl">Zero-Egress Fees</span>
+                      </div>
+                    </div>
+
+                    <div className="admin-r2-stat-pill">
+                      <span className="pill-icon">🕒</span>
+                      <div className="pill-content">
+                        <span className="pill-val">
+                          {r2Stats?.fetchedAt ? new Date(r2Stats.fetchedAt).toLocaleTimeString() : 'Live'}
+                        </span>
+                        <span className="pill-lbl">Last Synced Timestamp</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* FOLDER CATEGORY BREAKDOWN CARDS */}
+              <div className="admin-r2-categories-grid">
+                <div
+                  className={`admin-r2-cat-card ${r2FolderFilter === 'photos' ? 'active-filter' : ''}`}
+                  onClick={() => setR2FolderFilter(r2FolderFilter === 'photos' ? 'all' : 'photos')}
+                >
+                  <div className="admin-r2-cat-header">
+                    <div className="admin-r2-cat-icon photos-theme">
+                      <ImageIcon size={20} />
+                    </div>
+                    <span className="admin-r2-cat-badge">/photos/</span>
+                  </div>
+                  <h4 className="admin-r2-cat-title">Gallery Photos</h4>
+                  <div className="admin-r2-cat-metrics">
+                    <span className="admin-r2-cat-count">{r2Stats?.categories?.photos?.count ?? 0} files</span>
+                    <span className="admin-r2-cat-size">{r2Stats?.categories?.photos?.formatted || '0 B'}</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`admin-r2-cat-card ${r2FolderFilter === 'memories' ? 'active-filter' : ''}`}
+                  onClick={() => setR2FolderFilter(r2FolderFilter === 'memories' ? 'all' : 'memories')}
+                >
+                  <div className="admin-r2-cat-header">
+                    <div className="admin-r2-cat-icon memories-theme">
+                      <Film size={20} />
+                    </div>
+                    <span className="admin-r2-cat-badge">/memories/</span>
+                  </div>
+                  <h4 className="admin-r2-cat-title">Memories & Reels</h4>
+                  <div className="admin-r2-cat-metrics">
+                    <span className="admin-r2-cat-count">{r2Stats?.categories?.memories?.count ?? 0} files</span>
+                    <span className="admin-r2-cat-size">{r2Stats?.categories?.memories?.formatted || '0 B'}</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`admin-r2-cat-card ${r2FolderFilter === 'members' ? 'active-filter' : ''}`}
+                  onClick={() => setR2FolderFilter(r2FolderFilter === 'members' ? 'all' : 'members')}
+                >
+                  <div className="admin-r2-cat-header">
+                    <div className="admin-r2-cat-icon members-theme">
+                      <Users size={20} />
+                    </div>
+                    <span className="admin-r2-cat-badge">/members/</span>
+                  </div>
+                  <h4 className="admin-r2-cat-title">Squad Avatars</h4>
+                  <div className="admin-r2-cat-metrics">
+                    <span className="admin-r2-cat-count">{r2Stats?.categories?.members?.count ?? 0} files</span>
+                    <span className="admin-r2-cat-size">{r2Stats?.categories?.members?.formatted || '0 B'}</span>
+                  </div>
+                </div>
+
+                <div
+                  className={`admin-r2-cat-card ${r2FolderFilter === 'data' ? 'active-filter' : ''}`}
+                  onClick={() => setR2FolderFilter(r2FolderFilter === 'data' ? 'all' : 'data')}
+                >
+                  <div className="admin-r2-cat-header">
+                    <div className="admin-r2-cat-icon data-theme">
+                      <Database size={20} />
+                    </div>
+                    <span className="admin-r2-cat-badge">/data/</span>
+                  </div>
+                  <h4 className="admin-r2-cat-title">Cloud Databases</h4>
+                  <div className="admin-r2-cat-metrics">
+                    <span className="admin-r2-cat-count">{r2Stats?.categories?.data?.count ?? 0} files</span>
+                    <span className="admin-r2-cat-size">{r2Stats?.categories?.data?.formatted || '0 B'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* DIRECT CLOUD UPLOAD CENTER */}
               <div className="admin-upload-zone-box">
                 <Upload className="w-12 h-12 text-indigo-400 mb-3" />
-                <h3>Upload Image or Video to Cloudflare R2</h3>
-                <p>Files are stored in <code>/photos/</code> or <code>/memories/</code> and delivered via <code>{R2_BASE}</code></p>
+                <h3>Upload Media Directly to Cloudflare R2</h3>
+                <p>Delivered via fast edge CDN at <code>{r2Stats?.publicDomain || R2_BASE}</code></p>
+
+                {/* Target Folder Selector */}
+                <div className="admin-r2-dest-selector">
+                  <span className="admin-r2-dest-label">Destination Folder:</span>
+                  <div className="admin-r2-dest-pills">
+                    {['photos', 'memories', 'members'].map(folder => (
+                      <button
+                        key={folder}
+                        type="button"
+                        className={`admin-r2-dest-pill ${r2UploadCategory === folder ? 'active' : ''}`}
+                        onClick={() => setR2UploadCategory(folder)}
+                      >
+                        /{folder}/
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="admin-upload-actions-row">
                   <label className="admin-file-upload-btn">
@@ -1674,6 +1953,14 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <div key={i} className="admin-recent-upload-row">
                       <CheckCircle className="text-emerald-400" size={16} />
                       <span className="admin-code-url">{u.publicUrl}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyR2Url(u.publicUrl, `recent-${i}`)}
+                        className="admin-link-btn"
+                        title="Copy CDN Link"
+                      >
+                        {copiedKey === `recent-${i}` ? <CheckCheck size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                      </button>
                       <a href={u.publicUrl} target="_blank" rel="noopener noreferrer" className="admin-link">
                         Preview <ExternalLink size={12} />
                       </a>
@@ -1681,6 +1968,202 @@ export default function AdminPortal({ onExit, currentUser }) {
                   ))}
                 </div>
               )}
+
+              {/* LIVE CLOUD CDN ASSET EXPLORER */}
+              <div className="admin-r2-explorer-card">
+                <div className="admin-r2-explorer-header">
+                  <div className="admin-r2-explorer-title-wrap">
+                    <HardDrive size={18} className="text-indigo-400" />
+                    <h3>Live R2 Bucket Files</h3>
+                    <span className="admin-r2-explorer-count">
+                      {filteredR2Objects.length} of {r2Stats?.totalObjects ?? 0}
+                    </span>
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="admin-r2-filter-pills">
+                    {['all', 'photos', 'memories', 'members', 'data'].map(f => (
+                      <button
+                        key={f}
+                        type="button"
+                        className={`admin-r2-filter-pill ${r2FolderFilter === f ? 'active' : ''}`}
+                        onClick={() => setR2FolderFilter(f)}
+                      >
+                        {f.toUpperCase()}
+                        {r2Stats?.categories?.[f]?.count !== undefined && (
+                          <span className="pill-num">({r2Stats.categories[f].count})</span>
+                        )}
+                        {f === 'all' && r2Stats?.totalObjects !== undefined && (
+                          <span className="pill-num">({r2Stats.totalObjects})</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="admin-r2-search-bar">
+                  <Search size={16} className="text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search files by path or keyword (e.g. gopika, limra, reels, json)..."
+                    value={r2SearchTerm}
+                    onChange={(e) => setR2SearchTerm(e.target.value)}
+                  />
+                  {r2SearchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setR2SearchTerm('')}
+                      className="admin-r2-clear-search-btn"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
+                {/* File Explorer Table */}
+                <div className="admin-r2-table-wrapper">
+                  {filteredR2Objects.length === 0 ? (
+                    <div className="admin-r2-empty-state">
+                      <HardDrive size={32} className="text-slate-500 mb-2" />
+                      <p>No files match the current folder or search filter.</p>
+                      {r2SearchTerm && (
+                        <button
+                          type="button"
+                          className="admin-secondary-btn mt-2"
+                          onClick={() => { setR2SearchTerm(''); setR2FolderFilter('all'); }}
+                        >
+                          Clear Filters
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <table className="admin-r2-table">
+                      <thead>
+                        <tr>
+                          <th>Asset Preview</th>
+                          <th>Object Key / CDN Path</th>
+                          <th>Category</th>
+                          <th>File Size</th>
+                          <th>Last Modified</th>
+                          <th style={{ textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredR2Objects.map((item) => {
+                          const isImage = item.key.match(/\.(jpg|jpeg|png|webp|gif|avif)$/i);
+                          const isVideo = item.key.match(/\.(mp4|webm|mov|ogg)$/i);
+                          const isData = item.key.endsWith('.json');
+                          const isDeleting = deletingKey === item.key;
+                          const isCopied = copiedKey === item.key;
+
+                          return (
+                            <tr key={item.key} className="admin-r2-row">
+                              {/* Preview thumbnail */}
+                              <td className="admin-r2-col-thumb">
+                                <div className="admin-r2-thumb-box">
+                                  {isImage ? (
+                                    <img
+                                      src={item.url}
+                                      alt={item.key}
+                                      className="admin-r2-thumb-img"
+                                      loading="lazy"
+                                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    />
+                                  ) : isVideo ? (
+                                    <Film size={20} className="text-pink-400" />
+                                  ) : isData ? (
+                                    <FileCode size={20} className="text-amber-400" />
+                                  ) : (
+                                    <HardDrive size={20} className="text-indigo-400" />
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Object Key */}
+                              <td className="admin-r2-col-key">
+                                <span className="admin-r2-file-name" title={item.key}>
+                                  {item.key.split('/').pop()}
+                                </span>
+                                <span className="admin-r2-full-key" title={item.key}>
+                                  {item.key}
+                                </span>
+                              </td>
+
+                              {/* Category Badge */}
+                              <td className="admin-r2-col-cat">
+                                <span className={`admin-r2-cat-tag ${item.category}`}>
+                                  {item.category}
+                                </span>
+                              </td>
+
+                              {/* Size */}
+                              <td className="admin-r2-col-size">
+                                <span className="admin-r2-size-tag">{item.sizeFormatted}</span>
+                              </td>
+
+                              {/* Date */}
+                              <td className="admin-r2-col-date">
+                                {item.lastModified ? (
+                                  <span className="admin-r2-date-text">
+                                    {new Date(item.lastModified).toLocaleDateString(undefined, {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </span>
+                                ) : '—'}
+                              </td>
+
+                              {/* Action Buttons */}
+                              <td className="admin-r2-col-actions">
+                                <div className="admin-r2-action-btns">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyR2Url(item.url, item.key)}
+                                    className="admin-r2-icon-btn"
+                                    title="Copy Public CDN URL"
+                                  >
+                                    {isCopied ? (
+                                      <CheckCheck size={14} className="text-emerald-400" />
+                                    ) : (
+                                      <Copy size={14} />
+                                    )}
+                                  </button>
+
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="admin-r2-icon-btn"
+                                    title="Preview in new window"
+                                  >
+                                    <ExternalLink size={14} />
+                                  </a>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteR2Object(item.key)}
+                                    disabled={isDeleting}
+                                    className="admin-r2-icon-btn danger"
+                                    title="Permanently delete from Cloudflare R2"
+                                  >
+                                    {isDeleting ? (
+                                      <Loader2 size={14} className="spin-icon text-rose-400" />
+                                    ) : (
+                                      <Trash2 size={14} />
+                                    )}
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </main>
