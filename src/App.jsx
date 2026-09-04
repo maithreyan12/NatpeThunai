@@ -45,7 +45,7 @@ export default function App() {
   // Admin Route State (/admin and #admin support)
   const [isAdminRoute, setIsAdminRoute] = useState(() => {
     return typeof window !== 'undefined' && 
-      (window.location.pathname.startsWith('/admin') || window.location.hash === '#admin');
+      (window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#admin'));
   });
 
   // Album Overlay State (in-page full-screen overlay without URL redirect)
@@ -115,7 +115,7 @@ export default function App() {
   // Listen for URL changes (/admin and browser back/forward)
   useEffect(() => {
     const handleUrlChange = () => {
-      const isAdmin = window.location.pathname.startsWith('/admin') || window.location.hash === '#admin';
+      const isAdmin = window.location.pathname.startsWith('/admin') || window.location.hash.startsWith('#admin');
       setIsAdminRoute(isAdmin);
 
       if (window.location.hash === '#album' || window.location.hash === '#/album') {

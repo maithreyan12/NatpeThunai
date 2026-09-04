@@ -52,8 +52,9 @@ export default function MemoriesSpiral({ currentUser }) {
           <span className="memories-spiral__badge">✨ Memories Vault</span>
           {isAdmin && (
             <a
-              href="#admin"
+              href="#admin?tab=spiral"
               onClick={() => {
+                try { localStorage.setItem('admin_initial_tab', 'spiral'); } catch {}
                 window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'spiral' } }));
               }}
               className="admin-section-edit-trigger"

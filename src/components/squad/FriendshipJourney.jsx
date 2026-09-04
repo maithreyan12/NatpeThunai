@@ -63,8 +63,9 @@ export default function FriendshipJourney({ currentUser }) {
           </div>
           {isAdmin && (
             <a
-              href="#admin"
+              href="#admin?tab=journey"
               onClick={() => {
+                try { localStorage.setItem('admin_initial_tab', 'journey'); } catch {}
                 window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
               }}
               className="admin-section-edit-trigger"
@@ -120,8 +121,9 @@ export default function FriendshipJourney({ currentUser }) {
               />
               {isAdmin && (
                 <a
-                  href="#admin"
+                  href="#admin?tab=journey"
                   onClick={() => {
+                    try { localStorage.setItem('admin_initial_tab', 'journey'); } catch {}
                     window.dispatchEvent(new CustomEvent('open-admin-tab', { detail: { tab: 'journey', milestoneIdx: currentIndex } }));
                   }}
                   className="admin-card-edit-floating-pencil"

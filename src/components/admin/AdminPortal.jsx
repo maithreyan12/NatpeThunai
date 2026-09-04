@@ -78,9 +78,33 @@ export default function AdminPortal({ onExit, currentUser }) {
       .catch(() => {});
   }, [currentUser]);
 
-  // Active Tab: 'overview' | 'members' | 'memories' | 'posts' | 'events' | 'r2'
-  const [activeTab, setActiveTab] = useState('overview');
+  // Active Tab: 'overview' | 'members' | 'spiral' | 'journey' | 'reels' | 'memories' | 'posts' | 'events' | 'storage'
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem('admin_initial_tab');
+      if (saved) {
+        localStorage.removeItem('admin_initial_tab');
+        return saved;
+      }
+      if (window.location.hash) {
+        const parts = window.location.hash.split('?tab=');
+        if (parts[1]) return parts[1];
+      }
+    } catch {}
+    return 'overview';
+  });
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Listen to open-admin-tab events from in-page edit buttons
+  useEffect(() => {
+    const handleOpenAdminTab = (e) => {
+      if (e.detail?.tab) {
+        setActiveTab(e.detail.tab);
+      }
+    };
+    window.addEventListener('open-admin-tab', handleOpenAdminTab);
+    return () => window.removeEventListener('open-admin-tab', handleOpenAdminTab);
+  }, []);
 
   // Live Data States
   const [members, setMembers] = useState([]);
@@ -91,12 +115,14 @@ export default function AdminPortal({ onExit, currentUser }) {
   // Modals & Form States
   const [editingMember, setEditingMember] = useState(null);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [memberPhotoUploading, setMemberPhotoUploading] = useState(false);
   const [memberForm, setMemberForm] = useState({
     name: '', nickname: '', role: '', category: 'core', bio: '', quote: '', instagram: '', photo: ''
   });
 
   const [editingMemory, setEditingMemory] = useState(null);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
+  const [memoryPhotoUploading, setMemoryPhotoUploading] = useState(false);
   const [memoryForm, setMemoryForm] = useState({
     title: '', year: 'Chapter 5', description: '', date: '', location: '', mediaUrl: '', people: ''
   });
