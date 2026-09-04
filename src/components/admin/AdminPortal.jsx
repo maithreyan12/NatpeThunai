@@ -4,7 +4,8 @@ import {
   Calendar, HardDrive, LogOut, ArrowLeft, Plus, Trash2, Edit3,
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
   FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass,
-  Copy, Database, Server, BarChart3, FileCode, CheckCheck
+  Copy, Database, Server, BarChart3, FileCode, CheckCheck,
+  GripVertical, ChevronLeft, ChevronRight, Sliders, Move, Crosshair, ZoomIn, ZoomOut
 } from 'lucide-react';
 
 import {
@@ -170,6 +171,12 @@ export default function AdminPortal({ onExit, currentUser }) {
   const [editingSpiralItem, setEditingSpiralItem] = useState(null);
   const [isSpiralModalOpen, setIsSpiralModalOpen] = useState(false);
   const [spiralPhotoUploading, setSpiralPhotoUploading] = useState(false);
+  const [draggedSpiralIdx, setDraggedSpiralIdx] = useState(null);
+  const [dragOverSpiralIdx, setDragOverSpiralIdx] = useState(null);
+  const [activeQuickAlignId, setActiveQuickAlignId] = useState(null);
+  const [isDraggingPreview, setIsDraggingPreview] = useState(false);
+  const dragStartY = useRef(0);
+  const startPosY = useRef(20);
   const [spiralForm, setSpiralForm] = useState({
     id: '', src: '', alt: 'Squad Memory', title: ''
   });
@@ -922,6 +929,102 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
+  // ── Infinite Spiral Drag-and-Drop & Live Align Handlers ──
+  const handleSpiralDragStart = (e, idx) => {
+    setDraggedSpiralIdx(idx);
+    e.dataTransfer.effectAllowed = 'move';
+    try {
+      e.dataTransfer.setData('text/plain', String(idx));
+    } catch {}
+  };
+
+  const handleSpiralDragOver = (e, idx) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverSpiralIdx !== idx) {
+      setDragOverSpiralIdx(idx);
+    }
+  };
+
+  const handleSpiralDragLeave = (e, idx) => {
+    if (dragOverSpiralIdx === idx) {
+      setDragOverSpiralIdx(null);
+    }
+  };
+
+  const handleSpiralDrop = async (e, targetIdx) => {
+    e.preventDefault();
+    const sourceIdx = draggedSpiralIdx !== null ? draggedSpiralIdx : parseInt(e.dataTransfer.getData('text/plain'), 10);
+    setDraggedSpiralIdx(null);
+    setDragOverSpiralIdx(null);
+
+    if (isNaN(sourceIdx) || sourceIdx === targetIdx || sourceIdx < 0 || sourceIdx >= spiralItems.length) {
+      return;
+    }
+
+    const updated = [...spiralItems];
+    const [moved] = updated.splice(sourceIdx, 1);
+    updated.splice(targetIdx, 0, moved);
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(updated);
+    triggerToast(`Arranged: "${moved.title || moved.alt || 'Photo'}" is now Position #${targetIdx + 1} 🔄✨`);
+
+    try {
+      await saveAllSpiralItemsR2(updated);
+    } catch (err) {
+      triggerToast(`Spiral sequence save error: ${err.message}`);
+    }
+  };
+
+  const handleSpiralDragEnd = () => {
+    setDraggedSpiralIdx(null);
+    setDragOverSpiralIdx(null);
+  };
+
+  const handleMoveSpiral = async (idx, delta) => {
+    const targetIdx = idx + delta;
+    if (targetIdx < 0 || targetIdx >= spiralItems.length) return;
+
+    const updated = [...spiralItems];
+    const [moved] = updated.splice(idx, 1);
+    updated.splice(targetIdx, 0, moved);
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(updated);
+    triggerToast(`Moved "${moved.title || moved.alt || 'Photo'}" to Position #${targetIdx + 1} 🚀`);
+
+    try {
+      await saveAllSpiralItemsR2(updated);
+    } catch (err) {
+      triggerToast(`Move save error: ${err.message}`);
+    }
+  };
+
+  const handleQuickAlignSpiral = async (item, newPosY, newPosX = 'center') => {
+    const objPos = newPosX === 'center' ? `center ${newPosY}%` : `${newPosX} ${newPosY}%`;
+    const updated = spiralItems.map(s => {
+      if (s.id === item.id) {
+        return {
+          ...s,
+          positionY: newPosY,
+          objectPosition: objPos
+        };
+      }
+      return s;
+    });
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(updated);
+    triggerToast(`Aligned "${item.title || item.alt}": Focus at ${newPosY}% 🎯`);
+
+    try {
+      await saveAllSpiralItemsR2(updated);
+    } catch (err) {
+      triggerToast(`Align save error: ${err.message}`);
+    }
+  };
+
   const handleSyncAllSquadMembersToSpiral = async () => {
     if (!window.confirm('Sync all 14 squad members into the Infinite Spiral with calibrated face-framing? This will ensure all member photos appear in the rotating spiral with proper face framing.')) {
       return;
@@ -1519,6 +1622,14 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <p className="admin-section-sub">
                     Manage the {spiralItems.length} photos rotating in the 3D Infinite Spiral on the homepage.
                   </p>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <span className="admin-hint-pill">
+                      <GripVertical size={13} /> Drag &amp; drop cards or click ‹ › arrows to reorder sequence
+                    </span>
+                    <span className="admin-hint-pill">
+                      <Sliders size={13} /> Click Sliders or Edit to adjust face alignment
+                    </span>
+                  </div>
                 </div>
                 <div className="admin-action-bar">
                   <button
@@ -1559,8 +1670,19 @@ export default function AdminPortal({ onExit, currentUser }) {
                 <div className="admin-cards-grid">
                   {spiralItems.map((item, idx) => {
                     const focusPercent = item.positionY ?? (item.objectPosition?.match(/(\d+)%/)?.[1] ? parseInt(item.objectPosition.match(/(\d+)%/)[1], 10) : 20);
+                    const isQuickAlignOpen = activeQuickAlignId === (item.id || idx);
+
                     return (
-                      <div key={item.id || idx} className="admin-card-item">
+                      <div 
+                        key={item.id || idx} 
+                        className={`admin-card-item admin-spiral-card ${draggedSpiralIdx === idx ? 'is-dragging' : ''} ${dragOverSpiralIdx === idx ? 'is-drag-over' : ''}`}
+                        draggable
+                        onDragStart={(e) => handleSpiralDragStart(e, idx)}
+                        onDragOver={(e) => handleSpiralDragOver(e, idx)}
+                        onDragLeave={(e) => handleSpiralDragLeave(e, idx)}
+                        onDrop={(e) => handleSpiralDrop(e, idx)}
+                        onDragEnd={handleSpiralDragEnd}
+                      >
                         <div style={{ position: 'relative', overflow: 'hidden', height: '170px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px 12px 0 0' }}>
                           <img 
                             src={item.src} 
@@ -1571,7 +1693,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                               height: '100%',
                               objectFit: item.objectFit || 'cover',
                               objectPosition: item.objectPosition || `center ${focusPercent}%`,
-                              transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined
+                              transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined,
+                              transition: 'object-position 0.2s ease, transform 0.2s ease'
                             }}
                           />
                           <span style={{
@@ -1589,26 +1712,122 @@ export default function AdminPortal({ onExit, currentUser }) {
                             Face Focus: {focusPercent}%
                           </span>
                         </div>
-                      <div className="admin-card-body">
-                        <div className="admin-card-header-row">
-                          <span className="admin-card-badge">Position #{idx + 1}</span>
-                          <div className="admin-row-actions">
-                            <button onClick={() => openEditSpiralItem(item)} className="admin-icon-action-btn" title="Edit Photo & Adjust Framing">
-                              <Edit3 size={15} />
-                            </button>
-                            <button onClick={() => handleDeleteSpiralItem(item.id, item.title || item.alt)} className="admin-icon-action-btn delete" title="Delete Photo">
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </div>
-                        <h3 className="admin-card-title">{item.title || item.alt || `Photo #${idx + 1}`}</h3>
-                        <p className="admin-card-desc">{item.alt ? `Alt: ${item.alt}` : 'Featured in Infinite Spiral'}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                        <div className="admin-card-body">
+                          <div className="admin-card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <div 
+                                className="admin-drag-handle" 
+                                title="Click &amp; drag to reorder this card in the spiral sequence"
+                              >
+                                <GripVertical size={16} />
+                              </div>
+                              <span className="admin-card-badge" style={{ margin: 0 }}>
+                                Position #{idx + 1}
+                              </span>
+                              {/* Step Reorder ‹ › Arrows */}
+                              <div style={{ display: 'inline-flex', gap: '3px', marginLeft: '4px' }}>
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => handleMoveSpiral(idx, -1)}
+                                  className="admin-reorder-btn"
+                                  title="Move Earlier in Spiral"
+                                >
+                                  <ChevronLeft size={13} />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === spiralItems.length - 1}
+                                  onClick={() => handleMoveSpiral(idx, 1)}
+                                  className="admin-reorder-btn"
+                                  title="Move Later in Spiral"
+                                >
+                                  <ChevronRight size={13} />
+                                </button>
+                              </div>
+                            </div>
 
+                            <div className="admin-row-actions">
+                              <button 
+                                type="button"
+                                onClick={() => setActiveQuickAlignId(prev => prev === (item.id || idx) ? null : (item.id || idx))}
+                                className={`admin-icon-action-btn ${isQuickAlignOpen ? 'active' : ''}`}
+                                title="Quick Face Alignment"
+                                style={{ color: isQuickAlignOpen ? '#a855f7' : '#818cf8' }}
+                              >
+                                <Sliders size={15} />
+                              </button>
+                              <button onClick={() => openEditSpiralItem(item)} className="admin-icon-action-btn" title="Edit Photo &amp; Detailed Framing">
+                                <Edit3 size={15} />
+                              </button>
+                              <button onClick={() => handleDeleteSpiralItem(item.id, item.title || item.alt)} className="admin-icon-action-btn delete" title="Delete Photo">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+                          <h3 className="admin-card-title">{item.title || item.alt || `Photo #${idx + 1}`}</h3>
+                          <p className="admin-card-desc">{item.alt ? `Alt: ${item.alt}` : 'Featured in Infinite Spiral'}</p>
+
+                          {/* Inline Quick Alignment Drawer */}
+                          {isQuickAlignOpen && (
+                            <div className="admin-quick-align-bar">
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.74rem' }}>
+                                <span style={{ color: '#a5b4fc', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  <Crosshair size={12} /> Align Face Focus:
+                                </span>
+                                <span style={{ fontWeight: 700, color: '#fff' }}>{focusPercent}%</span>
+                              </div>
+                              <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+                                {[
+                                  { label: 'Top 15%', val: 15 },
+                                  { label: 'Upper 22%', val: 22 },
+                                  { label: 'Center 35%', val: 35 },
+                                  { label: 'Mid 50%', val: 50 }
+                                ].map(preset => (
+                                  <button
+                                    key={preset.val}
+                                    type="button"
+                                    onClick={() => handleQuickAlignSpiral(item, preset.val)}
+                                    className={`admin-preset-pill ${focusPercent === preset.val ? 'active' : ''}`}
+                                  >
+                                    {preset.label}
+                                  </button>
+                                ))}
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickAlignSpiral(item, Math.max(0, focusPercent - 5))}
+                                  className="admin-nudge-btn"
+                                  title="Nudge Up (-5%)"
+                                >
+                                  ▲ Up
+                                </button>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  step="2"
+                                  value={focusPercent}
+                                  onChange={(e) => handleQuickAlignSpiral(item, parseInt(e.target.value, 10))}
+                                  style={{ flex: 1, accentColor: '#6366f1', cursor: 'pointer' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleQuickAlignSpiral(item, Math.min(100, focusPercent + 5))}
+                                  className="admin-nudge-btn"
+                                  title="Nudge Down (+5%)"
+                                >
+                                  ▼ Down
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           )}
@@ -2597,29 +2816,70 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </div>
               </div>
 
-              {/* Live 3D Card Simulation Box */}
+              {/* Live 3D Card Simulation Box — Interactively Draggable */}
               <div className="admin-input-group" style={{ marginTop: '14px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontWeight: 600, color: '#c7d2fe' }}>Live 3D Spiral Card Preview</span>
+                  <span style={{ fontWeight: 600, color: '#c7d2fe', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <Move size={13} /> Interactive Drag-to-Align 3D Preview
+                  </span>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                    Exact Card Aspect Ratio (195 × 145)
+                    Exact 3D Card Ratio (195 × 145)
                   </span>
                 </label>
-                <div style={{
-                  position: 'relative',
-                  width: '100%',
-                  maxWidth: '280px',
-                  height: '190px',
-                  margin: '4px auto 14px',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  background: 'rgba(15, 23, 42, 0.8)',
-                  border: '2px solid rgba(99, 102, 241, 0.45)',
-                  boxShadow: '0 14px 34px rgba(0, 0, 0, 0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <div 
+                  onMouseDown={(e) => {
+                    setIsDraggingPreview(true);
+                    dragStartY.current = e.clientY;
+                    startPosY.current = spiralForm.positionY ?? 50;
+                  }}
+                  onMouseMove={(e) => {
+                    if (!isDraggingPreview) return;
+                    const delta = e.clientY - dragStartY.current;
+                    const newY = Math.max(0, Math.min(100, Math.round(startPosY.current - delta * 0.35)));
+                    const posX = spiralForm.objectPosition?.split(' ')?.[0] || 'center';
+                    setSpiralForm(prev => ({
+                      ...prev,
+                      positionY: newY,
+                      objectPosition: `${posX} ${newY}%`
+                    }));
+                  }}
+                  onMouseUp={() => setIsDraggingPreview(false)}
+                  onMouseLeave={() => setIsDraggingPreview(false)}
+                  onTouchStart={(e) => {
+                    setIsDraggingPreview(true);
+                    dragStartY.current = e.touches[0].clientY;
+                    startPosY.current = spiralForm.positionY ?? 50;
+                  }}
+                  onTouchMove={(e) => {
+                    if (!isDraggingPreview) return;
+                    const delta = e.touches[0].clientY - dragStartY.current;
+                    const newY = Math.max(0, Math.min(100, Math.round(startPosY.current - delta * 0.35)));
+                    const posX = spiralForm.objectPosition?.split(' ')?.[0] || 'center';
+                    setSpiralForm(prev => ({
+                      ...prev,
+                      positionY: newY,
+                      objectPosition: `${posX} ${newY}%`
+                    }));
+                  }}
+                  onTouchEnd={() => setIsDraggingPreview(false)}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    maxWidth: '280px',
+                    height: '190px',
+                    margin: '4px auto 14px',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    background: 'rgba(15, 23, 42, 0.8)',
+                    border: isDraggingPreview ? '2px solid #a855f7' : '2px solid rgba(99, 102, 241, 0.45)',
+                    boxShadow: isDraggingPreview ? '0 0 24px rgba(168, 85, 247, 0.5)' : '0 14px 34px rgba(0, 0, 0, 0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: isDraggingPreview ? 'grabbing' : 'ns-resize',
+                    userSelect: 'none'
+                  }}
+                >
                   {spiralForm.src ? (
                     <img
                       src={spiralForm.src}
@@ -2630,7 +2890,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                         objectFit: spiralForm.objectFit || 'cover',
                         objectPosition: spiralForm.objectPosition || `center ${spiralForm.positionY ?? 50}%`,
                         transform: spiralForm.scale && spiralForm.scale !== 1 ? `scale(${spiralForm.scale})` : undefined,
-                        transition: 'object-position 0.15s ease, transform 0.15s ease'
+                        transition: isDraggingPreview ? 'none' : 'object-position 0.15s ease, transform 0.15s ease',
+                        pointerEvents: 'none'
                       }}
                     />
                   ) : (
@@ -2639,6 +2900,47 @@ export default function AdminPortal({ onExit, currentUser }) {
                       Choose or enter photo URL above
                     </div>
                   )}
+
+                  {/* Face Target Guideline Overlay */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '12%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '74px',
+                    height: '84px',
+                    border: '1.5px dashed rgba(168, 85, 247, 0.7)',
+                    borderRadius: '50%',
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 12px rgba(168, 85, 247, 0.25)'
+                  }}>
+                    <span style={{ fontSize: '0.58rem', color: '#e9d5ff', background: 'rgba(0,0,0,0.6)', padding: '1px 4px', borderRadius: '3px' }}>
+                      Face Target
+                    </span>
+                  </div>
+
+                  {/* Top Drag Instruction Pill */}
+                  <span style={{
+                    position: 'absolute',
+                    top: '8px',
+                    fontSize: '0.66rem',
+                    padding: '3px 8px',
+                    borderRadius: '999px',
+                    background: isDraggingPreview ? '#6366f1' : 'rgba(0, 0, 0, 0.75)',
+                    color: '#ffffff',
+                    backdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    pointerEvents: 'none',
+                    transition: 'all 0.15s ease'
+                  }}>
+                    <Move size={11} /> {isDraggingPreview ? 'Dragging to align...' : 'Drag photo up/down to align'}
+                  </span>
+
                   <span style={{
                     position: 'absolute',
                     bottom: '8px',
@@ -2651,6 +2953,20 @@ export default function AdminPortal({ onExit, currentUser }) {
                     backdropFilter: 'blur(6px)'
                   }}>
                     {spiralForm.objectFit === 'contain' ? 'Fit: Contain' : `Vertical Y: ${spiralForm.positionY ?? 50}%`}
+                  </span>
+
+                  <span style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    right: '8px',
+                    fontSize: '0.68rem',
+                    padding: '3px 8px',
+                    borderRadius: '999px',
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    color: '#a5b4fc',
+                    backdropFilter: 'blur(6px)'
+                  }}>
+                    Scale: {Math.round((spiralForm.scale || 1) * 100)}%
                   </span>
                 </div>
               </div>
@@ -2679,10 +2995,10 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {[
-                      { label: '👤 Top (Face Focus)', val: 10 },
-                      { label: '🎯 Upper (25%)', val: 25 },
-                      { label: '⚖️ Center (50%)', val: 50 },
-                      { label: '🔻 Lower (80%)', val: 80 },
+                      { label: '👤 Top (Face Focus 15%)', val: 15 },
+                      { label: '🎯 Upper (22%)', val: 22 },
+                      { label: '⚖️ Center (35%)', val: 35 },
+                      { label: '🔻 Mid (50%)', val: 50 },
                     ].map(preset => {
                       const isSelected = (spiralForm.positionY ?? 50) === preset.val;
                       return (
@@ -2690,10 +3006,11 @@ export default function AdminPortal({ onExit, currentUser }) {
                           key={preset.val}
                           type="button"
                           onClick={() => {
+                            const curX = spiralForm.objectPosition?.split(' ')?.[0] || 'center';
                             setSpiralForm(prev => ({
                               ...prev,
                               positionY: preset.val,
-                              objectPosition: `center ${preset.val}%`
+                              objectPosition: `${curX} ${preset.val}%`
                             }));
                           }}
                           style={{
@@ -2715,6 +3032,49 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </div>
                 </div>
 
+                {/* Horizontal Alignment Presets */}
+                <div style={{ marginBottom: '14px' }}>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                    Horizontal Alignment (X-Axis):
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {[
+                      { label: 'Left (35%)', val: '35%' },
+                      { label: 'Center (50%)', val: 'center' },
+                      { label: 'Right (65%)', val: '65%' },
+                    ].map(hPreset => {
+                      const currentX = spiralForm.objectPosition?.split(' ')?.[0] || 'center';
+                      const isSelected = currentX === hPreset.val;
+                      return (
+                        <button
+                          key={hPreset.val}
+                          type="button"
+                          onClick={() => {
+                            const curY = spiralForm.positionY ?? 20;
+                            setSpiralForm(prev => ({
+                              ...prev,
+                              objectPosition: `${hPreset.val} ${curY}%`
+                            }));
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '6px 10px',
+                            fontSize: '0.78rem',
+                            borderRadius: '8px',
+                            border: isSelected ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.15)',
+                            background: isSelected ? '#6366f1' : 'rgba(255,255,255,0.06)',
+                            color: '#ffffff',
+                            cursor: 'pointer',
+                            fontWeight: isSelected ? 600 : 400
+                          }}
+                        >
+                          {hPreset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Fine-tune Vertical Offset Slider */}
                 <div style={{ marginBottom: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
@@ -2729,10 +3089,11 @@ export default function AdminPortal({ onExit, currentUser }) {
                     value={spiralForm.positionY ?? 50}
                     onChange={(e) => {
                       const val = parseInt(e.target.value, 10);
+                      const posX = spiralForm.objectPosition?.split(' ')?.[0] || 'center';
                       setSpiralForm(prev => ({
                         ...prev,
                         positionY: val,
-                        objectPosition: `center ${val}%`
+                        objectPosition: `${posX} ${val}%`
                       }));
                     }}
                     style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer' }}
@@ -2763,18 +3124,36 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <label style={{ margin: 0, fontSize: '0.78rem' }}>Zoom Scale</label>
                       <span style={{ color: '#818cf8', fontWeight: 600 }}>{Math.round((spiralForm.scale || 1) * 100)}%</span>
                     </div>
-                    <input
-                      type="range"
-                      min="0.8"
-                      max="1.4"
-                      step="0.05"
-                      value={spiralForm.scale || 1}
-                      onChange={(e) => {
-                        const val = parseFloat(e.target.value);
-                        setSpiralForm(prev => ({ ...prev, scale: val }));
-                      }}
-                      style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer' }}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSpiralForm(prev => ({ ...prev, scale: Math.max(0.7, parseFloat(((prev.scale || 1) - 0.05).toFixed(2))) }))}
+                        className="admin-reorder-btn"
+                        title="Zoom Out (-5%)"
+                      >
+                        <ZoomOut size={12} />
+                      </button>
+                      <input
+                        type="range"
+                        min="0.7"
+                        max="1.5"
+                        step="0.05"
+                        value={spiralForm.scale || 1}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setSpiralForm(prev => ({ ...prev, scale: val }));
+                        }}
+                        style={{ flex: 1, accentColor: '#6366f1', cursor: 'pointer' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setSpiralForm(prev => ({ ...prev, scale: Math.min(1.6, parseFloat(((prev.scale || 1) + 0.05).toFixed(2))) }))}
+                        className="admin-reorder-btn"
+                        title="Zoom In (+5%)"
+                      >
+                        <ZoomIn size={12} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

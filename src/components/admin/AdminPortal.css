@@ -2317,3 +2317,135 @@
   }
 }
 
+/* ── Infinite Spiral Drag-and-Drop & Live Align Controls ── */
+.admin-spiral-card {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  user-select: none;
+}
+
+.admin-spiral-card.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.96) rotate(1deg);
+  border: 2px dashed #818cf8 !important;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.45) !important;
+  z-index: 10;
+}
+
+.admin-spiral-card.is-drag-over {
+  border-color: #a855f7 !important;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 32px rgba(168, 85, 247, 0.35) !important;
+}
+
+.admin-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: grab;
+  transition: all 0.15s ease;
+}
+
+.admin-drag-handle:hover {
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.admin-drag-handle:active {
+  cursor: grabbing;
+}
+
+.admin-reorder-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.admin-reorder-btn:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.35);
+  border-color: rgba(99, 102, 241, 0.6);
+}
+
+.admin-reorder-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.admin-quick-align-bar {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 10px;
+  animation: adminFadeIn 0.2s ease;
+}
+
+.admin-preset-pill {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 0.7rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.admin-preset-pill:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: #fff;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.admin-preset-pill.active {
+  background: #6366f1;
+  color: #fff;
+  border-color: #818cf8;
+  font-weight: 600;
+}
+
+.admin-nudge-btn {
+  padding: 3px 7px;
+  font-size: 0.68rem;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #c7d2fe;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-nudge-btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #fff;
+}
+
+.admin-hint-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+}
+
+
