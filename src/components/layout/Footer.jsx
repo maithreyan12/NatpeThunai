@@ -61,16 +61,6 @@ export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, _curren
           <Heart size={13} className="footer-heart-glow" />
         </button>
         <span>Eternal Friendship Archive</span>
-        <a 
-          href="/admin" 
-          onClick={(e) => { 
-            e.preventDefault(); 
-            if (onOpenAdmin) onOpenAdmin(); 
-          }}
-          style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textDecoration: 'none', opacity: 0.6, marginLeft: '6px' }}
-        >
-          • Admin
-        </a>
       </div>
     </footer>
   );
