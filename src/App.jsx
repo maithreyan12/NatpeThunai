@@ -14,7 +14,8 @@ import {
   FriendModal,
   LightboxModal, 
   SignInModal,
-  AdminPortal
+  AdminPortal,
+  BackgroundMusicPlayer
 } from './components';
 import {
   subscribeToMembersR2,
@@ -348,6 +349,9 @@ export default function App() {
         />
 
       </main>
+
+      {/* ── AMBIENT BACKGROUND SOUNDTRACK CONTROLLER ── */}
+      <BackgroundMusicPlayer />
 
       {/* ── CORNER FLOATING MESSAGE & AI CHAT WIDGET ── */}
       <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
