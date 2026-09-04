@@ -78,15 +78,56 @@ export const normalizeEmail = (email) => {
   return `${local}@${domain}`;
 };
 
+let dynamicAdminEmails = new Set();
+
+export const registerLiveAdminEmails = (emailsOrAdmins) => {
+  if (!Array.isArray(emailsOrAdmins)) return;
+  dynamicAdminEmails = new Set(
+    emailsOrAdmins.map(item => {
+      const email = typeof item === 'string' ? item : item?.email;
+      return email ? email.trim().toLowerCase() : null;
+    }).filter(Boolean)
+  );
+};
+
 export const isAuthorizedAdmin = (user) => {
   const email = typeof user === 'string' ? user : user?.email;
   if (!email) return false;
   const userEmail = email.trim().toLowerCase();
   const userNorm = normalizeEmail(email);
-  return AUTHORIZED_ADMIN_EMAILS.some(adminEmail => {
+
+  // 1. Check primary hardcoded super admins
+  const isStatic = AUTHORIZED_ADMIN_EMAILS.some(adminEmail => {
     const adminLower = adminEmail.trim().toLowerCase();
     return adminLower === userEmail || normalizeEmail(adminEmail) === userNorm;
   });
+  if (isStatic) return true;
+
+  // 2. Check dynamic in-memory set
+  for (const dynamicEmail of dynamicAdminEmails) {
+    if (dynamicEmail === userEmail || normalizeEmail(dynamicEmail) === userNorm) {
+      return true;
+    }
+  }
+
+  // 3. Check persistent R2 localStorage cache (instant offline/redirect-proof)
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('r2_admins');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          const match = parsed.some(admin => {
+            const adminEmail = (admin?.email || '').trim().toLowerCase();
+            return adminEmail && (adminEmail === userEmail || normalizeEmail(adminEmail) === userNorm);
+          });
+          if (match) return true;
+        }
+      }
+    } catch {}
+  }
+
+  return false;
 };
 
 

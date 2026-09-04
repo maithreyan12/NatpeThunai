@@ -25,6 +25,7 @@ import {
   subscribeToPostsR2,
   subscribeToEventsR2,
   subscribeToMusicR2,
+  subscribeToAdminsR2,
   saveMemoryR2,
   savePostR2,
   saveEventR2,
@@ -35,7 +36,7 @@ import { useMusicEngine } from './hooks/useMusicEngine';
 import { getStoredMembers, reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
 
 
-import { onAuthChange, signInWithGoogle, logOut } from './firebase';
+import { onAuthChange, signInWithGoogle, logOut, registerLiveAdminEmails } from './firebase';
 import './App.css';
 
 
@@ -172,6 +173,9 @@ export default function App() {
     const unsubPosts     = subscribeToPostsR2(setPosts);
     const unsubEvents    = subscribeToEventsR2(setEvents);
     const unsubMusic     = subscribeToMusicR2(setMusicTracks);
+    const unsubAdmins    = subscribeToAdminsR2(admins => {
+      registerLiveAdminEmails(admins);
+    });
     return () => {
       unsubMembers();
       unsubMemories();
@@ -179,6 +183,7 @@ export default function App() {
       unsubPosts();
       unsubEvents();
       unsubMusic();
+      unsubAdmins();
     };
   }, []);
 

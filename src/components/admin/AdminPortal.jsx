@@ -6,7 +6,7 @@ import {
   FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass,
   Copy, Database, Server, BarChart3, FileCode, CheckCheck,
   GripVertical, ChevronLeft, ChevronRight, Sliders, Move, Crosshair, ZoomIn, ZoomOut,
-  Music, Play, Pause, Volume2
+  Music, Play, Pause, Volume2, ShieldCheck, Key, UserCheck, UserPlus
 } from 'lucide-react';
 
 import {
@@ -18,12 +18,13 @@ import {
   subscribeToSpiralR2, saveSpiralItemR2, saveAllSpiralItemsR2, deleteSpiralItemR2, INITIAL_SPIRAL_ITEMS,
   subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS, isVideoMedia,
   subscribeToMusicR2, saveMusicTrackR2, deleteMusicTrackR2, INITIAL_MUSIC_TRACKS,
+  subscribeToAdminsR2, saveAdminR2, deleteAdminR2, INITIAL_ADMINS,
   bootR2Database,
 } from '../../services/r2Database';
 
 
 
-import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin } from '../../firebase';
+import { signInWithGoogle, checkRedirectResult, logOut, isAuthorizedAdmin, normalizeEmail } from '../../firebase';
 import { uploadToR2WithGuardrails } from '../../services/r2StorageService';
 import { r2Photo, R2_BASE } from '../../services/r2Assets';
 import brandLogo from '../../assets/brand-logo.png';
@@ -158,6 +159,19 @@ export default function AdminPortal({ onExit, currentUser }) {
     coverPhoto: '',
     duration: '',
     isDefault: false
+  });
+
+  // ── Google Admin Access States ──
+  const [admins, setAdmins] = useState(INITIAL_ADMINS);
+  const [editingAdmin, setEditingAdmin] = useState(null);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [adminSaving, setAdminSaving] = useState(false);
+  const [adminSearch, setAdminSearch] = useState('');
+  const [adminForm, setAdminForm] = useState({
+    name: '',
+    email: '',
+    role: 'Admin',
+    note: ''
   });
 
   // ── Reels (Cinematic Archive) States ──
@@ -543,6 +557,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     const unsubJourney = subscribeToJourneyR2(setJourneyMilestones);
     const unsubSpiral = subscribeToSpiralR2(setSpiralItems);
     const unsubMusic = subscribeToMusicR2(setMusicTracks);
+    const unsubAdmins = subscribeToAdminsR2(setAdmins);
 
     return () => {
       unsubMembers();
@@ -553,6 +568,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       unsubJourney();
       unsubSpiral();
       unsubMusic();
+      unsubAdmins();
     };
 
   }, []);
@@ -1353,6 +1369,102 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
+  // ── Google Admin Access Handlers ──
+  const handleOpenAddAdmin = (prefill = {}) => {
+    setEditingAdmin(null);
+    setAdminForm({
+      name: prefill.name || '',
+      email: prefill.email || '',
+      role: prefill.role || 'Admin',
+      note: prefill.note || ''
+    });
+    setIsAdminModalOpen(true);
+  };
+
+  const handleEditAdmin = (admin) => {
+    setEditingAdmin(admin);
+    setAdminForm({
+      name: admin.name || '',
+      email: admin.email || '',
+      role: admin.role || 'Admin',
+      note: admin.note || ''
+    });
+    setIsAdminModalOpen(true);
+  };
+
+  const handleSaveAdmin = async (e) => {
+    e.preventDefault();
+    if (!adminForm.email.trim()) {
+      triggerToast('Please provide a Google account email.');
+      return;
+    }
+    const cleanEmail = adminForm.email.trim().toLowerCase();
+    if (!cleanEmail.includes('@')) {
+      triggerToast('Please provide a valid email address.');
+      return;
+    }
+
+    setAdminSaving(true);
+    try {
+      const payload = editingAdmin
+        ? {
+            ...editingAdmin,
+            name: adminForm.name.trim() || cleanEmail.split('@')[0],
+            email: cleanEmail,
+            role: adminForm.role || 'Admin',
+            note: adminForm.note.trim() || '',
+            updatedAt: new Date().toISOString()
+          }
+        : {
+            id: `admin-${Date.now()}`,
+            name: adminForm.name.trim() || cleanEmail.split('@')[0],
+            email: cleanEmail,
+            role: adminForm.role || 'Admin',
+            note: adminForm.note.trim() || '',
+            isProtected: false,
+            addedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+
+      // Instant optimistic state update
+      setAdmins(prev => {
+        const idx = prev.findIndex(a => a.id === payload.id || a.email.toLowerCase() === cleanEmail);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = { ...arr[idx], ...payload };
+          return arr;
+        }
+        return [payload, ...prev];
+      });
+
+      setIsAdminModalOpen(false);
+      await saveAdminR2(payload);
+      triggerToast(editingAdmin ? `Admin profile updated for ${payload.name}! 🛡️` : `Granted Google Admin access to ${cleanEmail}! 🔑`);
+      setEditingAdmin(null);
+      setAdminForm({ name: '', email: '', role: 'Admin', note: '' });
+    } catch (err) {
+      triggerToast(`Admin save failed: ${err.message}`);
+    } finally {
+      setAdminSaving(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (admin) => {
+    if (admin.isProtected || admin.email.toLowerCase() === 'maithreyan2006@gmail.com') {
+      triggerToast('Super Admin Maithreyan is protected and cannot be revoked! 🛡️');
+      return;
+    }
+    if (window.confirm(`Revoke Google Admin access for ${admin.name || admin.email} (${admin.email})?\nThey will no longer be able to log in to the admin portal.`)) {
+      setAdmins(prev => prev.filter(a => a.id !== admin.id));
+      triggerToast(`Revoked Google Admin access for ${admin.email} 🔒`);
+      try {
+        await deleteAdminR2(admin.id);
+      } catch (err) {
+        triggerToast(`Revoke error: ${err.message}`);
+      }
+    }
+  };
+
 
 
   // R2 Direct File Upload
@@ -1566,6 +1678,12 @@ export default function AdminPortal({ onExit, currentUser }) {
             >
               <HardDrive size={18} /> Cloudflare R2 Storage
             </button>
+            <button
+              className={`admin-nav-tab ${activeTab === 'admins' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admins')}
+            >
+              <ShieldCheck size={18} /> Google Admin Access ({admins.length})
+            </button>
           </nav>
         </aside>
 
@@ -1663,6 +1781,17 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h3 className="admin-stat-number">{musicTracks.length}</h3>
                   <p className="admin-stat-label">Music Playlist</p>
                   <span className="admin-stat-meta">Squad Songs & Anthem Audio</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card" onClick={() => setActiveTab('admins')} style={{ cursor: 'pointer' }}>
+                <div className="admin-stat-icon-wrap from-cyan">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{admins.length}</h3>
+                  <p className="admin-stat-label">Google Admins</p>
+                  <span className="admin-stat-meta">Live Authorized Access</span>
                 </div>
               </div>
 
@@ -2810,6 +2939,197 @@ export default function AdminPortal({ onExit, currentUser }) {
                     </table>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. GOOGLE ADMIN ACCESS TAB */}
+          {activeTab === 'admins' && (
+            <div className="admin-section-block">
+              {/* Header */}
+              <div className="admin-section-header">
+                <div>
+                  <div className="admin-r2-title-badge-row">
+                    <h2 className="admin-section-title">Google Admin Access & Permissions</h2>
+                    <span className="admin-live-pulse-badge">
+                      <span className="live-dot"></span> Realtime Sync
+                    </span>
+                  </div>
+                  <p className="admin-section-sub">
+                    Grant or revoke Google Login access live. Anyone listed here can authenticate with their Google account to access and manage the Natpe Thunai console.
+                  </p>
+                </div>
+                <button
+                  className="admin-primary-btn"
+                  onClick={() => handleOpenAddAdmin()}
+                >
+                  <UserPlus size={18} /> Grant Google Admin Access
+                </button>
+              </div>
+
+              {/* Quick Info & Stats Banner */}
+              <div className="admin-admins-hero-banner">
+                <div className="admin-admins-hero-stat">
+                  <span className="admin-admins-stat-label">Total Authorized Admins</span>
+                  <span className="admin-admins-stat-num">{admins.length}</span>
+                </div>
+                <div className="admin-admins-hero-divider" />
+                <div className="admin-admins-hero-stat">
+                  <span className="admin-admins-stat-label">Protected Super Admins</span>
+                  <span className="admin-admins-stat-num">{admins.filter(a => a.isProtected || a.role === 'Super Admin').length}</span>
+                </div>
+                <div className="admin-admins-hero-divider" />
+                <div className="admin-admins-hero-stat">
+                  <span className="admin-admins-stat-label">Authentication Method</span>
+                  <span className="admin-admins-auth-pill">
+                    <GoogleIcon /> Google OAuth 2.0
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Grant from Squad Members */}
+              {members.length > 0 && (
+                <div className="admin-squad-quickgrant-box">
+                  <div className="admin-squad-quickgrant-title">
+                    <Sparkles size={16} /> Quick-Grant from Squad Circle:
+                  </div>
+                  <div className="admin-squad-quickgrant-chips">
+                    {members.map(m => {
+                      const alreadyAdmin = admins.some(a => a.name?.toLowerCase() === m.name?.toLowerCase());
+                      return (
+                        <button
+                          key={m.id || m.name}
+                          type="button"
+                          className={`admin-squad-grant-chip ${alreadyAdmin ? 'is-active' : ''}`}
+                          onClick={() => {
+                            handleOpenAddAdmin({
+                              name: m.name,
+                              role: 'Core Admin',
+                              note: `Squad Circle member (${m.role || 'Member'})`
+                            });
+                          }}
+                          title={alreadyAdmin ? `${m.name} is already an admin` : `Click to grant ${m.name} Google Admin access`}
+                        >
+                          <img
+                            src={m.photo || brandLogo}
+                            alt={m.name}
+                            className="admin-squad-chip-avatar"
+                            onError={(e) => { e.currentTarget.src = brandLogo; }}
+                          />
+                          <span>{m.name}</span>
+                          {alreadyAdmin ? <Check size={13} className="text-emerald-400" /> : <Plus size={13} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Search & Filter Bar */}
+              <div className="admin-filter-bar">
+                <div className="admin-search-box">
+                  <Search size={18} />
+                  <input
+                    type="text"
+                    placeholder="Search by admin name, Google email, or role..."
+                    value={adminSearch}
+                    onChange={(e) => setAdminSearch(e.target.value)}
+                  />
+                  {adminSearch && (
+                    <button className="admin-search-clear" onClick={() => setAdminSearch('')}>
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Admins Grid */}
+              <div className="admin-admins-grid">
+                {admins
+                  .filter(a => {
+                    if (!adminSearch.trim()) return true;
+                    const q = adminSearch.toLowerCase();
+                    return (
+                      (a.name || '').toLowerCase().includes(q) ||
+                      (a.email || '').toLowerCase().includes(q) ||
+                      (a.role || '').toLowerCase().includes(q) ||
+                      (a.note || '').toLowerCase().includes(q)
+                    );
+                  })
+                  .map((admin) => {
+                    const isSuper = admin.isProtected || admin.role === 'Super Admin' || admin.email?.toLowerCase() === 'maithreyan2006@gmail.com';
+                    const isSelf = currentUser && (
+                      currentUser.email?.toLowerCase() === admin.email?.toLowerCase() ||
+                      normalizeEmail(currentUser.email) === normalizeEmail(admin.email)
+                    );
+
+                    return (
+                      <div key={admin.id || admin.email} className={`admin-admin-card ${isSuper ? 'is-super' : ''}`}>
+                        <div className="admin-admin-card-header">
+                          <div className="admin-admin-avatar-wrap">
+                            <div className="admin-admin-avatar-initial">
+                              {(admin.name || admin.email || 'A').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="admin-admin-google-badge" title="Verified Google Account">
+                              <GoogleIcon />
+                            </div>
+                          </div>
+
+                          <div className="admin-admin-info">
+                            <div className="admin-admin-name-row">
+                              <h4 className="admin-admin-name">{admin.name || 'Administrator'}</h4>
+                              {isSelf && <span className="admin-self-pill">You</span>}
+                            </div>
+                            <p className="admin-admin-email" title={admin.email}>{admin.email}</p>
+                          </div>
+                        </div>
+
+                        <div className="admin-admin-details">
+                          <div className="admin-admin-role-row">
+                            <span className={`admin-role-badge ${isSuper ? 'badge-super' : 'badge-admin'}`}>
+                              {isSuper ? <ShieldCheck size={13} /> : <Key size={13} />}
+                              {admin.role || 'Admin'}
+                            </span>
+                            <span className="admin-admin-status-dot">
+                              <span className="dot-pulse"></span> Active
+                            </span>
+                          </div>
+
+                          {admin.note && (
+                            <p className="admin-admin-note">
+                              "{admin.note}"
+                            </p>
+                          )}
+
+                          <div className="admin-admin-meta-row">
+                            <span>Added: {admin.addedAt ? new Date(admin.addedAt).toLocaleDateString() : 'Initial'}</span>
+                            {isSuper && <span className="admin-protected-tag">🛡️ Protected</span>}
+                          </div>
+                        </div>
+
+                        <div className="admin-admin-card-actions">
+                          <button
+                            type="button"
+                            className="admin-action-btn edit"
+                            onClick={() => handleEditAdmin(admin)}
+                            title="Edit Admin Details"
+                          >
+                            <Edit3 size={15} /> Edit
+                          </button>
+                          {!isSuper && (
+                            <button
+                              type="button"
+                              className="admin-action-btn delete"
+                              onClick={() => handleDeleteAdmin(admin)}
+                              title="Revoke Admin Access"
+                            >
+                              <Trash2 size={15} /> Revoke
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -4287,6 +4607,136 @@ export default function AdminPortal({ onExit, currentUser }) {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GOOGLE ADMIN ACCESS MODAL ── */}
+      {isAdminModalOpen && (
+        <div className="admin-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setIsAdminModalOpen(false); }}>
+          <div className="admin-modal-card admin-admin-modal-card">
+            <div className="admin-modal-header-row">
+              <div className="admin-modal-icon-badge">
+                <ShieldCheck size={22} className="text-cyan-400" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h2 className="admin-modal-title">
+                  {editingAdmin ? `Edit Admin (${editingAdmin.name || editingAdmin.email})` : 'Grant Google Admin Access'}
+                </h2>
+                <p className="admin-modal-subtitle">
+                  Configure Google login access for the Natpe Thunai sanctuary admin console.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="admin-modal-close-btn"
+                onClick={() => setIsAdminModalOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAdmin} className="admin-modal-form">
+              <div className="admin-input-group">
+                <label>
+                  Google Account Email *
+                  <span className="admin-field-hint" style={{ display: 'block', fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
+                    Must match the exact Google email the friend uses to sign in
+                  </span>
+                </label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <div style={{ position: 'absolute', left: '12px', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+                    <GoogleIcon />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="friend@gmail.com"
+                    value={adminForm.email}
+                    onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+                    required
+                    style={{ paddingLeft: '42px', width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              <div className="admin-input-group" style={{ marginTop: '14px' }}>
+                <label>Display Name / Nickname</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Jaffreen, Farish, Henu, Garnett"
+                  value={adminForm.name}
+                  onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
+                />
+              </div>
+
+              <div className="admin-input-group" style={{ marginTop: '14px' }}>
+                <label>Admin Privilege Role</label>
+                <select
+                  value={adminForm.role}
+                  onChange={(e) => setAdminForm({ ...adminForm, role: e.target.value })}
+                  style={{ width: '100%' }}
+                >
+                  <option value="Admin">Admin (Full Control to Manage Content)</option>
+                  <option value="Core Admin">Core Admin (Squad Lead Access)</option>
+                  <option value="Super Admin">Super Admin (Protected Master Privileges)</option>
+                  <option value="Content Moderator">Content Moderator (Photos & Stories)</option>
+                </select>
+              </div>
+
+              <div className="admin-input-group" style={{ marginTop: '14px' }}>
+                <label>Squad Assignment / Note (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Sanctuary Core, Reels Lead, Album Curator"
+                  value={adminForm.note}
+                  onChange={(e) => setAdminForm({ ...adminForm, note: e.target.value })}
+                />
+              </div>
+
+              <div style={{
+                marginTop: '16px',
+                padding: '12px 14px',
+                borderRadius: '10px',
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.25)',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                fontSize: '0.84rem',
+                color: '#bae6fd',
+                lineHeight: 1.45
+              }}>
+                <CheckCircle size={18} style={{ color: '#38bdf8', flexShrink: 0, marginTop: '2px' }} />
+                <span>
+                  <strong>Instant Live Sync:</strong> When saved, this account is registered in Cloudflare R2 and authorized immediately in Firebase. The user can simply click <strong>"Sign in with Google"</strong> to manage the website.
+                </span>
+              </div>
+
+              <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+                <button
+                  type="button"
+                  className="admin-cancel-btn"
+                  onClick={() => setIsAdminModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-primary-btn"
+                  disabled={adminSaving}
+                >
+                  {adminSaving ? (
+                    <>
+                      <Loader2 size={16} className="spin-icon" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={16} /> {editingAdmin ? 'Save Changes' : 'Grant Admin Access'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

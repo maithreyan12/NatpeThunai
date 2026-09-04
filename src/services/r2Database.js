@@ -24,6 +24,7 @@ export const COLLECTIONS = {
   SPIRAL:   'spiral',
   REELS:    'reels',
   MUSIC:    'music',
+  ADMINS:   'admins',
 };
 
 
@@ -244,6 +245,17 @@ export const INITIAL_SPIRAL_ITEMS = [
   { id: 'spiral-gopika',     src: r2Photo('gopika.jpg'),     alt: 'Gopika',         title: 'Gopika · The Graceful Heart',    objectPosition: 'center 28%', positionY: 28, scale: 1, objectFit: 'cover' },
 ];
 
+export const INITIAL_ADMINS = [
+  { id: 'admin-maithreyan', name: 'Maithreyan', email: 'maithreyan2006@gmail.com', role: 'Super Admin', addedAt: '2024-01-01T00:00:00.000Z', isProtected: true },
+  { id: 'admin-jaffreen',   name: 'Jaffreen',   email: 'jaffreenmarinvanan4@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-farish',     name: 'Farish',     email: 'farish.sharieef@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-kafil',      name: 'Kafil',      email: 'kafila444@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-garnett',    name: 'Garnett',    email: 'jgarnett295@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-heena',      name: 'Heena',      email: 'heenuu08@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-divya',      name: 'Divya',      email: 'd74875587@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+  { id: 'admin-meshak',     name: 'Meshak',     email: 'Mmeshak171@gmail.com', role: 'Admin', addedAt: '2024-01-01T00:00:00.000Z' },
+];
+
 // ═══════════════════════════════════════════════════════════════════
 //  BOOT: Seed all collections on first load if they don't exist
 // ═══════════════════════════════════════════════════════════════════
@@ -255,7 +267,7 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
   // Auto-purge any stale Shyam Sundar from browser localStorage on start
   if (typeof window !== 'undefined') {
     try {
-      const keys = ['squad_members', 'r2_members', 'r2_memories', 'r2_posts', 'r2_events', 'r2_journey', 'r2_spiral', 'r2_reels'];
+      const keys = ['squad_members', 'r2_members', 'r2_memories', 'r2_posts', 'r2_events', 'r2_journey', 'r2_spiral', 'r2_reels', 'r2_admins'];
       keys.forEach(k => {
         const d = localStorage.getItem(k);
         if (d && /shyam|sundar/i.test(d)) {
@@ -289,6 +301,7 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
     seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES.filter(j => !isBannedEntity(j))),
     seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS.filter(s => !isBannedEntity(s))),
     seedCollection(COLLECTIONS.MUSIC, INITIAL_MUSIC_TRACKS),
+    seedCollection(COLLECTIONS.ADMINS, INITIAL_ADMINS),
   ]);
 }
 
@@ -959,6 +972,106 @@ export async function deleteMusicTrackR2(trackId) {
   });
 
   await callAPI({ collection: COLLECTIONS.MUSIC, action: 'delete', id: trackId });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  GOOGLE ADMIN ACCESS COLLECTION — Cloudflare R2 Live Permissions
+// ═══════════════════════════════════════════════════════════════════
+
+const adminListeners = new Set();
+
+export function subscribeToAdminsR2(callback) {
+  adminListeners.add(callback);
+  const cacheKey = COLLECTIONS.ADMINS;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.length > 0) {
+    callback(cached.filter(x => !isBannedEntity(x)));
+  } else {
+    callback(INITIAL_ADMINS);
+  }
+
+  const refresh = async () => {
+    try {
+      const data = await fetchFromCDN(cacheKey);
+      if (Array.isArray(data) && data.length > 0) {
+        const clean = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, clean);
+        try {
+          localStorage.setItem('r2_admins', JSON.stringify(clean));
+        } catch {}
+        adminListeners.forEach(cb => {
+          try { cb(clean); } catch {}
+        });
+      }
+    } catch (err) {
+      console.warn('[R2 DB] Admin access fetch warning:', err.message);
+    }
+  };
+
+  refresh();
+  const pollCleanup = setupSmartPoll(refresh, 60000);
+  return () => {
+    adminListeners.delete(callback);
+    if (pollCleanup) pollCleanup();
+  };
+}
+
+export async function saveAdminR2(adminData) {
+  const email = (adminData.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    throw new Error('A valid Google Email address is required.');
+  }
+
+  const id = adminData.id || `admin-${Date.now()}`;
+  const adminItem = {
+    id,
+    name: adminData.name?.trim() || email.split('@')[0],
+    email,
+    role: adminData.role || 'Admin',
+    addedAt: adminData.addedAt || new Date().toISOString(),
+    isProtected: Boolean(adminData.isProtected),
+    updatedAt: new Date().toISOString()
+  };
+
+  const current = cache.get(COLLECTIONS.ADMINS) || INITIAL_ADMINS;
+  const existingIdx = current.findIndex(a => a.id === adminItem.id || a.email.toLowerCase() === email);
+  const updated = existingIdx >= 0
+    ? current.map((a, idx) => idx === existingIdx ? { ...a, ...adminItem } : a)
+    : [adminItem, ...current];
+
+  // ⚡ Instant optimistic cache update & listener notification
+  cache.set(COLLECTIONS.ADMINS, updated);
+  try {
+    localStorage.setItem('r2_admins', JSON.stringify(updated));
+  } catch {}
+  adminListeners.forEach(cb => {
+    try { cb(updated); } catch {}
+  });
+
+  await callAPI({ collection: COLLECTIONS.ADMINS, action: 'upsert', item: adminItem });
+  return adminItem;
+}
+
+export async function deleteAdminR2(adminId) {
+  const current = cache.get(COLLECTIONS.ADMINS) || INITIAL_ADMINS;
+  const target = current.find(a => a.id === adminId);
+  if (target?.isProtected) {
+    throw new Error('This primary super admin account is protected and cannot be revoked.');
+  }
+
+  const updated = current.filter(a => a.id !== adminId);
+  const finalAdmins = updated.length > 0 ? updated : INITIAL_ADMINS;
+
+  // ⚡ Instant optimistic cache update & listener notification
+  cache.set(COLLECTIONS.ADMINS, finalAdmins);
+  try {
+    localStorage.setItem('r2_admins', JSON.stringify(finalAdmins));
+  } catch {}
+  adminListeners.forEach(cb => {
+    try { cb(finalAdmins); } catch {}
+  });
+
+  await callAPI({ collection: COLLECTIONS.ADMINS, action: 'delete', id: adminId });
 }
 
 // Force refresh cache for a specific collection (call after admin write)
