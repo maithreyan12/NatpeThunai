@@ -18,8 +18,10 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [internalReels, setInternalReels] = useState(INITIAL_REELS);
 
   useEffect(() => {
-    if (propReels && propReels.length > 0) {
-      setInternalReels(propReels);
+    if (propReels !== undefined) {
+      if (Array.isArray(propReels) && propReels.length > 0) {
+        setInternalReels(propReels);
+      }
       return;
     }
     const unsub = subscribeToReelsR2((data) => {
@@ -37,15 +39,87 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isInView, setIsInView] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
   const [progressPercent, setProgressPercent] = useState(0);
   const reelContainerRef = useRef(null);
   const videoRef = useRef(null);
+  const manuallyPausedRef = useRef(false);
+  const manuallyMutedRef = useRef(false);
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
+
+  // Track scrolling in and out of the Reels section:
+  // - When entering reels section: play video, play reel original audio (unmute), stop background song
+  // - When leaving reels section (scrolling up): mute reel, pause video (avoids server data request), resume background song
+  useEffect(() => {
+    const el = document.getElementById('reel') || reelContainerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const inView = entry.isIntersecting && entry.intersectionRatio > 0.2;
+        setIsInView(inView);
+
+        const vid = videoRef.current;
+
+        if (inView) {
+          // ── USER SCROLLED TO REELS SECTION ──
+          // 1. Tell background music player to pause its song
+          window.dispatchEvent(
+            new CustomEvent('reel-state-change', {
+              detail: { isPlaying: true, inView: true }
+            })
+          );
+
+          // 2. Play the reel video and play its original sound/song
+          if (!manuallyPausedRef.current) {
+            setIsPlaying(true);
+            if (!manuallyMutedRef.current) {
+              setIsMuted(false);
+              if (vid) vid.muted = false;
+            }
+            if (vid) {
+              const p = vid.play();
+              if (p !== undefined) {
+                p.catch(() => {
+                  // Fallback to muted if browser policy requires it
+                  vid.muted = true;
+                  setIsMuted(true);
+                  vid.play().catch(() => {});
+                });
+              }
+            }
+          }
+        } else {
+          // ── USER SCROLLED UP / AWAY FROM REELS SECTION ──
+          // 1. Mute the reel and pause playback (stops background network streaming requests!)
+          if (vid) {
+            vid.pause();
+            vid.muted = true;
+          }
+          setIsMuted(true);
+
+          // 2. Tell background music player to resume its song
+          window.dispatchEvent(
+            new CustomEvent('reel-state-change', {
+              detail: { isPlaying: false, inView: false }
+            })
+          );
+        }
+      },
+      {
+        threshold: [0, 0.2, 0.6]
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Tab switch & visibility listener: pause video when user switches tabs, resume when tab is active
   useEffect(() => {
@@ -54,14 +128,24 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
       if (!vid) return;
       if (document.hidden) {
         vid.pause();
-      } else if (isPlaying) {
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: false, inView: false }
+          })
+        );
+      } else if (isInView && isPlaying && !manuallyPausedRef.current) {
         vid.play().catch(() => {});
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: true, inView: true }
+          })
+        );
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [isPlaying]);
+  }, [isInView, isPlaying]);
 
   // Detect video dimensions and orientation
   const handleLoadedMetadata = (e) => {
@@ -80,25 +164,24 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     }
   }, [safeIndex, activeItem?.mediaUrl]);
 
-  // Ensure HTML5 video plays automatically when isPlaying is true
+  // Ensure HTML5 video playback stays in sync with isPlaying and view state
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    if (isPlaying && !document.hidden) {
+    if (isPlaying && isInView && !document.hidden) {
       const p = vid.play();
       if (p !== undefined) {
         p.catch(() => {
-          // Autoplay policy fallback: mute and play
           vid.muted = true;
           setIsMuted(true);
           vid.play().catch(() => {});
         });
       }
-    } else {
+    } else if (!isPlaying || !isInView) {
       vid.pause();
     }
-  }, [isPlaying, safeIndex, activeItem?.mediaUrl]);
+  }, [isPlaying, isInView, safeIndex, activeItem?.mediaUrl]);
 
   // Sync mute changes directly with the video DOM element
   useEffect(() => {
@@ -145,6 +228,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const togglePlay = (e) => {
     e?.stopPropagation?.();
     const nextState = !isPlaying;
+    manuallyPausedRef.current = !nextState;
     setIsPlaying(nextState);
 
     const vid = videoRef.current;
@@ -158,7 +242,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
 
     window.dispatchEvent(
       new CustomEvent('reel-state-change', {
-        detail: { isPlaying: nextState }
+        detail: { isPlaying: nextState, inView: isInView }
       })
     );
   };
@@ -251,10 +335,10 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
               ref={videoRef}
               src={activeItem.mediaUrl} 
               className={`reel-media-element ${isPortrait ? 'media-portrait' : 'media-landscape'}`} 
-              autoPlay={isPlaying}
+              autoPlay={isInView && isPlaying}
               playsInline
               muted={isMuted}
-              preload="auto"
+              preload={isInView ? "auto" : "metadata"}
               onLoadedMetadata={handleLoadedMetadata}
               onTimeUpdate={handleTimeUpdate}
               onEnded={handleVideoEnded}
@@ -318,7 +402,11 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
               {activeItem.mediaType === 'video' && (
                 <button 
                   className="reel-icon-btn"
-                  onClick={() => setIsMuted(prev => !prev)}
+                  onClick={() => {
+                    const nextMuted = !isMuted;
+                    manuallyMutedRef.current = nextMuted;
+                    setIsMuted(nextMuted);
+                  }}
                   title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
