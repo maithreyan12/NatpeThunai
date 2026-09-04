@@ -1,33 +1,20 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, 
   Pause, 
-  Heart, 
-  MessageCircle, 
-  Send, 
-  Bookmark, 
-  Volume2, 
-  VolumeX, 
-  ChevronUp, 
-  ChevronDown, 
+  ChevronLeft, 
+  ChevronRight, 
+  Maximize2, 
+  Minimize2, 
   Film, 
-  CheckCircle2, 
-  Music, 
-  X
+  Volume2, 
+  VolumeX 
 } from 'lucide-react';
 import { subscribeToReelsR2, INITIAL_REELS, isVideoMedia } from '../../services/r2Database';
-import brandLogo from '../../assets/brand-logo.png';
 import './MemoryReel.css';
 
-// Initial pre-loaded squad comments for realistic Instagram experience
-const DEFAULT_SQUAD_COMMENTS = [
-  { id: 'c1', user: 'Maithreyan', handle: '@maithreyan', avatar: brandLogo, text: 'The gang energy in this reel is unmatched! 🔥 Best years ever.', time: '2h', likes: 14 },
-  { id: 'c2', user: 'Squad Member', handle: '@natpe_squad', avatar: brandLogo, text: 'Can we please go back to this exact day? 🥹 Unbreakable bond.', time: '5h', likes: 9 },
-  { id: 'c3', user: 'Campus Crew', handle: '@campus_vibes', avatar: brandLogo, text: 'Bro that laughter at the end will always be legendary 😂❤️', time: '1d', likes: 21 },
-  { id: 'c4', user: 'Natpe Thunai', handle: '@natpe_thunai', avatar: brandLogo, text: '15 members, one soul. Forever grateful for this brotherhood. ✨', time: '2d', likes: 38 },
-];
 
-export default function MemoryReel({ reels: propReels }) {
+export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [internalReels, setInternalReels] = useState(INITIAL_REELS);
 
   useEffect(() => {
@@ -45,96 +32,79 @@ export default function MemoryReel({ reels: propReels }) {
     return () => unsub();
   }, [propReels]);
 
-  // Extract valid video reels
+  // Extract reel items strictly from the reels collection — VIDEOS ONLY (photos filtered out)
   const sourceReels = Array.isArray(propReels) && propReels.length > 0 ? propReels : internalReels;
   const validReels = sourceReels.filter(r => r && isVideoMedia(r));
   const reelItems = validReels.length > 0 ? validReels : INITIAL_REELS;
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Active state
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
-  const [playbackProgress, setPlaybackProgress] = useState(0);
-
-  // Instagram interactions state (persisted per reel ID in localStorage)
-  const [likedReels, setLikedReels] = useState(() => {
-    try {
-      const saved = localStorage.getItem('squad_reels_liked');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  const [savedReels, setSavedReels] = useState(() => {
-    try {
-      const saved = localStorage.getItem('squad_reels_saved');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  // UI state
-  const [showCenterIcon, setShowCenterIcon] = useState(null); // 'play' | 'pause' | null
-  const [centerIconKey, setCenterIconKey] = useState(0);
-  const [showHeartBurst, setShowHeartBurst] = useState(false);
-  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [comments, setComments] = useState(DEFAULT_SQUAD_COMMENTS);
-  const [newCommentText, setNewCommentText] = useState('');
-  const [toastMessage, setToastMessage] = useState('');
-  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
-
-  // References
-  const feedRef = useRef(null);
-  const videoRefs = useRef({});
-  const lastTapTimeRef = useRef(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const reelContainerRef = useRef(null);
+  const videoRef = useRef(null);
   const manuallyPausedRef = useRef(false);
-  const toastTimeoutRef = useRef(null);
+  const manuallyMutedRef = useRef(false);
 
-  const safeIndex = reelItems.length > 0 ? Math.min(activeIndex, reelItems.length - 1) : 0;
+  const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
 
-  // Trigger brief toast notification
-  const triggerToast = (msg) => {
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setToastMessage(msg);
-    toastTimeoutRef.current = setTimeout(() => setToastMessage(''), 2500);
-  };
-
-  // ── Intersection Observer: Detect when Reels section enters/leaves screen ──
+  // Track scrolling in and out of the Reels section:
+  // - When entering reels section: play video, play reel original audio (unmute), stop background song
+  // - When leaving reels section (scrolling up): mute reel, pause video (avoids server data request), resume background song
   useEffect(() => {
-    const section = document.getElementById('reel');
-    if (!section) return;
+    const el = document.getElementById('reel') || reelContainerRef.current;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        const inView = entry.isIntersecting && entry.intersectionRatio > 0.25;
+        const inView = entry.isIntersecting && entry.intersectionRatio > 0.2;
         setIsInView(inView);
 
-        const currentVid = videoRefs.current[safeIndex];
+        const vid = videoRef.current;
 
         if (inView) {
-          // Tell background ambient player to yield
+          // ── USER SCROLLED TO REELS SECTION ──
+          // 1. Tell background music player to pause its song
           window.dispatchEvent(
             new CustomEvent('reel-state-change', {
               detail: { isPlaying: true, inView: true }
             })
           );
-          if (!manuallyPausedRef.current && currentVid) {
+
+          // 2. Play the reel video and play its original sound/song
+          if (!manuallyPausedRef.current) {
             setIsPlaying(true);
-            currentVid.play().catch(() => {
-              currentVid.muted = true;
-              setIsMuted(true);
-              currentVid.play().catch(() => {});
-            });
+            if (!manuallyMutedRef.current) {
+              setIsMuted(false);
+              if (vid) vid.muted = false;
+            }
+            if (vid) {
+              const p = vid.play();
+              if (p !== undefined) {
+                p.catch(() => {
+                  // Fallback to muted if browser policy requires it
+                  vid.muted = true;
+                  setIsMuted(true);
+                  vid.play().catch(() => {});
+                });
+              }
+            }
           }
         } else {
-          // Tell background ambient player to resume
-          if (currentVid) currentVid.pause();
-          setIsPlaying(false);
+          // ── USER SCROLLED UP / AWAY FROM REELS SECTION ──
+          // 1. Mute the reel and pause playback (stops background network streaming requests!)
+          if (vid) {
+            vid.pause();
+            vid.muted = true;
+          }
+          setIsMuted(true);
+
+          // 2. Tell background music player to resume its song
           window.dispatchEvent(
             new CustomEvent('reel-state-change', {
               detail: { isPlaying: false, inView: false }
@@ -142,574 +112,318 @@ export default function MemoryReel({ reels: propReels }) {
           );
         }
       },
-      { threshold: [0, 0.25, 0.6] }
+      {
+        threshold: [0, 0.2, 0.6]
+      }
     );
 
-    observer.observe(section);
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [safeIndex]);
+  }, []);
 
-  // Tab switch listener: Pause when user changes tabs
+  // Tab switch & visibility listener: pause video when user switches tabs, resume when tab is active
   useEffect(() => {
     const handleVisibility = () => {
-      const currentVid = videoRefs.current[safeIndex];
-      if (!currentVid) return;
+      const vid = videoRef.current;
+      if (!vid) return;
       if (document.hidden) {
-        currentVid.pause();
-        window.dispatchEvent(new CustomEvent('reel-state-change', { detail: { isPlaying: false, inView: false } }));
-      } else if (isInView && !manuallyPausedRef.current) {
-        currentVid.play().catch(() => {});
-        setIsPlaying(true);
-        window.dispatchEvent(new CustomEvent('reel-state-change', { detail: { isPlaying: true, inView: true } }));
+        vid.pause();
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: false, inView: false }
+          })
+        );
+      } else if (isInView && isPlaying && !manuallyPausedRef.current) {
+        vid.play().catch(() => {});
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: true, inView: true }
+          })
+        );
       }
     };
+
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [isInView, safeIndex]);
+  }, [isInView, isPlaying]);
 
-  // Sync mute state to all video elements
+  // Detect video dimensions and orientation
+  const handleLoadedMetadata = (e) => {
+    const { videoWidth, videoHeight } = e.target;
+    if (videoHeight && videoWidth) {
+      setIsPortrait(videoHeight > videoWidth);
+    }
+  };
+
+  // Sync orientation on index change and reset active progress
   useEffect(() => {
-    Object.values(videoRefs.current).forEach((vid) => {
-      if (vid) vid.muted = isMuted;
-    });
+    setProgressPercent(0);
+    const vid = videoRef.current;
+    if (vid && vid.videoWidth && vid.videoHeight) {
+      setIsPortrait(vid.videoHeight > vid.videoWidth);
+    }
+  }, [safeIndex, activeItem?.mediaUrl]);
+
+  // Ensure HTML5 video playback stays in sync with isPlaying and view state
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    if (isPlaying && isInView && !document.hidden) {
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          vid.muted = true;
+          setIsMuted(true);
+          vid.play().catch(() => {});
+        });
+      }
+    } else if (!isPlaying || !isInView) {
+      vid.pause();
+    }
+  }, [isPlaying, isInView, safeIndex, activeItem?.mediaUrl]);
+
+  // Sync mute changes directly with the video DOM element
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
   }, [isMuted]);
 
-  // ── Scroll To Specific Reel Slide ──
-  const scrollToReel = useCallback((index) => {
-    if (!feedRef.current || index < 0 || index >= reelItems.length) return;
-    const container = feedRef.current;
-    const slide = container.children[index];
-    if (slide) {
-      slide.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [reelItems.length]);
-
-  // ── Auto Advance: When current reel finishes, automatically go to next reel ──
-  const handleVideoEnded = () => {
-    if (reelItems.length <= 1) return;
-    const nextIndex = (safeIndex + 1) % reelItems.length;
-    setPlaybackProgress(0);
-    scrollToReel(nextIndex);
-  };
-
-  // Real-time progress update
-  const handleTimeUpdate = (e) => {
-    const vid = e.target;
+  // Real-time video progress tracking — perfectly synced with current position
+  const handleTimeUpdate = () => {
+    const vid = videoRef.current;
     if (vid && vid.duration && !isNaN(vid.duration) && vid.duration > 0) {
       const pct = (vid.currentTime / vid.duration) * 100;
-      setPlaybackProgress(pct);
+      setProgressPercent(pct);
     }
   };
 
-  // ── Scroll Listener with Intersection for Vertical Snapping ──
-  const handleFeedScroll = () => {
-    if (!feedRef.current) return;
-    const container = feedRef.current;
-    const height = container.clientHeight;
-    if (height <= 0) return;
-
-    const scrollTop = container.scrollTop;
-    const newIndex = Math.round(scrollTop / height);
-
-    if (newIndex !== activeIndex && newIndex >= 0 && newIndex < reelItems.length) {
-      // Pause old video
-      const oldVid = videoRefs.current[activeIndex];
-      if (oldVid) {
-        oldVid.pause();
-        oldVid.currentTime = 0;
-      }
-
-      setActiveIndex(newIndex);
-      setPlaybackProgress(0);
-      setIsCaptionExpanded(false);
-
-      // Play new video if active
-      const newVid = videoRefs.current[newIndex];
-      if (newVid && isInView && !manuallyPausedRef.current) {
-        setIsPlaying(true);
-        newVid.play().catch(() => {});
-      }
+  // When reel video finishes naturally, smoothly transition to next reel
+  const handleVideoEnded = () => {
+    if (reelItems.length > 1) {
+      setProgressPercent(0);
+      setCurrentIndex(prev => (prev + 1) % reelItems.length);
     }
   };
 
-  // ── Touch / Click to Stop and Run (Tap to Pause / Play) ──
-  const handleScreenTap = (e) => {
-    // Prevent trigger if clicking action buttons or drawer
-    if (e.target.closest('.insta-action-column') || e.target.closest('.insta-comments-drawer') || e.target.closest('.insta-top-overlay')) {
-      return;
-    }
+  // Auto progression fallback for non-video items
+  useEffect(() => {
+    if (!isPlaying || reelItems.length <= 1 || !activeItem) return;
+    if (activeItem.mediaType === 'video') return; // Handled directly by video onTimeUpdate / onEnded
 
-    const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
+    const interval = setInterval(() => {
+      setProgressPercent(prev => {
+        if (prev >= 100) {
+          setCurrentIndex(curr => (curr + 1) % reelItems.length);
+          return 0;
+        }
+        return prev + 1.25;
+      });
+    }, 100);
+    return () => clearInterval(interval);
+  }, [isPlaying, safeIndex, reelItems.length, activeItem]);
 
-    // Detect Double Tap for Heart Burst
-    if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
-      handleDoubleTapLike();
-      lastTapTimeRef.current = 0;
-      return;
-    }
-    lastTapTimeRef.current = now;
+  // Explicit play/pause toggle that directly commands the HTML5 video element
+  const togglePlay = (e) => {
+    e?.stopPropagation?.();
+    const nextState = !isPlaying;
+    manuallyPausedRef.current = !nextState;
+    setIsPlaying(nextState);
 
-    // Single Tap -> Toggle Play / Pause
-    const currentVid = videoRefs.current[safeIndex];
-    const nextPlayState = !isPlaying;
-    manuallyPausedRef.current = !nextPlayState;
-    setIsPlaying(nextPlayState);
-
-    if (currentVid) {
-      if (nextPlayState) {
-        currentVid.play().catch(() => {});
-        setShowCenterIcon('play');
+    const vid = videoRef.current;
+    if (vid) {
+      if (nextState) {
+        vid.play().catch(() => {});
       } else {
-        currentVid.pause();
-        setShowCenterIcon('pause');
+        vid.pause();
       }
-      setCenterIconKey(prev => prev + 1);
     }
 
     window.dispatchEvent(
       new CustomEvent('reel-state-change', {
-        detail: { isPlaying: nextPlayState, inView: isInView }
+        detail: { isPlaying: nextState, inView: isInView }
       })
     );
   };
 
-  // Double-tap heart animation
-  const handleDoubleTapLike = () => {
-    if (!activeItem) return;
-    setShowHeartBurst(true);
-    setTimeout(() => setShowHeartBurst(false), 900);
-
-    setLikedReels(prev => {
-      const updated = { ...prev, [activeItem.id]: true };
-      localStorage.setItem('squad_reels_liked', JSON.stringify(updated));
-      return updated;
-    });
+  const handlePrev = (e) => {
+    e?.stopPropagation();
+    if (reelItems.length === 0) return;
+    setProgressPercent(0);
+    setCurrentIndex(prev => (prev - 1 + reelItems.length) % reelItems.length);
   };
 
-  // Toggle Like button
-  const toggleLike = (e) => {
-    e.stopPropagation();
-    if (!activeItem) return;
-    const isCurrentlyLiked = !!likedReels[activeItem.id];
-    setLikedReels(prev => {
-      const updated = { ...prev, [activeItem.id]: !isCurrentlyLiked };
-      localStorage.setItem('squad_reels_liked', JSON.stringify(updated));
-      return updated;
-    });
-    if (!isCurrentlyLiked) {
-      setShowHeartBurst(true);
-      setTimeout(() => setShowHeartBurst(false), 900);
-    }
+  const handleNext = (e) => {
+    e?.stopPropagation();
+    if (reelItems.length === 0) return;
+    setProgressPercent(0);
+    setCurrentIndex(prev => (prev + 1) % reelItems.length);
   };
 
-  // Toggle Bookmark / Save
-  const toggleSave = (e) => {
-    e.stopPropagation();
-    if (!activeItem) return;
-    const isSaved = !!savedReels[activeItem.id];
-    setSavedReels(prev => {
-      const updated = { ...prev, [activeItem.id]: !isSaved };
-      localStorage.setItem('squad_reels_saved', JSON.stringify(updated));
-      return updated;
-    });
-    triggerToast(isSaved ? 'Removed from saved reels' : 'Saved to squad collection! 🔖');
-  };
 
-  // Share Reel
-  const handleShare = async (e) => {
-    e.stopPropagation();
-    const shareUrl = window.location.origin + window.location.pathname + '#reel';
-    const shareData = {
-      title: activeItem?.title || 'Natpe Thunai Reel',
-      text: `Check out this squad memory reel: "${activeItem?.title || 'Our Memories'}" on Natpe Thunai!`,
-      url: shareUrl
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        triggerToast('Shared successfully! 🚀');
-      } catch {
-        copyToClipboard(shareUrl);
-      }
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      reelContainerRef.current?.requestFullscreen?.();
+      setIsFullscreen(true);
     } else {
-      copyToClipboard(shareUrl);
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
     }
   };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard?.writeText(text).then(() => {
-      triggerToast('Reel link copied to clipboard! 🔗');
-    }).catch(() => {
-      triggerToast('Link copied! 🔗');
-    });
-  };
-
-  // Add Comment
-  const handleAddComment = (e) => {
-    e.preventDefault();
-    if (!newCommentText.trim()) return;
-    const newComment = {
-      id: `c-${Date.now()}`,
-      user: 'You (Squad Friend)',
-      handle: '@squad_guest',
-      avatar: brandLogo,
-      text: newCommentText.trim(),
-      time: 'Just now',
-      likes: 1
-    };
-    setComments([newComment, ...comments]);
-    setNewCommentText('');
-    triggerToast('Comment posted! 💌');
-  };
-
-  // Keyboard navigation: ArrowUp, ArrowDown, Space to pause/run
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!isInView || isCommentsOpen) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        scrollToReel((safeIndex + 1) % reelItems.length);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        scrollToReel((safeIndex - 1 + reelItems.length) % reelItems.length);
-      } else if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        handleScreenTap(e);
-      } else if (e.key === 'm' || e.key === 'M') {
-        setIsMuted(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isInView, isCommentsOpen, safeIndex, reelItems.length, scrollToReel, isPlaying]);
 
   return (
-    <section id="reel" className="insta-reels-section">
-      {/* Background Ambient Aura */}
-      <div className="insta-ambient-aura" />
-
-      {/* Section Header */}
+    <section id="reel" className="memory-reel-section">
       <div className="section-header">
         <div className="badge-pill">
           <Film size={14} />
-          <span>SQUAD REELS FEED</span>
+          <span>CINEMATIC ARCHIVE</span>
         </div>
         <h2 className="section-title">
-          Cinematic Squad Reels
+          Our Memory Reel
         </h2>
         <p className="section-desc">
-          Swipe through moments, laugh with our adventures, and experience our friendship in vertical motion.
+          Watch our shared journey unfold as a timeless visual cinematic reel.
         </p>
       </div>
 
-      {/* Main Reels Phone Container Frame */}
-      <div className="insta-device-stage">
-        {/* Desktop Quick Nav Arrows (Left/Right side of Phone Frame) */}
-        <div className="insta-external-controls">
-          <button 
-            type="button" 
-            className="insta-nav-arrow-btn"
-            onClick={() => scrollToReel((safeIndex - 1 + reelItems.length) % reelItems.length)}
-            title="Previous Reel (Arrow Up)"
-            aria-label="Previous Reel"
-          >
-            <ChevronUp size={22} />
-          </button>
-
-          <div className="insta-reel-step-pill">
-            <span>{safeIndex + 1}</span>
-            <span className="step-div">/</span>
-            <span>{reelItems.length}</span>
+      {reelItems.length === 0 || !activeItem ? (
+        <div className="empty-state-box">
+          <div className="empty-state-icon">
+            <Film size={26} />
           </div>
-
-          <button 
-            type="button" 
-            className="insta-nav-arrow-btn"
-            onClick={() => scrollToReel((safeIndex + 1) % reelItems.length)}
-            title="Next Reel (Arrow Down)"
-            aria-label="Next Reel"
-          >
-            <ChevronDown size={22} />
-          </button>
+          <h3 className="empty-state-title">Our memory reel is loading.</h3>
+          <p className="empty-state-text">
+            Moments and photographs will appear in this continuous squad memory reel.
+          </p>
         </div>
-
-        {/* Curvy Smartphone Bezel */}
-        <div className="insta-curved-phone-frame">
-          {/* Dynamic Island Notch */}
-          <div className="insta-dynamic-island">
-            <span className="insta-camera-lens" />
-            <span className="insta-sensor-dot" />
-          </div>
-
-          {/* Toast Notification Banner */}
-          {toastMessage && (
-            <div className="insta-toast-pill">
-              <span>{toastMessage}</span>
-            </div>
-          )}
-
-          {/* Vertical Reels Feed (Scroll-Snap Container) */}
-          <div 
-            className="insta-reels-feed" 
-            ref={feedRef}
-            onScroll={handleFeedScroll}
-          >
-            {reelItems.map((reel, idx) => {
-              const isSlideActive = idx === safeIndex;
-              const isLiked = !!likedReels[reel.id];
-              const isSaved = !!savedReels[reel.id];
-
-              return (
+      ) : (
+        <div 
+          className={`reel-theater-card ${isFullscreen ? 'fullscreen-mode' : ''} ${isPortrait ? 'is-portrait' : 'is-landscape'}`}
+          ref={reelContainerRef}
+        >
+          {/* Slide Progress Bars — Synchronized to real-time playback */}
+          <div className="reel-progress-indicators">
+            {reelItems.map((item, idx) => (
+              <div 
+                key={item?.id || `reel-track-${idx}`} 
+                className="progress-segment-track"
+                onClick={() => {
+                  setProgressPercent(0);
+                  setCurrentIndex(idx);
+                }}
+              >
                 <div 
-                  key={reel.id || `reel-slide-${idx}`} 
-                  className={`insta-reel-slide ${isSlideActive ? 'active-slide' : ''}`}
-                  onClick={handleScreenTap}
-                >
-                  {/* Video Media Element */}
-                  <video
-                    ref={(el) => { videoRefs.current[idx] = el; }}
-                    src={reel.mediaUrl}
-                    className="insta-video-element"
-                    playsInline
-                    loop={false}
-                    muted={isMuted}
-                    preload={isSlideActive ? "auto" : "metadata"}
-                    onTimeUpdate={isSlideActive ? handleTimeUpdate : undefined}
-                    onEnded={isSlideActive ? handleVideoEnded : undefined}
-                  />
-
-                  {/* Subtle Dark Gradient Shades for pristine text readability */}
-                  <div className="insta-top-gradient" />
-                  <div className="insta-bottom-gradient" />
-
-                  {/* Top Bar Overlay inside Reel */}
-                  <div className="insta-top-overlay">
-                    <div className="insta-brand-tag">
-                      <Film size={15} />
-                      <span>Reels</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="insta-sound-pill-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsMuted(prev => !prev);
-                      }}
-                      title={isMuted ? "Tap to Unmute" : "Tap to Mute"}
-                      aria-label={isMuted ? "Unmute" : "Mute"}
-                    >
-                      {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-                      <span>{isMuted ? "Audio Off" : "Audio On"}</span>
-                    </button>
-                  </div>
-
-                  {/* Center Pop Feedback Icon (Touch to Stop and Run) */}
-                  {isSlideActive && showCenterIcon && (
-                    <div 
-                      key={centerIconKey} 
-                      className={`insta-center-pop-icon ${showCenterIcon}`}
-                    >
-                      {showCenterIcon === 'play' ? <Play size={38} /> : <Pause size={38} />}
-                    </div>
-                  )}
-
-                  {/* Big Heart Burst Animation on Double Tap */}
-                  {isSlideActive && showHeartBurst && (
-                    <div className="insta-heart-burst">
-                      <Heart size={90} fill="#ff2d55" color="#ff2d55" />
-                    </div>
-                  )}
-
-                  {/* Right-Side Floating Action Column (Like, Comment, Share, Bookmark, Music Disc) */}
-                  <div className="insta-action-column" onClick={(e) => e.stopPropagation()}>
-                    {/* 1. Like Button */}
-                    <div className="insta-action-item">
-                      <button 
-                        type="button" 
-                        className={`insta-action-btn ${isLiked ? 'is-liked' : ''}`}
-                        onClick={toggleLike}
-                        aria-label="Like reel"
-                      >
-                        <Heart size={26} fill={isLiked ? "#ff2d55" : "none"} color={isLiked ? "#ff2d55" : "#ffffff"} />
-                      </button>
-                      <span className="insta-action-count">{isLiked ? '24.9K' : '24.8K'}</span>
-                    </div>
-
-                    {/* 2. Comment Button */}
-                    <div className="insta-action-item">
-                      <button 
-                        type="button" 
-                        className="insta-action-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsCommentsOpen(true);
-                        }}
-                        aria-label="View comments"
-                      >
-                        <MessageCircle size={25} color="#ffffff" />
-                      </button>
-                      <span className="insta-action-count">{comments.length}</span>
-                    </div>
-
-                    {/* 3. Share Button */}
-                    <div className="insta-action-item">
-                      <button 
-                        type="button" 
-                        className="insta-action-btn"
-                        onClick={handleShare}
-                        aria-label="Share reel"
-                      >
-                        <Send size={24} color="#ffffff" />
-                      </button>
-                      <span className="insta-action-count">2.4K</span>
-                    </div>
-
-                    {/* 4. Bookmark / Save Button */}
-                    <div className="insta-action-item">
-                      <button 
-                        type="button" 
-                        className={`insta-action-btn ${isSaved ? 'is-saved' : ''}`}
-                        onClick={toggleSave}
-                        aria-label="Save reel"
-                      >
-                        <Bookmark size={24} fill={isSaved ? "#f59e0b" : "none"} color={isSaved ? "#f59e0b" : "#ffffff"} />
-                      </button>
-                      <span className="insta-action-count">Save</span>
-                    </div>
-
-                    {/* 5. Rotating Vinyl Music Disc */}
-                    <div className="insta-action-item music-disc-wrap">
-                      <div className={`insta-music-disc ${isSlideActive && isPlaying ? 'is-spinning' : ''}`}>
-                        <img src={brandLogo} alt="Audio" className="insta-disc-art" />
-                      </div>
-                      <div className="insta-note-float">
-                        <Music size={11} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Left Information Overlay */}
-                  <div className="insta-bottom-info" onClick={(e) => e.stopPropagation()}>
-                    {/* Squad Profile Lockup */}
-                    <div className="insta-profile-row">
-                      <div className="insta-avatar-ring">
-                        <img src={brandLogo} alt="Natpe Thunai" className="insta-avatar-img" />
-                      </div>
-                      <div className="insta-user-meta">
-                        <span className="insta-username">natpe_thunai</span>
-                        <CheckCircle2 size={13} className="insta-verified-badge" />
-                      </div>
-                      <button 
-                        type="button" 
-                        className="insta-squad-follow-pill"
-                        onClick={() => triggerToast('You are an official squad family member! 🫂')}
-                      >
-                        Squad
-                      </button>
-                    </div>
-
-                    {/* Title & Caption with expandable ...more */}
-                    <div className="insta-caption-wrap">
-                      <h3 className="insta-reel-title">{reel.title || 'Squad Memory'}</h3>
-                      <p className={`insta-caption-text ${isCaptionExpanded ? 'expanded' : ''}`}>
-                        {reel.description || 'Stepping into chapters together — pure unfiltered squad energy.'}
-                      </p>
-                      {reel.description && reel.description.length > 55 && (
-                        <button 
-                          type="button" 
-                          className="insta-caption-more-btn"
-                          onClick={() => setIsCaptionExpanded(prev => !prev)}
-                        >
-                          {isCaptionExpanded ? 'less' : 'more'}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Audio Marquee Ticker */}
-                    <div className="insta-audio-ticker">
-                      <Music size={12} className="insta-music-note-icon" />
-                      <div className="insta-marquee-track">
-                        <span className="insta-marquee-text">
-                          Original Audio - Natpe Thunai Squad Anthem • {reel.category || 'Adventures'} • {reel.date || 'Forever'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Real-time Instagram Progress Bar (Very Bottom Edge) */}
-                  <div className="insta-progress-bar-track">
-                    <div 
-                      className="insta-progress-bar-fill"
-                      style={{ width: isSlideActive ? `${playbackProgress}%` : '0%' }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                  className={`progress-segment-fill ${idx < safeIndex ? 'completed' : (idx === safeIndex ? 'active' : '')}`}
+                  style={{
+                    width: idx < safeIndex ? '100%' : (idx === safeIndex ? `${progressPercent}%` : '0%')
+                  }}
+                />
+              </div>
+            ))}
           </div>
 
-          {/* Slide-Up Instagram Comments Sheet */}
-          {isCommentsOpen && (
-            <div className="insta-comments-drawer" onClick={(e) => e.stopPropagation()}>
-              <div className="insta-comments-header">
-                <div className="insta-sheet-handle" />
-                <div className="insta-comments-title-row">
-                  <h4>Comments ({comments.length})</h4>
-                  <button 
-                    type="button" 
-                    className="insta-close-comments-btn"
-                    onClick={() => setIsCommentsOpen(false)}
-                    aria-label="Close comments"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-              </div>
+          {/* Video Reel Viewport — Dynamically Formats to Portrait or Landscape */}
+          <div 
+            className={`reel-media-stage ${isPortrait ? 'stage-portrait' : 'stage-landscape'}`} 
+            onClick={togglePlay} 
+            title={isPlaying ? "Click to Pause" : "Click to Play"}
+          >
+            {/* Ambient CSS backdrop glow is handled via CSS stage-portrait */}
 
-              <div className="insta-comments-list">
-                {comments.map((cmt) => (
-                  <div key={cmt.id} className="insta-comment-item">
-                    <img src={cmt.avatar} alt={cmt.user} className="insta-comment-avatar" />
-                    <div className="insta-comment-body">
-                      <div className="insta-comment-user-line">
-                        <span className="insta-comment-name">{cmt.user}</span>
-                        <span className="insta-comment-time">{cmt.time}</span>
-                      </div>
-                      <p className="insta-comment-text">{cmt.text}</p>
-                    </div>
-                    <button type="button" className="insta-comment-like-btn" title="Like comment">
-                      <Heart size={14} />
-                      <span>{cmt.likes}</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <video 
+              ref={videoRef}
+              src={activeItem.mediaUrl} 
+              className={`reel-media-element ${isPortrait ? 'media-portrait' : 'media-landscape'}`} 
+              autoPlay={isInView && isPlaying}
+              playsInline
+              muted={isMuted}
+              preload={isInView ? "auto" : "metadata"}
+              onLoadedMetadata={handleLoadedMetadata}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleVideoEnded}
+              onPlay={() => setIsPlaying(true)}
+              key={activeItem.id || safeIndex}
+            />
 
-              <form onSubmit={handleAddComment} className="insta-comment-input-form">
-                <img src={brandLogo} alt="You" className="insta-comment-input-avatar" />
-                <input
-                  type="text"
-                  value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
-                  placeholder="Add a squad comment..."
-                  className="insta-comment-input"
-                  maxLength={160}
-                />
-                <button 
-                  type="submit" 
-                  disabled={!newCommentText.trim()}
-                  className="insta-comment-submit-btn"
-                >
-                  Post
-                </button>
-              </form>
+            {/* Paused State Floating Overlay */}
+            {!isPlaying && (
+              <div className="reel-paused-indicator" title="Paused - Click to Play">
+                <Play size={34} style={{ marginLeft: 3 }} />
+              </div>
+            )}
+
+            {/* Tap areas for left/right navigation */}
+            <div className="reel-tap-area left" onClick={handlePrev}>
+              <button className="reel-nav-arrow left" aria-label="Previous">
+                <ChevronLeft size={24} />
+              </button>
             </div>
-          )}
+            <div className="reel-tap-area right" onClick={handleNext}>
+              <button className="reel-nav-arrow right" aria-label="Next">
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
+            {/* Bottom Caption Overlay */}
+            <div className="reel-caption-overlay">
+              <div className="reel-caption-meta">
+                <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
+                <span className="reel-date">{activeItem.date || ""}</span>
+                {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
+              </div>
+              <h3 className="reel-item-title">{activeItem.title || "Squad Memory"}</h3>
+              {activeItem.description && (
+                <p className="reel-item-desc">{activeItem.description}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom Bar Controls */}
+          <div className="reel-controls-bar">
+            <div className="controls-left">
+              <button 
+                className={`reel-control-btn play-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
+                onClick={togglePlay}
+                title={isPlaying ? "Pause Reel" : "Play Reel"}
+              >
+                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                <span>{isPlaying ? "Pause Reel" : "Play Reel"}</span>
+              </button>
+
+
+
+              <span className="reel-counter-text">
+                {safeIndex + 1} of {reelItems.length}
+              </span>
+            </div>
+
+            <div className="controls-right">
+              {activeItem.mediaType === 'video' && (
+                <button 
+                  className="reel-icon-btn"
+                  onClick={() => {
+                    const nextMuted = !isMuted;
+                    manuallyMutedRef.current = nextMuted;
+                    setIsMuted(nextMuted);
+                  }}
+                  title={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                </button>
+              )}
+
+              <button 
+                className="reel-icon-btn"
+                onClick={toggleFullscreen}
+                title="Fullscreen"
+              >
+                {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }
