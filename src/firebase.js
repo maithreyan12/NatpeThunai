@@ -1,17 +1,17 @@
 // Firebase Configuration for நட்பே துணை
 import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  initializeAuth, 
-  browserLocalPersistence, 
-  browserSessionPersistence, 
-  browserPopupRedirectResolver, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+import {
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  browserPopupRedirectResolver,
+  GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
-  signOut, 
-  onAuthStateChanged 
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -57,9 +57,11 @@ export const AUTHORIZED_ADMIN_EMAILS = [
   'maithreyan2006@gmail.com',
   'jaffreenmarinvanan4@gmail.com',
   'farish.sharieef@gmail.com',
-  'farishsharieef@gmail.com',
-  'farish.sharif@gmail.com',
-  'farishsharif@gmail.com'
+  'kafila444@gmail.com',
+  'jgarnett295@gmail.com',
+  'heenuu08@gmail.com',
+  'd74875587@gmail.com',
+  'Mmeshak171@gmail.com'
 ];
 
 export const AUTHORIZED_ADMIN_EMAIL = AUTHORIZED_ADMIN_EMAILS[0];
@@ -130,9 +132,9 @@ export const signInWithGoogle = async () => {
       throw err;
     }
     if (
-      err.code === 'auth/popup-blocked' || 
-      err.code === 'auth/internal-error' || 
-      err.message?.toLowerCase().includes('indexeddb') || 
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/internal-error' ||
+      err.message?.toLowerCase().includes('indexeddb') ||
       err.message?.toLowerCase().includes('database')
     ) {
       try {
@@ -155,7 +157,7 @@ export const onAuthChange = (callback) => {
       if (!isAuthorizedAdmin(user)) {
         try {
           await signOut(auth);
-        } catch {}
+        } catch { }
         callback(null);
         return;
       }
