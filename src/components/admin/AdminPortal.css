@@ -404,10 +404,14 @@
 
 .admin-nav-tab.active {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(168, 85, 247, 0.22));
-  color: #818cf8;
+  color: #4338ca;
   border: 1px solid rgba(99, 102, 241, 0.4);
   box-shadow: 0 4px 18px rgba(99, 102, 241, 0.22);
   font-weight: 800;
+}
+
+[data-theme="dark"] .admin-nav-tab.active {
+  color: #818cf8;
 }
 
 /* Content Pane */
@@ -2455,29 +2459,42 @@
 }
 
 .admin-position-select-label {
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 800;
-  color: #a5b4fc;
+  color: #4338ca;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   pointer-events: none;
 }
 
+[data-theme="dark"] .admin-position-select-label {
+  color: #a5b4fc;
+}
+
 .admin-position-select-dropdown {
   background: transparent;
   border: none;
-  color: #ffffff;
-  font-size: 0.76rem;
-  font-weight: 700;
+  color: #1e1b4b;
+  font-size: 0.78rem;
+  font-weight: 800;
   cursor: pointer;
   padding: 1px 0;
   outline: none;
 }
 
+[data-theme="dark"] .admin-position-select-dropdown {
+  color: #ffffff;
+}
+
 .admin-position-select-dropdown option {
+  background: #ffffff;
+  color: #1e1b4b;
+  padding: 4px;
+}
+
+[data-theme="dark"] .admin-position-select-dropdown option {
   background: #1e1b4b;
   color: #ffffff;
-  padding: 4px;
 }
 
 .admin-quick-align-bar {
@@ -2494,9 +2511,9 @@
   padding: 4px 6px;
   font-size: 0.7rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
@@ -2505,7 +2522,7 @@
 
 .admin-preset-pill:hover {
   background: rgba(99, 102, 241, 0.2);
-  color: #fff;
+  color: #4338ca;
   border-color: rgba(99, 102, 241, 0.4);
 }
 
@@ -2520,11 +2537,17 @@
   padding: 3px 7px;
   font-size: 0.68rem;
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: #c7d2fe;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.08);
+  color: #4338ca;
   cursor: pointer;
   transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .admin-nudge-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #c7d2fe;
 }
 
 .admin-nudge-btn:hover {
@@ -2536,11 +2559,18 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-size: 0.74rem;
+  font-size: 0.76rem;
+  font-weight: 600;
   background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #4338ca;
+}
+
+[data-theme="dark"] .admin-hint-pill {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
   color: #c7d2fe;
 }
 

@@ -32,10 +32,10 @@ import './AdminPortal.css';
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
     </svg>
   );
 }
@@ -78,7 +78,7 @@ export default function AdminPortal({ onExit, currentUser }) {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [currentUser]);
 
   // Active Tab: 'overview' | 'members' | 'spiral' | 'journey' | 'reels' | 'memories' | 'posts' | 'events' | 'storage'
@@ -93,7 +93,7 @@ export default function AdminPortal({ onExit, currentUser }) {
         const parts = window.location.hash.split('?tab=');
         if (parts[1]) return parts[1];
       }
-    } catch {}
+    } catch { }
     return 'overview';
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -325,7 +325,7 @@ export default function AdminPortal({ onExit, currentUser }) {
         // If auto-create items is checked, add to the respective active section (reels or memories)
         if (bundleSettings.autoCreateMemories && publicUrl) {
           const cleanedName = item.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
-          const title = bundleSettings.titlePrefix 
+          const title = bundleSettings.titlePrefix
             ? `${bundleSettings.titlePrefix} - ${cleanedName}`
             : cleanedName;
 
@@ -529,20 +529,20 @@ export default function AdminPortal({ onExit, currentUser }) {
   // ── Live R2 subscriptions — push updates to this component AND public website ──
   useEffect(() => {
     // Boot: seed R2 if first time
-    bootR2Database().catch(() => {});
+    bootR2Database().catch(() => { });
 
     // Fetch live storage metrics immediately
     fetchR2Stats();
 
     // Subscribe to live data from R2 CDN
-    const unsubMembers   = subscribeToMembersR2(setMembers);
-    const unsubMemories  = subscribeToMemoriesR2(setMemories);
-    const unsubReels     = subscribeToReelsR2(setReelItems);
-    const unsubPosts     = subscribeToPostsR2(setPosts);
-    const unsubEvents    = subscribeToEventsR2(setEvents);
-    const unsubJourney   = subscribeToJourneyR2(setJourneyMilestones);
-    const unsubSpiral    = subscribeToSpiralR2(setSpiralItems);
-    const unsubMusic     = subscribeToMusicR2(setMusicTracks);
+    const unsubMembers = subscribeToMembersR2(setMembers);
+    const unsubMemories = subscribeToMemoriesR2(setMemories);
+    const unsubReels = subscribeToReelsR2(setReelItems);
+    const unsubPosts = subscribeToPostsR2(setPosts);
+    const unsubEvents = subscribeToEventsR2(setEvents);
+    const unsubJourney = subscribeToJourneyR2(setJourneyMilestones);
+    const unsubSpiral = subscribeToSpiralR2(setSpiralItems);
+    const unsubMusic = subscribeToMusicR2(setMusicTracks);
 
     return () => {
       unsubMembers();
@@ -747,13 +747,13 @@ export default function AdminPortal({ onExit, currentUser }) {
       const payload = editingReel
         ? { ...editingReel, ...reelForm, mediaType: 'video' }
         : {
-            id: `reel_${Date.now()}`,
-            ...reelForm,
-            category: reelForm.category || 'Adventures',
-            mediaType: 'video',
-            isReel: true,
-            timestamp: Date.now()
-          };
+          id: `reel_${Date.now()}`,
+          ...reelForm,
+          category: reelForm.category || 'Adventures',
+          mediaType: 'video',
+          isReel: true,
+          timestamp: Date.now()
+        };
       // ⚡ Instant optimistic update to REELS only (never touches memories!)
       setReelItems(prev => {
         const idx = prev.findIndex(m => m.id === payload.id);
@@ -986,7 +986,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     e.dataTransfer.effectAllowed = 'move';
     try {
       e.dataTransfer.setData('text/plain', String(idx));
-    } catch {}
+    } catch { }
   };
 
   const handleSpiralDragOver = (e, idx) => {
@@ -1082,20 +1082,20 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
 
     const faceCalibrations = {
-      kafil:      { positionY: 18, objectPosition: 'center 18%', scale: 1.0,  role: 'Creative Soul' },
-      haniya:     { positionY: 20, objectPosition: 'center 20%', scale: 1.0,  role: 'The Chill Sloth' },
-      grace:      { positionY: 16, objectPosition: 'center 16%', scale: 1.0,  role: 'The Spark & Creative' },
-      jaffreen:   { positionY: 16, objectPosition: 'center 16%', scale: 1.0,  role: 'The Sweet Heart' },
-      farish:     { positionY: 15, objectPosition: 'center 15%', scale: 1.0,  role: 'The Mastermind' },
-      divyaaa:    { positionY: 22, objectPosition: 'center 22%', scale: 1.05, role: 'The Sunshine' },
-      heenuuu:    { positionY: 20, objectPosition: 'center 20%', scale: 1.05, role: 'The Spark & Heart' },
-      puppy:      { positionY: 28, objectPosition: 'center 28%', scale: 1.0,  role: 'The Chill Vibe' },
-      afnaan:     { positionY: 22, objectPosition: 'center 22%', scale: 1.0,  role: 'The Energy Dynamo' },
-      meshak:     { positionY: 30, objectPosition: '62% 30%',    scale: 1.0,  role: 'The Silent Strength' },
-      samuel:     { positionY: 24, objectPosition: 'center 24%', scale: 1.0,  role: 'The Joyful Soul' },
-      harshitha:  { positionY: 24, objectPosition: 'center 24%', scale: 1.0,  role: 'Radiant Sunshine' },
-      maithreyan: { positionY: 35, objectPosition: 'center 35%', scale: 1.0,  role: 'Tech & Vibe Pilot' },
-      gopika:     { positionY: 28, objectPosition: 'center 28%', scale: 1.0,  role: 'The Graceful Heart' },
+      kafil: { positionY: 18, objectPosition: 'center 18%', scale: 1.0, role: 'Creative Soul' },
+      haniya: { positionY: 20, objectPosition: 'center 20%', scale: 1.0, role: 'The Chill Sloth' },
+      grace: { positionY: 16, objectPosition: 'center 16%', scale: 1.0, role: 'The Spark & Creative' },
+      jaffreen: { positionY: 16, objectPosition: 'center 16%', scale: 1.0, role: 'The Sweet Heart' },
+      farish: { positionY: 15, objectPosition: 'center 15%', scale: 1.0, role: 'The Mastermind' },
+      divyaaa: { positionY: 22, objectPosition: 'center 22%', scale: 1.05, role: 'The Sunshine' },
+      heenuuu: { positionY: 20, objectPosition: 'center 20%', scale: 1.05, role: 'The Spark & Heart' },
+      puppy: { positionY: 28, objectPosition: 'center 28%', scale: 1.0, role: 'The Chill Vibe' },
+      afnaan: { positionY: 22, objectPosition: 'center 22%', scale: 1.0, role: 'The Energy Dynamo' },
+      meshak: { positionY: 30, objectPosition: '62% 30%', scale: 1.0, role: 'The Silent Strength' },
+      samuel: { positionY: 24, objectPosition: 'center 24%', scale: 1.0, role: 'The Joyful Soul' },
+      harshitha: { positionY: 24, objectPosition: 'center 24%', scale: 1.0, role: 'Radiant Sunshine' },
+      maithreyan: { positionY: 35, objectPosition: 'center 35%', scale: 1.0, role: 'Tech & Vibe Pilot' },
+      gopika: { positionY: 28, objectPosition: 'center 28%', scale: 1.0, role: 'The Graceful Heart' },
     };
 
     let syncedList = [];
@@ -1309,8 +1309,8 @@ export default function AdminPortal({ onExit, currentUser }) {
           arr[idx] = payload;
           return payload.isDefault ? arr.map(t => t.id === payload.id ? t : { ...t, isDefault: false }) : arr;
         }
-        return payload.isDefault 
-          ? [payload, ...prev.map(t => ({ ...t, isDefault: false }))] 
+        return payload.isDefault
+          ? [payload, ...prev.map(t => ({ ...t, isDefault: false }))]
           : [...prev, payload];
       });
 
@@ -1417,7 +1417,7 @@ export default function AdminPortal({ onExit, currentUser }) {
           <div className="admin-google-auth-box">
             {authError && <p className="admin-error-text">{authError}</p>}
 
-            <button 
+            <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
@@ -1468,11 +1468,11 @@ export default function AdminPortal({ onExit, currentUser }) {
 
         <div className="admin-header-actions">
           <div className="admin-user-pill">
-            <img 
-              src={(currentUser && currentUser.photoURL) || brandLogo} 
-              alt="" 
-              className="admin-user-avatar" 
-              referrerPolicy="no-referrer" 
+            <img
+              src={(currentUser && currentUser.photoURL) || brandLogo}
+              alt=""
+              className="admin-user-avatar"
+              referrerPolicy="no-referrer"
             />
             <span className="admin-user-name">{(currentUser && currentUser.displayName) || 'Sanctuary Admin'}</span>
           </div>
@@ -1807,20 +1807,21 @@ export default function AdminPortal({ onExit, currentUser }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '7px',
-                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(168, 85, 247, 0.28))',
-                      border: '1px solid rgba(139, 92, 246, 0.45)',
-                      color: '#e0e7ff',
-                      padding: '8px 14px',
+                      background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                      border: '1px solid rgba(139, 92, 246, 0.6)',
+                      color: '#ffffff',
+                      padding: '8px 16px',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       fontSize: '0.86rem',
-                      fontWeight: 500,
+                      fontWeight: 600,
+                      boxShadow: '0 2px 8px rgba(79, 70, 229, 0.35)',
                       transition: 'all 0.2s ease'
                     }}
                     title="Sync all 14 squad members with calibrated face framing"
                   >
-                    <Sparkles size={16} style={{ color: '#a5b4fc' }} />
-                    <span>Sync All 14 Members (Face Focus)</span>
+                    <Sparkles size={16} style={{ color: '#ffffff' }} />
+                    <span style={{ color: '#ffffff', fontWeight: 600 }}>Sync All 14 Members (Face Focus)</span>
                   </button>
                   <button onClick={openAddSpiralItem} className="admin-primary-btn">
                     <Plus size={16} /> Add Spiral Photo
@@ -1841,8 +1842,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                     const isQuickAlignOpen = activeQuickAlignId === (item.id || idx);
 
                     return (
-                      <div 
-                        key={item.id || idx} 
+                      <div
+                        key={item.id || idx}
                         className={`admin-card-item admin-spiral-card ${draggedSpiralIdx === idx ? 'is-dragging' : ''} ${dragOverSpiralIdx === idx ? 'is-drag-over' : ''}`}
                         draggable
                         onDragStart={(e) => handleSpiralDragStart(e, idx)}
@@ -1852,10 +1853,10 @@ export default function AdminPortal({ onExit, currentUser }) {
                         onDragEnd={handleSpiralDragEnd}
                       >
                         <div style={{ position: 'relative', overflow: 'hidden', height: '170px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px 12px 0 0' }}>
-                          <img 
-                            src={item.src} 
-                            alt={item.alt || item.title} 
-                            className="admin-card-img" 
+                          <img
+                            src={item.src}
+                            alt={item.alt || item.title}
+                            className="admin-card-img"
                             style={{
                               width: '100%',
                               height: '100%',
@@ -1883,8 +1884,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                         <div className="admin-card-body">
                           <div className="admin-card-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                              <div 
-                                className="admin-drag-handle" 
+                              <div
+                                className="admin-drag-handle"
                                 title="Click &amp; drag to reorder this card in the spiral sequence"
                               >
                                 <GripVertical size={16} />
@@ -1926,7 +1927,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                             </div>
 
                             <div className="admin-row-actions">
-                              <button 
+                              <button
                                 type="button"
                                 onClick={() => setActiveQuickAlignId(prev => prev === (item.id || idx) ? null : (item.id || idx))}
                                 className={`admin-icon-action-btn ${isQuickAlignOpen ? 'active' : ''}`}
@@ -2870,9 +2871,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <label className="admin-file-pick-btn">
                       <Camera size={16} />
                       <span>{memberPhotoUploading ? 'Uploading to R2...' : 'Choose Photo File'}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*,image/heic,image/heif,.heic,.heif" 
+                      <input
+                        type="file"
+                        accept="image/*,image/heic,image/heif,.heic,.heif"
                         onChange={handleMemberPhotoFile}
                         disabled={memberPhotoUploading}
                         style={{ display: 'none' }}
@@ -2950,9 +2951,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <label className="admin-file-pick-btn">
                       <Camera size={16} />
                       <span>{milestonePhotoUploading ? 'Uploading to R2...' : 'Choose Milestone Photo'}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*,image/heic,image/heif,.heic,.heif" 
+                      <input
+                        type="file"
+                        accept="image/*,image/heic,image/heif,.heic,.heif"
                         onChange={handleMilestonePhotoFile}
                         disabled={milestonePhotoUploading}
                         style={{ display: 'none' }}
@@ -3070,9 +3071,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <label className="admin-file-pick-btn">
                       <Camera size={16} />
                       <span>{spiralPhotoUploading ? 'Uploading to R2...' : 'Choose Photo'}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*,image/heic,image/heif,.heic,.heif" 
+                      <input
+                        type="file"
+                        accept="image/*,image/heic,image/heif,.heic,.heif"
                         onChange={handleSpiralPhotoFile}
                         disabled={spiralPhotoUploading}
                         style={{ display: 'none' }}
@@ -3155,7 +3156,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                     Exact 3D Card Ratio (195 × 145)
                   </span>
                 </label>
-                <div 
+                <div
                   onMouseDown={(e) => {
                     setIsDraggingPreview(true);
                     dragStartY.current = e.clientY;
@@ -3528,9 +3529,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <label className="admin-file-pick-btn">
                       <Film size={16} />
                       <span>{reelPhotoUploading ? 'Uploading Video to R2...' : 'Choose Video File'}</span>
-                      <input 
-                        type="file" 
-                        accept="video/*" 
+                      <input
+                        type="file"
+                        accept="video/*"
                         onChange={handleReelPhotoFile}
                         disabled={reelPhotoUploading}
                         style={{ display: 'none' }}
@@ -3676,9 +3677,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <label className="admin-file-pick-btn">
                       <Camera size={16} />
                       <span>{memoryPhotoUploading ? 'Uploading to R2...' : 'Choose Chapter Photo'}</span>
-                      <input 
-                        type="file" 
-                        accept="image/*,image/heic,image/heif,.heic,.heif" 
+                      <input
+                        type="file"
+                        accept="image/*,image/heic,image/heif,.heic,.heif"
                         onChange={handleMemoryPhotoFile}
                         disabled={memoryPhotoUploading}
                         style={{ display: 'none' }}
@@ -3838,9 +3839,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                   {editingMusic ? 'Edit Track Details' : 'Add Song to Squad Playlist'}
                 </h2>
               </div>
-              <button 
-                type="button" 
-                onClick={() => setIsMusicModalOpen(false)} 
+              <button
+                type="button"
+                onClick={() => setIsMusicModalOpen(false)}
                 className="admin-modal-close-btn"
                 style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
               >
@@ -4024,14 +4025,14 @@ export default function AdminPortal({ onExit, currentUser }) {
                   Upload multiple photos or an entire computer folder directly to Cloudflare R2 and optionally publish them as Memories.
                 </p>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   if (!isBundleUploading) {
                     setIsBundleModalOpen(false);
                     handleClearBundle();
                   }
-                }} 
+                }}
                 disabled={isBundleUploading}
                 className="admin-modal-close-btn"
                 title="Close"
@@ -4041,24 +4042,24 @@ export default function AdminPortal({ onExit, currentUser }) {
             </div>
 
             {/* Hidden Input Pickers */}
-            <input 
-              ref={folderInputRef} 
-              type="file" 
-              multiple 
-              onChange={(e) => handleSelectFiles(e.target.files)} 
-              style={{ display: 'none' }} 
+            <input
+              ref={folderInputRef}
+              type="file"
+              multiple
+              onChange={(e) => handleSelectFiles(e.target.files)}
+              style={{ display: 'none' }}
             />
-            <input 
-              ref={multiFileInputRef} 
-              type="file" 
-              multiple 
-              accept="image/*,video/*" 
-              onChange={(e) => handleSelectFiles(e.target.files)} 
-              style={{ display: 'none' }} 
+            <input
+              ref={multiFileInputRef}
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              onChange={(e) => handleSelectFiles(e.target.files)}
+              style={{ display: 'none' }}
             />
 
             {/* Selection Dropzone */}
-            <div 
+            <div
               className="admin-bundle-dropzone"
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -4071,18 +4072,18 @@ export default function AdminPortal({ onExit, currentUser }) {
               </div>
               <h3>Choose Photos or Entire Folder</h3>
               <p>Drag &amp; drop photos here, or click below to select multiple files or a whole folder from your device</p>
-              
+
               <div className="admin-bundle-picker-buttons">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => folderInputRef.current?.click()}
                   disabled={isBundleUploading}
                   className="admin-folder-picker-btn"
                 >
                   <FolderPlus size={16} /> Select Entire Folder
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => multiFileInputRef.current?.click()}
                   disabled={isBundleUploading}
                   className="admin-multifile-picker-btn"
@@ -4095,9 +4096,9 @@ export default function AdminPortal({ onExit, currentUser }) {
             {/* Memory Publish Configuration */}
             <div className="admin-bundle-config-box">
               <label className="admin-bundle-checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={bundleSettings.autoCreateMemories} 
+                <input
+                  type="checkbox"
+                  checked={bundleSettings.autoCreateMemories}
                   onChange={(e) => setBundleSettings({ ...bundleSettings, autoCreateMemories: e.target.checked })}
                   disabled={isBundleUploading}
                 />
@@ -4112,9 +4113,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                 <div className="admin-bundle-config-grid">
                   <div className="admin-input-group">
                     <label>Chapter Label</label>
-                    <input 
-                      type="text" 
-                      value={bundleSettings.year} 
+                    <input
+                      type="text"
+                      value={bundleSettings.year}
                       onChange={(e) => setBundleSettings({ ...bundleSettings, year: e.target.value })}
                       placeholder="e.g. Chapter 5, College Trip"
                       disabled={isBundleUploading}
@@ -4122,9 +4123,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </div>
                   <div className="admin-input-group">
                     <label>Title Prefix (Optional)</label>
-                    <input 
-                      type="text" 
-                      value={bundleSettings.titlePrefix} 
+                    <input
+                      type="text"
+                      value={bundleSettings.titlePrefix}
                       onChange={(e) => setBundleSettings({ ...bundleSettings, titlePrefix: e.target.value })}
                       placeholder="e.g. Squad Memory"
                       disabled={isBundleUploading}
@@ -4132,9 +4133,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </div>
                   <div className="admin-input-group">
                     <label>Location</label>
-                    <input 
-                      type="text" 
-                      value={bundleSettings.location} 
+                    <input
+                      type="text"
+                      value={bundleSettings.location}
                       onChange={(e) => setBundleSettings({ ...bundleSettings, location: e.target.value })}
                       placeholder="e.g. Squad Sanctuary"
                       disabled={isBundleUploading}
@@ -4142,8 +4143,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </div>
                   <div className="admin-input-group">
                     <label>Category</label>
-                    <select 
-                      value={bundleSettings.category} 
+                    <select
+                      value={bundleSettings.category}
                       onChange={(e) => setBundleSettings({ ...bundleSettings, category: e.target.value })}
                       disabled={isBundleUploading}
                     >
@@ -4167,9 +4168,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                     <span><strong>{bundleFiles.length}</strong> photos queued for upload</span>
                   </div>
                   {!isBundleUploading && (
-                    <button 
-                      type="button" 
-                      onClick={handleClearBundle} 
+                    <button
+                      type="button"
+                      onClick={handleClearBundle}
                       className="admin-clear-bundle-btn"
                     >
                       Clear List
@@ -4206,8 +4207,8 @@ export default function AdminPortal({ onExit, currentUser }) {
                         )}
                       </div>
                       {!isBundleUploading && item.status !== 'done' && (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => handleRemoveBundleItem(item.id)}
                           className="admin-bundle-remove-btn"
                           title="Remove from batch"
@@ -4242,22 +4243,22 @@ export default function AdminPortal({ onExit, currentUser }) {
 
             {/* Modal Actions */}
             <div className="admin-modal-actions">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => {
                   setIsBundleModalOpen(false);
                   handleClearBundle();
-                }} 
-                disabled={isBundleUploading} 
+                }}
+                disabled={isBundleUploading}
                 className="admin-cancel-btn"
               >
                 {bundleFiles.some(f => f.status === 'done') ? 'Done' : 'Cancel'}
               </button>
 
-              <button 
-                type="button" 
-                onClick={handleStartBundleUpload} 
-                disabled={isBundleUploading || bundleFiles.length === 0 || bundleFiles.every(f => f.status === 'done')} 
+              <button
+                type="button"
+                onClick={handleStartBundleUpload}
+                disabled={isBundleUploading || bundleFiles.length === 0 || bundleFiles.every(f => f.status === 'done')}
                 className="admin-primary-btn"
               >
                 {isBundleUploading ? (

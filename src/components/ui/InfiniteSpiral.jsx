@@ -348,8 +348,13 @@ const InfiniteSpiral = ({
                   transformOrigin: item.objectPosition || (item.positionY !== undefined ? `center ${item.positionY}%` : 'center 20%'),
                   filter: `grayscale(${Math.min(1, Math.max(0, grayscale))})`
                 }}
-
               />
+              {/* Member / Photo Name Tag Overlay */}
+              {(item.title || item.alt) && (
+                <div className="infinite-spiral__caption-pill">
+                  <span>{(item.title || item.alt).split('•')[0].trim()}</span>
+                </div>
+              )}
             </Card>
           );
         })}
