@@ -15,7 +15,7 @@ import { subscribeToReelsR2, INITIAL_REELS, isVideoMedia } from '../../services/
 import './MemoryReel.css';
 
 
-export default function MemoryReel({ reels: propReels, memories = [] }) {
+function MemoryReel({ reels: propReels, memories = [] }) {
   const [internalReels, setInternalReels] = useState(INITIAL_REELS);
 
   useEffect(() => {
@@ -482,3 +482,5 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     </section>
   );
 }
+
+export default React.memo(MemoryReel);

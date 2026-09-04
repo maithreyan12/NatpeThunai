@@ -34,16 +34,20 @@ body {
   font-size: 15.5px;
   overflow-x: hidden;
   width: 100%;
-  transition: background-color 0.35s var(--ease-cinematic), color 0.35s var(--ease-cinematic);
+  transition: background-color 0.3s ease;
 }
 
-/* ── Section Containment for 120fps Smooth Scrolling ── */
+/* ── Section Containment & Content-Visibility for 120fps Butter-Smooth Scrolling ── */
 .app-container > section {
   contain: layout style;
+  content-visibility: auto;
+  contain-intrinsic-size: 850px;
 }
 
-#hero {
+#hero,
+#story {
   contain: none;
+  content-visibility: visible;
 }
 
 img, video, canvas, svg {

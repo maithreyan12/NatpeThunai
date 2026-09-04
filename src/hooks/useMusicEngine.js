@@ -20,6 +20,18 @@ export function useMusicEngine(initialTracks = []) {
   const audioRef = useRef(null);
   const wasPlayingBeforeReelRef = useRef(false);
   const manuallyPausedRef = useRef(false);
+  const isModalOpenRef = useRef(isModalOpen);
+
+  // Keep isModalOpenRef in sync and immediately update currentTime when modal opens
+  useEffect(() => {
+    isModalOpenRef.current = isModalOpen;
+    if (isModalOpen && audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime || 0);
+      if (audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+        setDuration(audioRef.current.duration);
+      }
+    }
+  }, [isModalOpen]);
 
   // Sync external tracks from R2 live subscription
   useEffect(() => {
@@ -56,7 +68,12 @@ export function useMusicEngine(initialTracks = []) {
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
+    
+    // ⚡ CRITICAL PERFORMANCE OPTIMIZATION:
+    // Only dispatch React state updates for currentTime when the Spotify modal is actually OPEN.
+    // When the modal is closed (99% of user session), this prevents 4 re-renders/sec of the entire website!
     const handleTimeUpdate = () => {
+      if (!isModalOpenRef.current) return;
       setCurrentTime(audio.currentTime);
       if (audio.duration && !isNaN(audio.duration)) {
         setDuration(audio.duration);
@@ -263,6 +280,22 @@ export function useMusicEngine(initialTracks = []) {
     selectTrack(prevIdx);
   }, [currentTrackIndex, tracks.length, selectTrack]);
 
+  const openModal = useCallback(() => {
+    isModalOpenRef.current = true;
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime || 0);
+      if (audioRef.current.duration && !isNaN(audioRef.current.duration)) {
+        setDuration(audioRef.current.duration);
+      }
+    }
+    setIsModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    isModalOpenRef.current = false;
+    setIsModalOpen(false);
+  }, []);
+
   return {
     tracks,
     activeTrack,
@@ -273,8 +306,8 @@ export function useMusicEngine(initialTracks = []) {
     volume,
     isMuted,
     isModalOpen,
-    openModal: () => setIsModalOpen(true),
-    closeModal: () => setIsModalOpen(false),
+    openModal,
+    closeModal,
     togglePlay,
     seekTo,
     selectTrack,

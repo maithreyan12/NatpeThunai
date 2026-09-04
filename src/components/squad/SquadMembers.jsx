@@ -214,7 +214,7 @@ function MemberFlipCard({ member, onSelectMember, onFilterByMember }) {
   );
 }
 
-export default function SquadMembers({
+function SquadMembers({
   members = [],
   onSelectMember,
   onFilterByMember
@@ -457,3 +457,5 @@ export default function SquadMembers({
     </section>
   );
 }
+
+export default React.memo(SquadMembers);

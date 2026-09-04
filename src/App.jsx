@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Navbar, 
   Hero, 
@@ -96,9 +96,9 @@ export default function App() {
     localStorage.setItem('squad_theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  }, []);
 
   // Listen to Firebase Auth
   useEffect(() => {
@@ -142,26 +142,26 @@ export default function App() {
     };
   }, [music.openModal]);
 
-  const navigateToAdmin = () => {
+  const navigateToAdmin = useCallback(() => {
     window.history.pushState(null, '', '/admin');
     setIsAdminRoute(true);
-  };
+  }, []);
 
-  const exitAdmin = () => {
+  const exitAdmin = useCallback(() => {
     window.history.pushState(null, '', '/');
     setIsAdminRoute(false);
-  };
+  }, []);
 
-  const handleOpenAlbum = () => {
+  const handleOpenAlbum = useCallback(() => {
     setIsAlbumOpen(true);
-  };
+  }, []);
 
-  const handleCloseAlbum = () => {
+  const handleCloseAlbum = useCallback(() => {
     setIsAlbumOpen(false);
     if (window.location.hash === '#album' || window.location.hash === '#/album') {
       window.history.replaceState(null, '', window.location.pathname);
     }
-  };
+  }, []);
 
   // ── Live R2 data subscriptions — public website always shows latest admin data ──
   useEffect(() => {
@@ -182,10 +182,8 @@ export default function App() {
     };
   }, []);
 
-
-
   // Scroll to section helper
-  const scrollToSection = (sectionId) => {
+  const scrollToSection = useCallback((sectionId) => {
     if (sectionId === 'admin') {
       navigateToAdmin();
       return;
@@ -201,7 +199,7 @@ export default function App() {
         behavior: 'smooth'
       });
     }
-  };
+  }, [navigateToAdmin]);
 
   // High-performance asynchronous IntersectionObserver for scroll spy (zero main-thread scroll listener)
   useEffect(() => {

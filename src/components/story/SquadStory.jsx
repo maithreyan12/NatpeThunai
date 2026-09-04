@@ -38,7 +38,7 @@ Fourth year ippo namma journey-la odittu irukku. Indha year Symposium event-la c
 
 College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, jaffreen, Farish, Divya, Afnaan, Haniya, Meshak, Talha, Kumran, Harshitha, Jeevitha, Heena, Garnett, Maithreyan, Gopika-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru. Namma friendship-ku oru beginning irukku… aana ending kedaiyadhu. Because this is not just a friends gang, this is our little family — Natpe Thunai. ❤️🫂✨`;
 
-export default function SquadStory() {
+function SquadStory() {
   const [activeLang, setActiveLang] = useState('tanglish'); // 'tanglish' | 'english'
   const [likesCount, setLikesCount] = useState(() => {
     return parseInt(localStorage.getItem('natpe_story_likes') || '108', 10);
@@ -442,3 +442,5 @@ export default function SquadStory() {
     </section>
   );
 }
+
+export default React.memo(SquadStory);

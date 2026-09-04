@@ -8,7 +8,7 @@ import {
 import './Hero.css';
 import { r2Photo } from '../../services';
 
-export default function Hero({
+function Hero({
   onExploreTimeline,
   onWatchReel,
   onReadStory,
@@ -281,3 +281,5 @@ export default function Hero({
     </section>
   );
 }
+
+export default React.memo(Hero);

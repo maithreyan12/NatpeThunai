@@ -5,7 +5,7 @@ import { subscribeToJourneyR2, INITIAL_JOURNEY_MILESTONES } from '../../services
 import { isAuthorizedAdmin, onAuthChange } from '../../firebase';
 import './FriendshipJourney.css';
 
-export default function FriendshipJourney({ currentUser }) {
+function FriendshipJourney({ currentUser }) {
   const [isAdmin, setIsAdmin] = useState(() => isAuthorizedAdmin(currentUser));
   const [milestones, setMilestones] = useState(INITIAL_JOURNEY_MILESTONES);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -217,3 +217,5 @@ export default function FriendshipJourney({ currentUser }) {
     </section>
   );
 }
+
+export default React.memo(FriendshipJourney);

@@ -22,7 +22,7 @@ const DEFAULT_MARQUEE_PHOTOS = [
   r2Photo('friend4.jpg'),
 ];
 
-export default function AlbumMarqueeSection({ onOpenAlbum, members = [], memories = [] }) {
+function AlbumMarqueeSection({ onOpenAlbum, members = [], memories = [] }) {
   // Aggregate valid photo URLs only
   const photoList = useMemo(() => {
     const list = [];
@@ -166,3 +166,5 @@ export default function AlbumMarqueeSection({ onOpenAlbum, members = [], memorie
     </section>
   );
 }
+
+export default React.memo(AlbumMarqueeSection);

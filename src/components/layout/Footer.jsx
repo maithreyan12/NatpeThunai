@@ -5,7 +5,7 @@ import brandLogo from '../../assets/brand-logo.png';
 import { isAuthorizedAdmin } from '../../firebase';
 import './Footer.css';
 
-export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, currentUser }) {
+function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, currentUser }) {
   const isAdmin = currentUser && isAuthorizedAdmin(currentUser);
 
   return (
@@ -84,4 +84,6 @@ export default function Footer({ onScrollTop, onOpenSignIn, onOpenAdmin, current
     </footer>
   );
 }
+
+export default React.memo(Footer);
 

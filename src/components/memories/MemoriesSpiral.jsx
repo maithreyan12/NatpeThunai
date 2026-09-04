@@ -9,7 +9,7 @@ import './MemoriesSpiral.css';
 // Fallback initial squad photos for all 14 members
 const FALLBACK_SPIRAL_IMAGES = INITIAL_SPIRAL_ITEMS;
 
-export default function MemoriesSpiral({ currentUser }) {
+function MemoriesSpiral({ currentUser }) {
   const [isAdmin, setIsAdmin] = useState(() => isAuthorizedAdmin(currentUser));
   const [spiralItems, setSpiralItems] = useState(INITIAL_SPIRAL_ITEMS || FALLBACK_SPIRAL_IMAGES);
   const [isMobile, setIsMobile] = useState(
@@ -106,3 +106,5 @@ export default function MemoriesSpiral({ currentUser }) {
     </section>
   );
 }
+
+export default React.memo(MemoriesSpiral);
