@@ -112,6 +112,12 @@ const InfiniteSpiral = ({
       const delta = Math.min((time - previousTime) / 1000, 0.05);
       previousTime = time;
 
+      // When the spiral is off-screen and not being dragged, sleep the loop to preserve 120fps scrolling!
+      if (!visibleRef.current && !draggingRef.current) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
       const autoEnabled = animationMode === 'auto' || animationMode === 'all';
       const isPhotoPaused = Date.now() < photoPausedUntilRef.current;
       const motionPaused = draggingRef.current || (pauseOnHover && hoveredRef.current) || isPhotoPaused;
@@ -126,7 +132,6 @@ const InfiniteSpiral = ({
 
       const followBlend = 1 - Math.exp(-delta * (draggingRef.current ? 22 : 11));
       progressRef.current += (targetProgressRef.current - progressRef.current) * followBlend;
-
 
       const count = normalizedItems.length;
       const half = count / 2;
@@ -153,15 +158,12 @@ const InfiniteSpiral = ({
         const depthScale = clamp(perspective / Math.max(perspective - z, 1), 0.72, 1.45);
         const visualScale = scale * depthScale;
         const depth = (z / Math.max(responsiveRadius, 1) + 1) / 2;
-        const blur = edgeBlur * smoothstep(0.35, 1, edge);
-        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${offset * verticalSpacing * fit}px, 0) rotateZ(${cardTilt}deg) scale(${visualScale})`;
-        card.style.opacity = opacity.toFixed(3);
 
-        card.style.filter = blur > 0.01 ? `blur(${blur.toFixed(2)}px)` : 'none';
-        card.style.zIndex = String(Math.round(depth * 100000) + index);
+        card.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${(offset * verticalSpacing * fit).toFixed(1)}px, 0) rotateZ(${cardTilt}deg) scale(${visualScale.toFixed(3)})`;
+        card.style.opacity = opacity.toFixed(2);
+        card.style.zIndex = String(Math.round(depth * 10000) + index);
         card.style.pointerEvents = opacity > 0.25 ? 'auto' : 'none';
       });
-
 
       frameId = requestAnimationFrame(render);
     };
@@ -298,6 +300,7 @@ const InfiniteSpiral = ({
                 src={item.src}
                 alt={item.alt}
                 loading={index < 6 ? 'eager' : 'lazy'}
+                decoding="async"
                 draggable={false}
                 onError={(e) => {
                   const currentSrc = e.target.src;

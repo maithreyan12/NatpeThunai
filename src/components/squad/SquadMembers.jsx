@@ -65,6 +65,8 @@ function MemberFlipCard({ member, onSelectMember, onFilterByMember }) {
                 <img
                   src={member.photo}
                   alt={member.name}
+                  loading="lazy"
+                  decoding="async"
                   className="flip-front-avatar-img"
                   onError={(e) => {
                     const currentSrc = e.target.src;

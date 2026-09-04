@@ -21,9 +21,9 @@ import './SquadStory.css';
 
 const SQUAD_NAMES = [
   "Jeysha", "Kafil", "jaffreen", "Farish",
-  "Divya", "Afnaan", "Haniya", "Sham", "kumran",
+  "Divya", "Afnaan", "Haniya", "kumran",
   "Meshak", "Talha", "Harshitha", "Jeevitha",
-  "Heena", "Garnett", "Sham Sundhar", "Maithreyan", "Gopika"
+  "Heena", "Garnett", "Maithreyan", "Gopika"
 ];
 
 const FULL_STORY_TEXT = `2023 first year first sem-la, oru chemistry lab-la start aana oru chinna friendship, konjam konjama oru azhagana gang-aa maaruchu. Backbench-la irundha boys, girls-nu aarambichu, lunch share pannadhu, class-la pesinadhu, birthday celebrations, namma friendship-oda first outing-aa class cut panni Limra-ku poi saapittu, anga ukkandhu dare games, double meaning games-nu solli sirichu, dare pannitu, full-ah fun pannina andha naal namma gang-oda first official outing-aa marakka mudiyadha memory-a pochu. Adhe first year-la class cut panni ellarum serndhu movies-ku pona moments-um thani level memories. Adhukkapparam Jeevitha thopukku poi, oru full day ellarum serndhu samayal panni, biriyani seithu, oru periya ilai-la full-ah biriyani parappi ukkandhu saapittathu, anga irundha nature-oda serndhu full-ah enjoy pannadhu, pasanga kinarukulla poi kuthichu vilaiyaadinadhu, andha memories ellam innum special. First year-la class cut panni Green Thunder poi semma fun pannadhu, swimming theriyama kooda pool-la kuthichu vilaiyaadinadhu, adhe nerathula mazhai vandhu swimming pool-la mazhaiyoda serndhu enjoy pannadhu, HOD room munnadi ninnu panna attagasam-nu… first year full-ah memories-ku panjam-e illa. Oru naal Chennai-ku train-la poi, unforgettable-aana andha journey-lendhu, Ooty IV trip-la ellarum serndhu panna crazy memories varaikkum, ovvoru naalum oru pudhu story.
@@ -36,7 +36,7 @@ Adhukkapparam third year summer leave-la vandha andha one-month Bangalore intern
 
 Fourth year ippo namma journey-la odittu irukku. Indha year Symposium event-la campaign-ku join pannom; enga HOD namma group-a repeated-ah target panninaalum, adhellaam thaandi ellarum onna serndhu campaign pannom. Campaign-nu aarambichadhu, Yelagiri varaikkum poi, anga ellarum serndhu oru crazy ride-la poi, bayam, excitement, screams, laughter-nu semma memories create pannina oru unforgettable journey-a maariduchu. Ippo fourth year poittu irukku… aana namma story inga mudiyala. Innum neraya days, neraya trips, neraya celebrations, neraya sandai, neraya sirippu, neraya memories namakkaaga wait pannittu irukku.
 
-College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, jaffreen, Farish, Divya, Afnaan, Haniya, Sham, Meshak, Talha, Kumran, Harshitha, Jeevitha, Heena, Garnett, Sham Sundhar, Maithreyan, Gopika-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru. Namma friendship-ku oru beginning irukku… aana ending kedaiyadhu. Because this is not just a friends gang, this is our little family — Natpe Thunai. ❤️🫂✨`;
+College days maaralaam, classes mudiyalaam, namma daily routine maaralaam… aana first year-la Limra-la start aana indha friendship, fourth year varaikkum vandhadhu mattum illa, ini college-ku appuramum continue aagura oru bond-aa irukkum. Jeysha, Kafil, jaffreen, Farish, Divya, Afnaan, Haniya, Meshak, Talha, Kumran, Harshitha, Jeevitha, Heena, Garnett, Maithreyan, Gopika-nu indha peru ellam summa names illa… namma life-la serndha memories-oda peru. Namma friendship-ku oru beginning irukku… aana ending kedaiyadhu. Because this is not just a friends gang, this is our little family — Natpe Thunai. ❤️🫂✨`;
 
 export default function SquadStory() {
   const [activeLang, setActiveLang] = useState('tanglish'); // 'tanglish' | 'english'

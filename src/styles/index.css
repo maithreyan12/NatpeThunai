@@ -16,11 +16,12 @@ html {
   font-family: var(--font-main);
   background-color: var(--bg-base);
   color: var(--text-primary);
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -34,6 +35,15 @@ body {
   overflow-x: hidden;
   width: 100%;
   transition: background-color 0.35s var(--ease-cinematic), color 0.35s var(--ease-cinematic);
+}
+
+/* ── Section Containment for 120fps Smooth Scrolling ── */
+.app-container > section {
+  contain: layout style;
+}
+
+#hero {
+  contain: none;
 }
 
 img, video, canvas, svg {
@@ -64,6 +74,11 @@ p, h1, h2, h3, h4, h5, h6, span, a, button {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .orb {
@@ -73,6 +88,10 @@ p, h1, h2, h3, h4, h5, h6, span, a, button {
   opacity: 0.65;
   pointer-events: none;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 [data-theme="dark"] .orb {

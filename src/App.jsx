@@ -187,21 +187,29 @@ export default function App() {
     }
   };
 
-  // Scroll spy observer
+  // High-performance rAF throttled scroll spy observer
   useEffect(() => {
     const sections = ['hero', 'story', 'journey', 'members', 'album-teaser', 'timeline', 'reel'];
+    let ticking = false;
+
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(sectionId);
-            break;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY + 200;
+          for (const sectionId of sections) {
+            const el = document.getElementById(sectionId);
+            if (el) {
+              const top = el.offsetTop;
+              const height = el.offsetHeight;
+              if (scrollPosition >= top && scrollPosition < top + height) {
+                setActiveSection(prev => (prev !== sectionId ? sectionId : prev));
+                break;
+              }
+            }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 

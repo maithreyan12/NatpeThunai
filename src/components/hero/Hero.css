@@ -26,6 +26,9 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
@@ -37,6 +40,10 @@
   opacity: 0;
   will-change: transform, opacity;
   pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .smoke-orb-1 {
@@ -76,35 +83,35 @@
 }
 
 @keyframes smokeFloat1 {
-  0%   { opacity: 0;    transform: translate(0, 0) scale(1); }
+  0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
   20%  { opacity: 0.85; }
-  50%  { opacity: 0.7;  transform: translate(60px, 40px) scale(1.15); }
+  50%  { opacity: 0.7;  transform: translate3d(60px, 40px, 0) scale(1.15); }
   80%  { opacity: 0.85; }
-  100% { opacity: 0;    transform: translate(0, 0) scale(1); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes smokeFloat2 {
-  0%   { opacity: 0;    transform: translate(0, 0) scale(1); }
+  0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
   15%  { opacity: 0.70; }
-  50%  { opacity: 0.55; transform: translate(-80px, 60px) scale(1.2); }
+  50%  { opacity: 0.55; transform: translate3d(-80px, 60px, 0) scale(1.2); }
   85%  { opacity: 0.70; }
-  100% { opacity: 0;    transform: translate(0, 0) scale(1); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes smokeFloat3 {
-  0%   { opacity: 0;    transform: translate(0, 0) scale(1); }
+  0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
   25%  { opacity: 0.75; }
-  55%  { opacity: 0.60; transform: translate(50px, -50px) scale(1.1); }
+  55%  { opacity: 0.60; transform: translate3d(50px, -50px, 0) scale(1.1); }
   80%  { opacity: 0.75; }
-  100% { opacity: 0;    transform: translate(0, 0) scale(1); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes smokeFloat4 {
-  0%   { opacity: 0;    transform: translate(0, 0) scale(1); }
+  0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
   30%  { opacity: 0.60; }
-  60%  { opacity: 0.45; transform: translate(-40px, -60px) scale(1.25); }
+  60%  { opacity: 0.45; transform: translate3d(-40px, -60px, 0) scale(1.25); }
   85%  { opacity: 0.60; }
-  100% { opacity: 0;    transform: translate(0, 0) scale(1); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(1); }
 }
 
 /* Dark mode orbs: deeper, more cinematic purples */
