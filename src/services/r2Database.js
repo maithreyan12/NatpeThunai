@@ -882,7 +882,10 @@ export const INITIAL_MUSIC_TRACKS = [
   }
 ];
 
+const musicListeners = new Set();
+
 export function subscribeToMusicR2(callback) {
+  musicListeners.add(callback);
   const cacheKey = COLLECTIONS.MUSIC;
   const cached = cache.get(cacheKey);
   if (cached && cached.length > 0) {
@@ -897,7 +900,9 @@ export function subscribeToMusicR2(callback) {
       if (Array.isArray(data) && data.length > 0) {
         const clean = data.filter(x => !isBannedEntity(x));
         cache.set(cacheKey, clean);
-        callback(clean);
+        musicListeners.forEach(cb => {
+          try { cb(clean); } catch {}
+        });
       }
     } catch (err) {
       console.warn('[R2 DB] Music fetch warning:', err.message);
@@ -905,7 +910,11 @@ export function subscribeToMusicR2(callback) {
   };
 
   refresh();
-  return setupSmartPoll(refresh, 60000);
+  const pollCleanup = setupSmartPoll(refresh, 60000);
+  return () => {
+    musicListeners.delete(callback);
+    if (pollCleanup) pollCleanup();
+  };
 }
 
 export async function saveMusicTrackR2(trackData) {
@@ -929,8 +938,12 @@ export async function saveMusicTrackR2(trackData) {
     ? current.map(t => t.id === track.id ? track : (track.isDefault ? { ...t, isDefault: false } : t))
     : (track.isDefault ? [track, ...current.map(t => ({ ...t, isDefault: false }))] : [track, ...current]);
 
-  // ⚡ Instant optimistic cache update
+  // ⚡ Instant optimistic cache update and instant subscriber notification
   cache.set(COLLECTIONS.MUSIC, updated);
+  musicListeners.forEach(cb => {
+    try { cb(updated); } catch {}
+  });
+
   await callAPI({ collection: COLLECTIONS.MUSIC, action: 'upsert', item: track });
   return track;
 }
@@ -938,8 +951,13 @@ export async function saveMusicTrackR2(trackData) {
 export async function deleteMusicTrackR2(trackId) {
   const current = cache.get(COLLECTIONS.MUSIC) || INITIAL_MUSIC_TRACKS;
   const updated = current.filter(t => t.id !== trackId);
-  // ⚡ Instant optimistic cache update
-  cache.set(COLLECTIONS.MUSIC, updated.length > 0 ? updated : INITIAL_MUSIC_TRACKS);
+  const finalTracks = updated.length > 0 ? updated : INITIAL_MUSIC_TRACKS;
+  // ⚡ Instant optimistic cache update and instant subscriber notification
+  cache.set(COLLECTIONS.MUSIC, finalTracks);
+  musicListeners.forEach(cb => {
+    try { cb(finalTracks); } catch {}
+  });
+
   await callAPI({ collection: COLLECTIONS.MUSIC, action: 'delete', id: trackId });
 }
 

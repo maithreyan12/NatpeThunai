@@ -105,13 +105,32 @@ export default async function handler(req, res) {
       }
 
       if (action === 'upsert') {
-        const existing = await readData(client, collection) || [];
-        const list = Array.isArray(existing) ? existing : [];
+        const existing = await readData(client, collection);
+        let list = Array.isArray(existing) ? existing : [];
+        if (collection === 'music' && list.length === 0) {
+          list = [
+            {
+              id: 'track-1',
+              title: 'Sonthamulla Vaazhkai',
+              titleTamil: 'சொந்தமுள்ள வாழ்க்கை',
+              artist: 'Hiphop Tamizha • Natpe Thunai Anthem',
+              description: 'The soul, laughter and official anthem of our lifelong friendship sanctuary.',
+              audioUrl: '/audio/sonthamulla-vaazhkai.m4a',
+              coverPhoto: 'https://pub-2f92e02e604a43878bda07da4ebefb31.r2.dev/members/farish.jpg',
+              duration: '4:18',
+              isDefault: true,
+              createdAt: '2024-01-01T00:00:00.000Z'
+            }
+          ];
+        }
         const idx = list.findIndex(i => i.id === item.id);
         if (idx >= 0) {
           list[idx] = { ...list[idx], ...item };
         } else {
           list.unshift(item);
+        }
+        if (collection === 'music' && item?.isDefault) {
+          list = list.map(t => t.id === item.id ? t : { ...t, isDefault: false });
         }
         await writeData(client, collection, list);
         return res.status(200).json({ message: 'Upserted', data: list });

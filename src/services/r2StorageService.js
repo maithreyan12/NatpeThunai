@@ -91,7 +91,7 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         filename: activeFile.name,
-        mimeType: activeFile.type || (isImage ? 'image/jpeg' : 'video/mp4'),
+        mimeType: activeFile.type || (isAudio ? 'audio/mpeg' : (isImage ? 'image/jpeg' : 'video/mp4')),
         sizeBytes: activeFile.size,
         category,
       }),

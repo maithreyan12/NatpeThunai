@@ -120,11 +120,30 @@ export function r2DevServerPlugin() {
               return json(200, { message: 'Saved', data });
             }
             if (action === 'upsert') {
-              const list = (await readData()) || [];
-              const arr = Array.isArray(list) ? list : [];
+              const list = (await readData());
+              let arr = Array.isArray(list) ? list : [];
+              if (collection === 'music' && arr.length === 0) {
+                arr = [
+                  {
+                    id: 'track-1',
+                    title: 'Sonthamulla Vaazhkai',
+                    titleTamil: 'சொந்தமுள்ள வாழ்க்கை',
+                    artist: 'Hiphop Tamizha • Natpe Thunai Anthem',
+                    description: 'The soul, laughter and official anthem of our lifelong friendship sanctuary.',
+                    audioUrl: '/audio/sonthamulla-vaazhkai.m4a',
+                    coverPhoto: 'https://pub-2f92e02e604a43878bda07da4ebefb31.r2.dev/members/farish.jpg',
+                    duration: '4:18',
+                    isDefault: true,
+                    createdAt: '2024-01-01T00:00:00.000Z'
+                  }
+                ];
+              }
               const idx = arr.findIndex(i => i.id === item.id);
               if (idx >= 0) arr[idx] = { ...arr[idx], ...item };
               else arr.unshift(item);
+              if (collection === 'music' && item?.isDefault) {
+                arr = arr.map(t => t.id === item.id ? t : { ...t, isDefault: false });
+              }
               await writeData(arr);
               return json(200, { message: 'Upserted', data: arr });
             }
@@ -150,10 +169,13 @@ export function r2DevServerPlugin() {
             const uniqueToken = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
             const safeName    = (filename || 'media.bin').replace(/[^a-zA-Z0-9.-]/g, '_');
             const objectKey   = `${category}/${datePrefix}/${uniqueToken}_${safeName}`;
+            const isAudioExt  = filename?.match(/\.(mp3|m4a|wav|aac|ogg|flac)$/i);
+            const isVideoExt  = filename?.match(/\.(mp4|webm|mov)$/i);
+            const contentType = mimeType || (isVideoExt ? 'video/mp4' : (isAudioExt ? 'audio/mpeg' : 'image/jpeg'));
 
             const command = new PutObjectCommand({
               Bucket: bucket, Key: objectKey,
-              ContentType: mimeType || 'application/octet-stream',
+              ContentType: contentType,
               CacheControl: 'public, max-age=31536000, immutable',
             });
             const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });

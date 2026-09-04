@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     const isAudioExt = filename?.match(/\.(mp3|m4a|wav|aac|ogg|flac)$/i);
     const isVideoExt = filename?.match(/\.(mp4|webm|mov)$/i);
     const contentType = mimeType || (isVideoExt ? 'video/mp4' : (isAudioExt ? 'audio/mpeg' : 'image/jpeg'));
+    const objectKey   = `${category}/${datePrefix}/${uniqueToken}_${safeName}`;
 
     const command = new PutObjectCommand({
       Bucket: bucketName,

@@ -1248,6 +1248,19 @@ export default function AdminPortal({ onExit, currentUser }) {
     setMusicAudioUploading(true);
     setMusicUploadProgress(10);
     try {
+      // Auto-probe duration from audio file
+      try {
+        const tempAudio = new Audio(URL.createObjectURL(file));
+        tempAudio.onloadedmetadata = () => {
+          if (tempAudio.duration && !isNaN(tempAudio.duration)) {
+            const mins = Math.floor(tempAudio.duration / 60);
+            const secs = Math.floor(tempAudio.duration % 60);
+            const durStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            setMusicForm(prev => ({ ...prev, duration: prev.duration || durStr }));
+          }
+        };
+      } catch {}
+
       const result = await uploadToR2WithGuardrails(file, 'music', (pct) => {
         setMusicUploadProgress(pct);
       });
