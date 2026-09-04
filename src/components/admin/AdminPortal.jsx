@@ -5,7 +5,8 @@ import {
   CheckCircle, AlertCircle, Upload, Eye, Search, ExternalLink, Sparkles, Camera,
   FolderPlus, FolderUp, Layers, Check, X, RefreshCw, Loader2, Film, Compass,
   Copy, Database, Server, BarChart3, FileCode, CheckCheck,
-  GripVertical, ChevronLeft, ChevronRight, Sliders, Move, Crosshair, ZoomIn, ZoomOut
+  GripVertical, ChevronLeft, ChevronRight, Sliders, Move, Crosshair, ZoomIn, ZoomOut,
+  Music, Play, Pause, Volume2
 } from 'lucide-react';
 
 import {
@@ -16,6 +17,7 @@ import {
   subscribeToJourneyR2, saveJourneyMilestoneR2,
   subscribeToSpiralR2, saveSpiralItemR2, saveAllSpiralItemsR2, deleteSpiralItemR2, INITIAL_SPIRAL_ITEMS,
   subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS, isVideoMedia,
+  subscribeToMusicR2, saveMusicTrackR2, deleteMusicTrackR2, INITIAL_MUSIC_TRACKS,
   bootR2Database,
 } from '../../services/r2Database';
 
@@ -138,6 +140,24 @@ export default function AdminPortal({ onExit, currentUser }) {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [eventForm, setEventForm] = useState({
     title: '', date: '', time: '', location: '', description: ''
+  });
+
+  // ── Music Playlist States ──
+  const [musicTracks, setMusicTracks] = useState([]);
+  const [editingMusic, setEditingMusic] = useState(null);
+  const [isMusicModalOpen, setIsMusicModalOpen] = useState(false);
+  const [musicAudioUploading, setMusicAudioUploading] = useState(false);
+  const [musicPhotoUploading, setMusicPhotoUploading] = useState(false);
+  const [musicUploadProgress, setMusicUploadProgress] = useState(0);
+  const [musicForm, setMusicForm] = useState({
+    title: '',
+    titleTamil: '',
+    artist: '',
+    description: '',
+    audioUrl: '',
+    coverPhoto: '',
+    duration: '',
+    isDefault: false
   });
 
   // ── Reels (Cinematic Archive) States ──
@@ -522,6 +542,7 @@ export default function AdminPortal({ onExit, currentUser }) {
     const unsubEvents    = subscribeToEventsR2(setEvents);
     const unsubJourney   = subscribeToJourneyR2(setJourneyMilestones);
     const unsubSpiral    = subscribeToSpiralR2(setSpiralItems);
+    const unsubMusic     = subscribeToMusicR2(setMusicTracks);
 
     return () => {
       unsubMembers();
@@ -531,6 +552,7 @@ export default function AdminPortal({ onExit, currentUser }) {
       unsubEvents();
       unsubJourney();
       unsubSpiral();
+      unsubMusic();
     };
 
   }, []);
@@ -1218,6 +1240,106 @@ export default function AdminPortal({ onExit, currentUser }) {
     }
   };
 
+  // ── Music Handlers ──
+  const handleMusicAudioUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMusicAudioUploading(true);
+    setMusicUploadProgress(10);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'music', (pct) => {
+        setMusicUploadProgress(pct);
+      });
+      setMusicForm(prev => ({
+        ...prev,
+        audioUrl: result.publicUrl,
+        title: prev.title || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+      }));
+      triggerToast(`Audio uploaded successfully to Cloudflare R2! 🎵`);
+    } catch (err) {
+      triggerToast(`Audio upload failed: ${err.message}`);
+    } finally {
+      setMusicAudioUploading(false);
+      setMusicUploadProgress(0);
+    }
+  };
+
+  const handleMusicPhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMusicPhotoUploading(true);
+    try {
+      const result = await uploadToR2WithGuardrails(file, 'music');
+      setMusicForm(prev => ({
+        ...prev,
+        coverPhoto: result.publicUrl
+      }));
+      triggerToast(`Cover artwork uploaded to Cloudflare R2! 📸`);
+    } catch (err) {
+      triggerToast(`Cover upload failed: ${err.message}`);
+    } finally {
+      setMusicPhotoUploading(false);
+    }
+  };
+
+  const handleSaveMusic = async (e) => {
+    e.preventDefault();
+    if (!musicForm.title.trim()) {
+      triggerToast('Please provide a song title.');
+      return;
+    }
+    if (!musicForm.audioUrl.trim()) {
+      triggerToast('Please upload an audio file or provide a direct audio URL.');
+      return;
+    }
+
+    setIsMusicModalOpen(false);
+    try {
+      const payload = editingMusic
+        ? { ...editingMusic, ...musicForm }
+        : { id: `track-${Date.now()}`, ...musicForm };
+
+      // Instant optimistic update
+      setMusicTracks(prev => {
+        const idx = prev.findIndex(t => t.id === payload.id);
+        if (idx >= 0) {
+          const arr = [...prev];
+          arr[idx] = payload;
+          return payload.isDefault ? arr.map(t => t.id === payload.id ? t : { ...t, isDefault: false }) : arr;
+        }
+        return payload.isDefault 
+          ? [payload, ...prev.map(t => ({ ...t, isDefault: false }))] 
+          : [...prev, payload];
+      });
+
+      await saveMusicTrackR2(payload);
+      triggerToast(editingMusic ? `Updated song "${musicForm.title}"! 🎵` : `Added "${musicForm.title}" to Squad Playlist! 🚀`);
+      setEditingMusic(null);
+      setMusicForm({
+        title: '',
+        titleTamil: '',
+        artist: '',
+        description: '',
+        audioUrl: '',
+        coverPhoto: '',
+        duration: '',
+        isDefault: false
+      });
+    } catch (err) {
+      triggerToast(`Music save failed: ${err.message}`);
+    }
+  };
+
+  const handleDeleteMusic = async (trackId, title) => {
+    if (window.confirm(`Delete song "${title || 'this track'}" from the squad playlist?`)) {
+      setMusicTracks(prev => prev.filter(t => t.id !== trackId));
+      triggerToast(`Song removed from playlist 🗑️`);
+      deleteMusicTrackR2(trackId).catch(err => triggerToast(`Delete error: ${err.message}`));
+    }
+  };
+
 
 
   // R2 Direct File Upload
@@ -1420,6 +1542,12 @@ export default function AdminPortal({ onExit, currentUser }) {
               <Calendar size={18} /> Events & Trips ({events.length})
             </button>
             <button
+              className={`admin-nav-tab ${activeTab === 'music' ? 'active' : ''}`}
+              onClick={() => setActiveTab('music')}
+            >
+              <Music size={18} /> Music Playlist ({musicTracks.length})
+            </button>
+            <button
               className={`admin-nav-tab ${activeTab === 'r2' ? 'active' : ''}`}
               onClick={() => setActiveTab('r2')}
             >
@@ -1511,6 +1639,17 @@ export default function AdminPortal({ onExit, currentUser }) {
                   <h3 className="admin-stat-number">{events.length}</h3>
                   <p className="admin-stat-label">Scheduled Meetups</p>
                   <span className="admin-stat-meta">Roadtrips & Gatherings</span>
+                </div>
+              </div>
+
+              <div className="admin-stat-card" onClick={() => setActiveTab('music')} style={{ cursor: 'pointer' }}>
+                <div className="admin-stat-icon-wrap from-indigo">
+                  <Music size={24} />
+                </div>
+                <div>
+                  <h3 className="admin-stat-number">{musicTracks.length}</h3>
+                  <p className="admin-stat-label">Music Playlist</p>
+                  <span className="admin-stat-meta">Squad Songs & Anthem Audio</span>
                 </div>
               </div>
 
@@ -2101,6 +2240,128 @@ export default function AdminPortal({ onExit, currentUser }) {
                       <h3 className="admin-card-title">{ev.title}</h3>
                       <p className="admin-card-loc">📍 {ev.location}</p>
                       <p className="admin-card-desc">{ev.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 5. MUSIC PLAYLIST TAB */}
+          {activeTab === 'music' && (
+            <div className="admin-section-block">
+              <div className="admin-section-header">
+                <div>
+                  <h2 className="admin-section-title">Music Playlist Manager 🎵</h2>
+                  <p className="admin-section-sub">
+                    Upload squad songs, assign album cover art, add titles & descriptions, and sync live to Cloudflare R2 and the Spotify-style player ({musicTracks.length} tracks).
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingMusic(null);
+                    setMusicForm({
+                      title: '',
+                      titleTamil: '',
+                      artist: '',
+                      description: '',
+                      audioUrl: '',
+                      coverPhoto: '',
+                      duration: '',
+                      isDefault: musicTracks.length === 0
+                    });
+                    setIsMusicModalOpen(true);
+                  }}
+                  className="admin-primary-btn"
+                >
+                  <Plus size={16} /> Add New Song
+                </button>
+              </div>
+
+              <div className="admin-cards-grid">
+                {musicTracks.map((track, idx) => (
+                  <div key={track.id || idx} className="admin-card">
+                    <div className="admin-card-header" style={{ position: 'relative' }}>
+                      <div className="admin-card-img-wrap" style={{ height: '170px', overflow: 'hidden', borderRadius: '14px' }}>
+                        <img
+                          src={track.coverPhoto || '/audio/cover-default.jpg'}
+                          alt={track.title}
+                          className="admin-card-img"
+                          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                        />
+                      </div>
+                      {track.isDefault && (
+                        <span style={{
+                          position: 'absolute',
+                          top: '10px',
+                          left: '10px',
+                          background: 'linear-gradient(135deg, #f59e0b 0%, #ec4899 100%)',
+                          color: '#fff',
+                          fontSize: '0.72rem',
+                          fontWeight: '800',
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                          letterSpacing: '0.04em'
+                        }}>
+                          ★ DEFAULT ANTHEM
+                        </span>
+                      )}
+                      <div className="admin-card-actions">
+                        <button
+                          onClick={() => {
+                            setEditingMusic(track);
+                            setMusicForm({
+                              title: track.title || '',
+                              titleTamil: track.titleTamil || '',
+                              artist: track.artist || '',
+                              description: track.description || '',
+                              audioUrl: track.audioUrl || '',
+                              coverPhoto: track.coverPhoto || '',
+                              duration: track.duration || '',
+                              isDefault: Boolean(track.isDefault)
+                            });
+                            setIsMusicModalOpen(true);
+                          }}
+                          className="admin-action-btn edit"
+                          title="Edit Track"
+                        >
+                          <Edit3 size={15} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMusic(track.id, track.title)}
+                          className="admin-action-btn delete"
+                          title="Delete Track"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="admin-card-body" style={{ padding: '14px 16px' }}>
+                      <h3 className="admin-card-title" style={{ fontSize: '1.05rem', fontWeight: '700', marginBottom: '2px' }}>
+                        {track.title}
+                      </h3>
+                      {track.titleTamil && (
+                        <span style={{ color: '#ffd166', fontSize: '0.88rem', fontWeight: '600', display: 'block', marginBottom: '4px' }}>
+                          {track.titleTamil}
+                        </span>
+                      )}
+                      <p className="admin-card-desc" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '8px', lineHeight: '1.4' }}>
+                        {track.artist || 'Natpe Thunai'} {track.description ? `• ${track.description}` : ''}
+                      </p>
+
+                      {/* Mini Audio Preview */}
+                      {track.audioUrl && (
+                        <div style={{ marginTop: '10px' }}>
+                          <audio
+                            controls
+                            src={track.audioUrl}
+                            style={{ width: '100%', height: '34px', borderRadius: '8px' }}
+                            preload="none"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -3556,6 +3817,191 @@ export default function AdminPortal({ onExit, currentUser }) {
                 </button>
                 <button type="submit" className="admin-primary-btn">
                   {editingEvent ? 'Save Changes' : 'Save Event'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Music Playlist Modal */}
+      {isMusicModalOpen && (
+        <div className="admin-modal-backdrop">
+          <div className="admin-modal-card">
+            <div className="admin-modal-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <span className="admin-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(29, 185, 84, 0.15)', color: '#1db954', border: '1px solid rgba(29, 185, 84, 0.3)', marginBottom: '6px' }}>
+                  <Music size={12} />
+                  <span>SPOTIFY &amp; LIVE R2 STREAMING</span>
+                </span>
+                <h2 className="admin-modal-title" style={{ margin: 0 }}>
+                  {editingMusic ? 'Edit Track Details' : 'Add Song to Squad Playlist'}
+                </h2>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsMusicModalOpen(false)} 
+                className="admin-modal-close-btn"
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMusic} className="admin-modal-form">
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Song Title (English) *</label>
+                  <input
+                    type="text"
+                    value={musicForm.title}
+                    onChange={(e) => setMusicForm({ ...musicForm, title: e.target.value })}
+                    placeholder="e.g. Sonthamulla Vaazhkai"
+                    required
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Song Title (Tamil / Native Script)</label>
+                  <input
+                    type="text"
+                    value={musicForm.titleTamil}
+                    onChange={(e) => setMusicForm({ ...musicForm, titleTamil: e.target.value })}
+                    placeholder="e.g. சொந்தமுள்ள வாழ்க்கை"
+                  />
+                </div>
+              </div>
+
+              <div className="admin-form-row">
+                <div className="admin-input-group">
+                  <label>Artist / Movie / Squad Note</label>
+                  <input
+                    type="text"
+                    value={musicForm.artist}
+                    onChange={(e) => setMusicForm({ ...musicForm, artist: e.target.value })}
+                    placeholder="e.g. Anirudh Ravichander / Natpe Thunai"
+                  />
+                </div>
+                <div className="admin-input-group">
+                  <label>Duration (Optional)</label>
+                  <input
+                    type="text"
+                    value={musicForm.duration}
+                    onChange={(e) => setMusicForm({ ...musicForm, duration: e.target.value })}
+                    placeholder="e.g. 4:12"
+                  />
+                </div>
+              </div>
+
+              {/* Audio File Upload & Cloudflare R2 Streaming */}
+              <div className="admin-photo-upload-section" style={{ background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <label className="admin-field-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                    <Music size={15} style={{ color: '#1db954' }} /> Audio File (MP3, M4A, WAV, FLAC, OGG) *
+                  </span>
+                  {musicAudioUploading && (
+                    <span style={{ fontSize: '0.8rem', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Loader2 size={13} className="spin" /> Uploading to R2 ({musicUploadProgress}%)
+                    </span>
+                  )}
+                </label>
+
+                <div className="admin-photo-picker-controls" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <label className="admin-file-pick-btn" style={{ background: 'linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(20, 83, 45, 0.3))', borderColor: 'rgba(29, 185, 84, 0.4)' }}>
+                    <Upload size={16} style={{ color: '#1db954' }} />
+                    <span>{musicAudioUploading ? `Uploading audio (${musicUploadProgress}%)...` : 'Upload Song File from Computer'}</span>
+                    <input
+                      type="file"
+                      accept="audio/*,audio/mpeg,audio/mp3,audio/wav,audio/m4a,audio/aac,audio/ogg,audio/flac"
+                      onChange={handleMusicAudioUpload}
+                      disabled={musicAudioUploading}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+
+                  <div className="admin-input-group" style={{ margin: 0 }}>
+                    <input
+                      type="text"
+                      value={musicForm.audioUrl}
+                      onChange={(e) => setMusicForm({ ...musicForm, audioUrl: e.target.value })}
+                      placeholder={`Direct audio URL (e.g. ${R2_BASE}/music/... or https://...)`}
+                      required
+                    />
+                  </div>
+
+                  {musicForm.audioUrl && (
+                    <div style={{ marginTop: '4px', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '6px 10px' }}>
+                      <audio controls src={musicForm.audioUrl} style={{ width: '100%', height: '32px' }} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Cover Artwork Upload */}
+              <div className="admin-photo-upload-section" style={{ marginTop: '14px', background: 'rgba(255,255,255,0.03)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <label className="admin-field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, marginBottom: '8px' }}>
+                  <Camera size={15} style={{ color: '#f59e0b' }} /> Album Cover Artwork
+                </label>
+                <div className="admin-photo-picker-row" style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <div className="admin-photo-preview-box" style={{ width: '64px', height: '64px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    {musicForm.coverPhoto ? (
+                      <img src={musicForm.coverPhoto} alt="Cover Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <ImageIcon size={24} style={{ color: '#64748b' }} />
+                    )}
+                  </div>
+                  <div className="admin-photo-picker-controls" style={{ flex: 1 }}>
+                    <label className="admin-file-pick-btn">
+                      <Camera size={15} />
+                      <span>{musicPhotoUploading ? 'Uploading artwork...' : 'Choose Cover Photo'}</span>
+                      <input
+                        type="file"
+                        accept="image/*,image/heic,image/heif"
+                        onChange={handleMusicPhotoUpload}
+                        disabled={musicPhotoUploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      value={musicForm.coverPhoto}
+                      onChange={(e) => setMusicForm({ ...musicForm, coverPhoto: e.target.value })}
+                      placeholder="Or paste artwork URL..."
+                      style={{ marginTop: '8px', width: '100%' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-input-group" style={{ marginTop: '14px' }}>
+                <label>Story / Lyrics / Squad Memory Note</label>
+                <textarea
+                  rows="2"
+                  value={musicForm.description}
+                  onChange={(e) => setMusicForm({ ...musicForm, description: e.target.value })}
+                  placeholder="Why this song is special for the squad..."
+                />
+              </div>
+
+              {/* Default Anthem Flag */}
+              <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', borderRadius: '8px', background: musicForm.isDefault ? 'rgba(29, 185, 84, 0.15)' : 'rgba(255,255,255,0.02)', border: musicForm.isDefault ? '1px solid rgba(29, 185, 84, 0.4)' : '1px solid rgba(255,255,255,0.06)' }}>
+                <input
+                  type="checkbox"
+                  id="musicDefaultCheckbox"
+                  checked={!!musicForm.isDefault}
+                  onChange={(e) => setMusicForm({ ...musicForm, isDefault: e.target.checked })}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#1db954' }}
+                />
+                <label htmlFor="musicDefaultCheckbox" style={{ margin: 0, cursor: 'pointer', fontSize: '0.88rem', color: '#f1f5f9' }}>
+                  <strong>Set as Default Anthem</strong> — plays automatically when visitors arrive at the website.
+                </label>
+              </div>
+
+              <div className="admin-modal-actions" style={{ marginTop: '20px' }}>
+                <button type="button" onClick={() => setIsMusicModalOpen(false)} className="admin-cancel-btn">
+                  Cancel
+                </button>
+                <button type="submit" className="admin-primary-btn" disabled={musicAudioUploading || musicPhotoUploading} style={{ background: '#1db954', borderColor: '#1db954' }}>
+                  {editingMusic ? 'Save Changes' : 'Publish Song'}
                 </button>
               </div>
             </form>

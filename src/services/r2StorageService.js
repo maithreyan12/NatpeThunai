@@ -5,22 +5,24 @@
 
 export const R2_BUDGET_LIMITS = {
   MAX_STORAGE_BYTES: 9 * 1024 * 1024 * 1024, // 9 GB safe ceiling
-  MAX_IMAGE_BYTES:   10 * 1024 * 1024,        // 10 MB per image
-  MAX_VIDEO_BYTES:   100 * 1024 * 1024,        // 100 MB per video
+  MAX_IMAGE_BYTES:   15 * 1024 * 1024,        // 15 MB per image
+  MAX_AUDIO_BYTES:   60 * 1024 * 1024,        // 60 MB per song / audio
+  MAX_VIDEO_BYTES:   100 * 1024 * 1024,       // 100 MB per video
 };
 
 const ALLOWED_TYPES = {
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml', 'image/heic', 'image/heif'],
   video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg'],
+  audio: ['audio/mpeg', 'audio/mp3', 'audio/m4a', 'audio/x-m4a', 'audio/wav', 'audio/aac', 'audio/ogg', 'audio/webm', 'audio/flac'],
 };
 
 /**
- * Upload an image or video file to Cloudflare R2.
+ * Upload an image, audio, or video file to Cloudflare R2.
  * Automatically converts iPhone HEIC/HEIF to universally supported JPEG.
  * Requests a presigned URL from /api/r2/presign, then streams the file directly.
  *
  * @param {File} file         - Browser File object
- * @param {string} category   - 'members' | 'memories' | 'posts' | 'reels'
+ * @param {string} category   - 'members' | 'memories' | 'posts' | 'reels' | 'music'
  * @param {Function} onProgress - Callback(percentage 0-100)
  * @returns {Promise<{publicUrl, objectKey, fileType, sizeBytes}>}
  */
@@ -52,15 +54,25 @@ export async function uploadToR2WithGuardrails(file, category = 'members', onPro
     }
   }
 
+  const isAudio = ALLOWED_TYPES.audio.includes(activeFile.type) || 
+                  activeFile.type.startsWith('audio/') || 
+                  /\.(mp3|m4a|wav|aac|ogg|flac)$/i.test(activeFile.name);
   const isImage = ALLOWED_TYPES.image.includes(activeFile.type) || activeFile.type.startsWith('image/') || isHeic;
   const isVideo = ALLOWED_TYPES.video.includes(activeFile.type) || activeFile.type.startsWith('video/');
 
-  if (!isImage && !isVideo) {
-    throw new Error(`Unsupported file type: ${activeFile.type || 'unknown'}. Only images and videos are allowed.`);
+  if (!isImage && !isVideo && !isAudio) {
+    throw new Error(`Unsupported file type: ${activeFile.type || 'unknown'}. Only images, audio, and videos are allowed.`);
   }
 
-  const fileType = isImage ? 'image' : 'video';
-  const maxSize  = isImage ? R2_BUDGET_LIMITS.MAX_IMAGE_BYTES : R2_BUDGET_LIMITS.MAX_VIDEO_BYTES;
+  let fileType = 'image';
+  let maxSize = R2_BUDGET_LIMITS.MAX_IMAGE_BYTES;
+  if (isAudio) {
+    fileType = 'audio';
+    maxSize = R2_BUDGET_LIMITS.MAX_AUDIO_BYTES;
+  } else if (isVideo) {
+    fileType = 'video';
+    maxSize = R2_BUDGET_LIMITS.MAX_VIDEO_BYTES;
+  }
 
   if (activeFile.size > maxSize) {
     const maxMB  = (maxSize / (1024 * 1024)).toFixed(0);

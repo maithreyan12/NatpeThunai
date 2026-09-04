@@ -39,6 +39,7 @@ export { default as AdminPortal } from './admin/AdminPortal';
 export { default as InstagramIcon } from './ui/InstagramIcon';
 export { default as InfiniteSpiral } from './ui/InfiniteSpiral';
 export { default as BackgroundMusicPlayer } from './ui/BackgroundMusicPlayer';
+export { default as SpotifyMusicModal } from './music/SpotifyMusicModal';
 export { 
   CreatePostModal, 
   AddEventModal, 

@@ -23,6 +23,7 @@ export const COLLECTIONS = {
   JOURNEY:  'journey',
   SPIRAL:   'spiral',
   REELS:    'reels',
+  MUSIC:    'music',
 };
 
 
@@ -287,6 +288,7 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
     seedCollection(COLLECTIONS.EVENTS, initialEvents.filter(e => !isBannedEntity(e))),
     seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES.filter(j => !isBannedEntity(j))),
     seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS.filter(s => !isBannedEntity(s))),
+    seedCollection(COLLECTIONS.MUSIC, INITIAL_MUSIC_TRACKS),
   ]);
 }
 
@@ -859,6 +861,86 @@ export async function deleteReelR2(reelId) {
   // ⚡ Instant optimistic cache update
   cache.set(COLLECTIONS.REELS, updated);
   await callAPI({ collection: COLLECTIONS.REELS, action: 'delete', id: reelId });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MUSIC PLAYLIST COLLECTION — Cloudflare R2 Live Audio Database
+// ═══════════════════════════════════════════════════════════════════
+
+export const INITIAL_MUSIC_TRACKS = [
+  {
+    id: 'track-1',
+    title: 'Sonthamulla Vaazhkai',
+    titleTamil: 'சொந்தமுள்ள வாழ்க்கை',
+    artist: 'Hiphop Tamizha • Natpe Thunai Anthem',
+    description: 'The soul, laughter and official anthem of our lifelong friendship sanctuary.',
+    audioUrl: '/audio/sonthamulla-vaazhkai.m4a',
+    coverPhoto: r2Photo('farish.jpg'),
+    duration: '4:18',
+    isDefault: true,
+    createdAt: '2024-01-01T00:00:00.000Z'
+  }
+];
+
+export function subscribeToMusicR2(callback) {
+  const cacheKey = COLLECTIONS.MUSIC;
+  const cached = cache.get(cacheKey);
+  if (cached && cached.length > 0) {
+    callback(cached.filter(x => !isBannedEntity(x)));
+  } else {
+    callback(INITIAL_MUSIC_TRACKS);
+  }
+
+  const refresh = async () => {
+    try {
+      const data = await fetchFromCDN(cacheKey);
+      if (Array.isArray(data) && data.length > 0) {
+        const clean = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, clean);
+        callback(clean);
+      }
+    } catch (err) {
+      console.warn('[R2 DB] Music fetch warning:', err.message);
+    }
+  };
+
+  refresh();
+  return setupSmartPoll(refresh, 60000);
+}
+
+export async function saveMusicTrackR2(trackData) {
+  const id = trackData.id || `track-${Date.now()}`;
+  const track = {
+    id,
+    title: trackData.title || 'Untitled Track',
+    titleTamil: trackData.titleTamil || '',
+    artist: trackData.artist || 'Natpe Thunai Squad',
+    description: trackData.description || '',
+    audioUrl: trackData.audioUrl || '',
+    coverPhoto: trackData.coverPhoto || r2Photo('farish.jpg'),
+    duration: trackData.duration || '3:30',
+    isDefault: Boolean(trackData.isDefault),
+    updatedAt: new Date().toISOString()
+  };
+
+  const current = cache.get(COLLECTIONS.MUSIC) || INITIAL_MUSIC_TRACKS;
+  const existingIdx = current.findIndex(t => t.id === track.id);
+  const updated = existingIdx >= 0
+    ? current.map(t => t.id === track.id ? track : (track.isDefault ? { ...t, isDefault: false } : t))
+    : (track.isDefault ? [track, ...current.map(t => ({ ...t, isDefault: false }))] : [track, ...current]);
+
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.MUSIC, updated);
+  await callAPI({ collection: COLLECTIONS.MUSIC, action: 'upsert', item: track });
+  return track;
+}
+
+export async function deleteMusicTrackR2(trackId) {
+  const current = cache.get(COLLECTIONS.MUSIC) || INITIAL_MUSIC_TRACKS;
+  const updated = current.filter(t => t.id !== trackId);
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.MUSIC, updated.length > 0 ? updated : INITIAL_MUSIC_TRACKS);
+  await callAPI({ collection: COLLECTIONS.MUSIC, action: 'delete', id: trackId });
 }
 
 // Force refresh cache for a specific collection (call after admin write)

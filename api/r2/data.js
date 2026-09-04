@@ -21,7 +21,7 @@ function getR2Client() {
   });
 }
 
-const ALLOWED = new Set(['members', 'memories', 'posts', 'events', 'journey', 'spiral', 'reels']);
+const ALLOWED = new Set(['members', 'memories', 'posts', 'events', 'journey', 'spiral', 'reels', 'music']);
 const BUCKET = process.env.R2_BUCKET_NAME || 'natpethunai';
 
 

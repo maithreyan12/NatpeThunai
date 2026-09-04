@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   Images,
-  Shield
+  Shield,
+  Music
 } from 'lucide-react';
 import { signInWithGoogle, logOut, isAuthorizedAdmin } from '../../firebase';
 import { r2Photo } from '../../services';
@@ -21,10 +22,13 @@ import './Navbar.css';
 export default function Navbar({
   activeSection,
   onNavigate,
+  onOpenMusic,
+  isMusicActive,
   theme,
   onToggleTheme,
   currentUser,
-  onOpenSignIn
+  onOpenSignIn,
+  onOpenAdmin
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -72,7 +76,11 @@ export default function Navbar({
   }, [mobileMenuOpen]);
 
   const handleNavClick = (section) => {
-    onNavigate(section);
+    if (section === 'music') {
+      if (onOpenMusic) onOpenMusic();
+    } else {
+      onNavigate(section);
+    }
     setMobileMenuOpen(false);
   };
 
@@ -94,16 +102,15 @@ export default function Navbar({
   // Determine active states for the core tabs
   const isSquadActive = activeSection === 'members' || activeSection === 'journey';
   const isMemoriesActive = activeSection === 'album-teaser' || activeSection === 'reel';
+  const isMusicCurrent = isMusicActive || activeSection === 'music';
 
   const navLinks = [
     { id: 'hero', label: 'Home', icon: Sparkles, isActive: activeSection === 'hero' },
     { id: 'story', label: 'Story', icon: Heart, isActive: activeSection === 'story' },
     { id: 'members', label: 'Members', icon: Users, isActive: isSquadActive },
     { id: 'album-teaser', label: 'Memories', icon: Film, isActive: isMemoriesActive },
+    { id: 'music', label: 'Music', icon: Music, isActive: isMusicCurrent },
   ];
-
-
-
 
   return (
     <>
@@ -133,7 +140,7 @@ export default function Navbar({
               <button
                 key={id}
                 className={`nav-item-btn ${isActive ? 'active' : ''}`}
-                onClick={() => onNavigate(id)}
+                onClick={() => handleNavClick(id)}
               >
                 {label}
               </button>

@@ -3,15 +3,26 @@ import { Play, Pause, Volume2, VolumeX, Music, Sparkles } from 'lucide-react';
 import brandLogo from '../../assets/brand-logo.png';
 import './BackgroundMusicPlayer.css';
 
-const AUDIO_SRC = '/audio/sonthamulla-vaazhkai.m4a';
-const SONG_TITLE_TAMIL = 'சொந்தமுள்ள வாழ்க்கை';
-const SONG_TITLE_ENG = 'Sonthamulla Vaazhkkai';
-const SONG_SUBTITLE = 'நட்பே துணை Special Song';
+const DEFAULT_AUDIO_SRC = '/audio/sonthamulla-vaazhkai.m4a';
+const DEFAULT_SONG_TITLE_TAMIL = 'சொந்தமுள்ள வாழ்க்கை';
+const DEFAULT_SONG_TITLE_ENG = 'Sonthamulla Vaazhkai';
+const DEFAULT_SONG_SUBTITLE = 'நட்பே துணை Special Song';
 
-export default function BackgroundMusicPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(85);
+export default function BackgroundMusicPlayer({
+  activeTrack,
+  isPlaying: externalIsPlaying,
+  isMuted: externalIsMuted,
+  volume: externalVolume,
+  onTogglePlay: externalTogglePlay,
+  onToggleMute: externalToggleMute,
+  onVolumeChange: externalVolumeChange,
+  onOpenSpotifyModal,
+}) {
+  const isControlled = externalTogglePlay !== undefined;
+
+  const [internalIsPlaying, setInternalIsPlaying] = useState(false);
+  const [internalIsMuted, setInternalIsMuted] = useState(false);
+  const [internalVolume, setInternalVolume] = useState(85);
   const [hasStarted, setHasStarted] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showInteractionPrompt, setShowInteractionPrompt] = useState(true);
@@ -21,8 +32,18 @@ export default function BackgroundMusicPlayer() {
   const wasPlayingBeforeReelRef = useRef(false);
   const manuallyPausedByUserRef = useRef(false);
 
-  // Initialize native HTML5 audio with autoplay
+  const isPlaying = isControlled ? externalIsPlaying : internalIsPlaying;
+  const isMuted = isControlled ? externalIsMuted : internalIsMuted;
+  const volume = isControlled ? externalVolume : internalVolume;
+
+  const songTitleTamil = activeTrack?.titleTamil || DEFAULT_SONG_TITLE_TAMIL;
+  const songTitleEng = activeTrack?.title || DEFAULT_SONG_TITLE_ENG;
+  const songSubtitle = activeTrack?.artist || DEFAULT_SONG_SUBTITLE;
+  const coverPhoto = activeTrack?.coverPhoto || brandLogo;
+
+  // Initialize native HTML5 audio with autoplay only when uncontrolled
   useEffect(() => {
+    if (isControlled) return;
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -33,21 +54,21 @@ export default function BackgroundMusicPlayer() {
     const tryAutoplay = async () => {
       try {
         await audio.play();
-        setIsPlaying(true);
+        setInternalIsPlaying(true);
         setHasStarted(true);
         setShowInteractionPrompt(false);
       } catch (err) {
         // Browser blocked audio autoplay before user interaction
         console.log('[Audio Player] Waiting for user gesture to unlock audio:', err.message);
-        setIsPlaying(false);
+        setInternalIsPlaying(false);
       }
     };
 
     tryAutoplay();
 
     // Event listeners on native audio
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => setInternalIsPlaying(true);
+    const handlePause = () => setInternalIsPlaying(false);
     const handleEnded = () => {
       audio.currentTime = 0;
       audio.play().catch(() => {});
@@ -62,7 +83,7 @@ export default function BackgroundMusicPlayer() {
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [isControlled]);
 
   // Seamless fallback: start audio on FIRST user interaction (tap, click, scroll, keydown)
   useEffect(() => {
@@ -199,66 +220,70 @@ export default function BackgroundMusicPlayer() {
   }, []);
 
   // Toggle Play / Pause
-  const togglePlay = async () => {
+  const togglePlay = isControlled ? externalTogglePlay : () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
-      manuallyPausedByUserRef.current = true;
-      wasPlayingBeforeReelRef.current = false;
       audio.pause();
-      setIsPlaying(false);
+      setInternalIsPlaying(false);
+      manuallyPausedByUserRef.current = true;
     } else {
-      try {
-        manuallyPausedByUserRef.current = false;
-        await audio.play();
-        setIsPlaying(true);
+      audio.play().then(() => {
+        setInternalIsPlaying(true);
         setHasStarted(true);
         setShowInteractionPrompt(false);
-      } catch (err) {
+        manuallyPausedByUserRef.current = false;
+      }).catch(err => {
         console.warn('[Audio Player] Play error:', err);
-      }
+      });
     }
   };
 
   // Toggle Mute
-  const toggleMute = () => {
+  const toggleMute = isControlled ? externalToggleMute : () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isMuted) {
       audio.muted = false;
-      setIsMuted(false);
+      setInternalIsMuted(false);
     } else {
       audio.muted = true;
-      setIsMuted(true);
+      setInternalIsMuted(true);
     }
   };
 
   // Adjust Volume
   const handleVolumeChange = (e) => {
     const val = parseInt(e.target.value, 10);
-    setVolume(val);
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = val / 100;
-      if (val > 0 && isMuted) {
-        audio.muted = false;
-        setIsMuted(false);
+    if (isControlled) {
+      externalVolumeChange(val);
+    } else {
+      setInternalVolume(val);
+      const audio = audioRef.current;
+      if (audio) {
+        audio.volume = val / 100;
+        if (val > 0 && isMuted) {
+          audio.muted = false;
+          setInternalIsMuted(false);
+        }
       }
     }
   };
 
   return (
     <>
-      {/* Pure HTML5 Native Audio Element — ZERO Video */}
-      <audio
-        ref={audioRef}
-        src={AUDIO_SRC}
-        preload="auto"
-        loop
-        playsInline
-      />
+      {/* Uncontrolled fallback native audio element */}
+      {!isControlled && (
+        <audio
+          ref={audioRef}
+          src={DEFAULT_AUDIO_SRC}
+          preload="auto"
+          loop
+          playsInline
+        />
+      )}
 
       {/* Ambient Autoplay Prompt Pill (Disappears once music plays) */}
       {showInteractionPrompt && !isPlaying && (
@@ -270,7 +295,7 @@ export default function BackgroundMusicPlayer() {
         >
           <div className="prompt-pulse-dot" />
           <span className="prompt-text">
-            🎵 Tap to play <strong>{SONG_TITLE_TAMIL}</strong>
+            🎵 Tap to play <strong>{songTitleTamil}</strong>
           </span>
           <button
             type="button"
@@ -299,15 +324,23 @@ export default function BackgroundMusicPlayer() {
         <button
           type="button"
           className="bg-music-vinyl-btn"
-          onClick={() => setIsCollapsed(prev => !prev)}
-          title={isCollapsed ? 'Expand music player' : 'Collapse music player'}
-          aria-label={isCollapsed ? 'Expand music player' : 'Collapse music player'}
+          onClick={() => {
+            if (onOpenSpotifyModal) onOpenSpotifyModal();
+            else setIsCollapsed(prev => !prev);
+          }}
+          title={onOpenSpotifyModal ? "Open Spotify Music Player" : (isCollapsed ? 'Expand music player' : 'Collapse music player')}
+          aria-label="Open Spotify Music Player"
         >
           <div className={`vinyl-disc ${isPlaying ? 'spinning' : ''}`}>
             <div className="vinyl-groove-ring" />
             <div className="vinyl-groove-ring-inner" />
             <div className="vinyl-center-label">
-              <img src={brandLogo} alt="Natpe Thunai" className="vinyl-logo-img" />
+              <img 
+                src={coverPhoto} 
+                alt="Album Cover" 
+                className="vinyl-logo-img" 
+                onError={(e) => { e.currentTarget.src = brandLogo; }}
+              />
             </div>
           </div>
           {isPlaying && (
@@ -319,10 +352,15 @@ export default function BackgroundMusicPlayer() {
         {!isCollapsed && (
           <div className="bg-music-details">
             {/* Song Meta Information */}
-            <div className="bg-music-info">
+            <div 
+              className="bg-music-info"
+              onClick={onOpenSpotifyModal}
+              style={{ cursor: onOpenSpotifyModal ? 'pointer' : 'default' }}
+              title={onOpenSpotifyModal ? "Open Spotify Player" : undefined}
+            >
               <div className="bg-music-title-row">
-                <span className="bg-music-badge">SONG</span>
-                <span className="bg-music-name-tamil">{SONG_TITLE_TAMIL}</span>
+                <span className="bg-music-badge">MUSIC</span>
+                <span className="bg-music-name-tamil">{songTitleTamil}</span>
                 {isPlaying && (
                   <div className="bg-music-soundwave" aria-hidden="true">
                     <span className="bar bar-1" />
@@ -333,7 +371,7 @@ export default function BackgroundMusicPlayer() {
                 )}
               </div>
               <div className="bg-music-artist">
-                {SONG_TITLE_ENG} • {SONG_SUBTITLE}
+                {songTitleEng} • {songSubtitle}
               </div>
             </div>
 

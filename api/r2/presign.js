@@ -37,8 +37,9 @@ export default async function handler(req, res) {
     const datePrefix  = new Date().toISOString().slice(0, 7);
     const uniqueToken = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const safeName    = (filename || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-    const objectKey   = `${category}/${datePrefix}/${uniqueToken}_${safeName}`;
-    const contentType = mimeType || (filename?.match(/\.(mp4|webm|mov)$/i) ? 'video/mp4' : 'image/jpeg');
+    const isAudioExt = filename?.match(/\.(mp3|m4a|wav|aac|ogg|flac)$/i);
+    const isVideoExt = filename?.match(/\.(mp4|webm|mov)$/i);
+    const contentType = mimeType || (isVideoExt ? 'video/mp4' : (isAudioExt ? 'audio/mpeg' : 'image/jpeg'));
 
     const command = new PutObjectCommand({
       Bucket: bucketName,
@@ -52,12 +53,16 @@ export default async function handler(req, res) {
       ? `${publicDomain}/${objectKey}`
       : uploadUrl.split('?')[0];
 
+    let fileType = 'image';
+    if (contentType.startsWith('video/')) fileType = 'video';
+    else if (contentType.startsWith('audio/')) fileType = 'audio';
+
     return res.status(200).json({
       success: true,
       uploadUrl,
       publicUrl,
       objectKey,
-      fileType: contentType.startsWith('video/') ? 'video' : 'image',
+      fileType,
     });
   } catch (err) {
     console.error('[R2 Presign Error]', err);

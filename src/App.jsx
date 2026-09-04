@@ -15,7 +15,8 @@ import {
   LightboxModal, 
   SignInModal,
   AdminPortal,
-  BackgroundMusicPlayer
+  BackgroundMusicPlayer,
+  SpotifyMusicModal
 } from './components';
 import {
   subscribeToMembersR2,
@@ -23,11 +24,13 @@ import {
   subscribeToReelsR2,
   subscribeToPostsR2,
   subscribeToEventsR2,
+  subscribeToMusicR2,
   saveMemoryR2,
   savePostR2,
   saveEventR2,
   bootR2Database,
 } from './services/r2Database';
+import { useMusicEngine } from './hooks/useMusicEngine';
 
 import { getStoredMembers, reactToMemory, addCommentToMemory, likePost, toggleEventRsvp } from './services';
 
@@ -56,11 +59,15 @@ export default function App() {
   });
 
   // Data States — R2 will populate them live
-  const [members, setMembers]   = useState(getStoredMembers());
-  const [memories, setMemories] = useState([]);
-  const [posts, setPosts]       = useState([]);
-  const [events, setEvents]     = useState([]);
-  const [reels, setReels]       = useState([]);
+  const [members, setMembers]       = useState(getStoredMembers());
+  const [memories, setMemories]     = useState([]);
+  const [posts, setPosts]           = useState([]);
+  const [events, setEvents]         = useState([]);
+  const [reels, setReels]           = useState([]);
+  const [musicTracks, setMusicTracks] = useState([]);
+
+  // Unified Music Engine (shared by floating dock and Spotify modal)
+  const music = useMusicEngine(musicTracks);
 
 
   // Filter States
@@ -122,6 +129,9 @@ export default function App() {
       if (window.location.hash === '#album' || window.location.hash === '#/album') {
         setIsAlbumOpen(true);
       }
+      if (window.location.hash === '#music' || window.location.hash === '#/music') {
+        music.openModal();
+      }
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -130,7 +140,7 @@ export default function App() {
       window.removeEventListener('popstate', handleUrlChange);
       window.removeEventListener('hashchange', handleUrlChange);
     };
-  }, []);
+  }, [music.openModal]);
 
   const navigateToAdmin = () => {
     window.history.pushState(null, '', '/admin');
@@ -161,12 +171,14 @@ export default function App() {
     const unsubReels     = subscribeToReelsR2(setReels);
     const unsubPosts     = subscribeToPostsR2(setPosts);
     const unsubEvents    = subscribeToEventsR2(setEvents);
+    const unsubMusic     = subscribeToMusicR2(setMusicTracks);
     return () => {
       unsubMembers();
       unsubMemories();
       unsubReels();
       unsubPosts();
       unsubEvents();
+      unsubMusic();
     };
   }, []);
 
@@ -304,6 +316,8 @@ export default function App() {
       <Navbar 
         activeSection={activeSection} 
         onNavigate={scrollToSection}
+        onOpenMusic={music.openModal}
+        isMusicActive={music.isModalOpen}
         theme={theme}
         onToggleTheme={toggleTheme}
         currentUser={currentUser}
@@ -362,7 +376,36 @@ export default function App() {
       </main>
 
       {/* ── AMBIENT BACKGROUND SOUNDTRACK CONTROLLER ── */}
-      <BackgroundMusicPlayer />
+      <BackgroundMusicPlayer 
+        activeTrack={music.activeTrack}
+        isPlaying={music.isPlaying}
+        isMuted={music.isMuted}
+        volume={music.volume}
+        onTogglePlay={music.togglePlay}
+        onToggleMute={music.toggleMute}
+        onVolumeChange={music.setVolume}
+        onOpenSpotifyModal={music.openModal}
+      />
+
+      {/* ── SPOTIFY-STYLE MUSIC STUDIO MODAL ── */}
+      <SpotifyMusicModal
+        isOpen={music.isModalOpen}
+        onClose={music.closeModal}
+        tracks={music.tracks}
+        currentTrackIndex={music.currentTrackIndex}
+        isPlaying={music.isPlaying}
+        currentTime={music.currentTime}
+        duration={music.duration}
+        volume={music.volume}
+        isMuted={music.isMuted}
+        onTogglePlay={music.togglePlay}
+        onSeek={music.seekTo}
+        onSelectTrack={music.selectTrack}
+        onNextTrack={music.nextTrack}
+        onPrevTrack={music.prevTrack}
+        onVolumeChange={music.setVolume}
+        onToggleMute={music.toggleMute}
+      />
 
       {/* ── CORNER FLOATING MESSAGE & AI CHAT WIDGET ── */}
       <FloatingChatWidget onOpenSignIn={() => setIsSignInOpen(true)} />
