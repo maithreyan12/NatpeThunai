@@ -144,23 +144,23 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   // Explicit play/pause toggle that directly commands the HTML5 video element
   const togglePlay = (e) => {
     e?.stopPropagation?.();
-    setIsPlaying(prev => {
-      const nextState = !prev;
-      const vid = videoRef.current;
-      if (vid) {
-        if (nextState) {
-          vid.play().catch(() => {});
-        } else {
-          vid.pause();
-        }
+    const nextState = !isPlaying;
+    setIsPlaying(nextState);
+
+    const vid = videoRef.current;
+    if (vid) {
+      if (nextState) {
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
       }
-      window.dispatchEvent(
-        new CustomEvent('reel-state-change', {
-          detail: { isPlaying: nextState, inView: isInView }
-        })
-      );
-      return nextState;
-    });
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('reel-state-change', {
+        detail: { isPlaying: nextState }
+      })
+    );
   };
 
   const handlePrev = (e) => {
