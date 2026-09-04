@@ -4,7 +4,7 @@
 
 .floating-chat-root {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   right: 24px;
   z-index: 5000;
   font-family: var(--font-main, 'Plus Jakarta Sans', sans-serif);
@@ -487,15 +487,50 @@
   gap: 0.5rem;
 }
 
-@media (max-width: 480px) {
+/* ── Responsive Tablet Breakpoint (<= 768px) ── */
+@media (max-width: 768px) {
   .floating-chat-root {
-    bottom: 16px;
-    right: 16px;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    right: 18px;
   }
+}
+
+/* ── Responsive Mobile Breakpoint (<= 640px) ── */
+@media (max-width: 640px) {
+  .floating-chat-root {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    right: 14px;
+  }
+
+  .floating-chat-trigger-btn {
+    width: 3.15rem; /* ~50px */
+    height: 3.15rem;
+  }
+
   .floating-chat-popup {
-    bottom: 68px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     right: 0;
-    width: calc(100vw - 32px);
-    height: 75vh;
+    width: calc(100vw - 28px);
+    max-height: calc(100dvh - 90px);
+  }
+}
+
+/* ── Ultra-Compact Mobile Phones (<= 390px) ── */
+@media (max-width: 390px) {
+  .floating-chat-root {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    right: 10px;
+  }
+
+  .floating-chat-trigger-btn {
+    width: 2.85rem; /* ~45.6px */
+    height: 2.85rem;
+  }
+
+  .floating-chat-popup {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    right: 0;
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 80px);
   }
 }

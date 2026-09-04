@@ -40,7 +40,7 @@
 
 @media (max-width: 600px) {
   .toast-notification {
-    bottom: 80px;
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
     left: 20px;
     right: 20px;
     text-align: center;
