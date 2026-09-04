@@ -12,29 +12,32 @@
 
 .reel-theater-card {
   width: 100%;
-  max-width: 860px;
+  max-width: 900px;
   background: #000000;
-  border-radius: var(--radius-2xl);
+  border-radius: 34px;
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 25px 70px -10px rgba(0, 0, 0, 0.8), 0 0 50px rgba(99, 102, 241, 0.25);
   display: flex;
   flex-direction: column;
   position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.18);
   transition: max-width 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
 /* Portrait Card: authentic vertical mobile reel */
 .reel-theater-card.is-portrait {
   max-width: 440px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 40px rgba(99, 102, 241, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 36px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.75), 0 0 50px rgba(99, 102, 241, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Landscape Card: widescreen cinematic theater */
 .reel-theater-card.is-landscape {
-  max-width: 900px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 920px;
+  border-radius: 34px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), 0 0 45px rgba(99, 102, 241, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.18);
 }
 
 
@@ -94,8 +97,8 @@
 .reel-media-stage {
   position: relative;
   width: 100%;
-  height: 520px;
-  max-height: 80vh;
+  height: clamp(480px, 68vh, 640px);
+  max-height: 85vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,21 +106,22 @@
   cursor: pointer;
   user-select: none;
   overflow: hidden;
+  border-radius: inherit;
   transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reel-media-stage.stage-portrait {
-  height: clamp(520px, 72vh, 670px);
+  height: clamp(540px, 78vh, 720px);
   background: radial-gradient(circle at center, rgba(99, 102, 241, 0.22) 0%, rgba(15, 23, 42, 0.95) 70%, #000000 100%);
 }
 
 .reel-media-stage.stage-landscape {
-  height: clamp(380px, 50vw, 520px);
+  height: clamp(480px, 68vh, 640px);
   background: #000000;
 }
 
 .fullscreen-mode .reel-media-stage {
-  height: calc(100vh - 65px);
+  height: 100vh;
   max-height: 100vh;
 }
 
@@ -127,15 +131,16 @@
   width: 100%;
   height: 100%;
   animation: reelMediaFade 0.4s ease-out;
+  border-radius: inherit;
   z-index: 2;
 }
 
 .reel-media-element.media-portrait {
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .reel-media-element.media-landscape {
-  object-fit: contain;
+  object-fit: cover;
 }
 
 
@@ -193,108 +198,33 @@
   transform: scale(1.1);
 }
 
-/* Caption Overlay */
-.reel-caption-overlay {
+/* ── Center Pop Feedback Animation (Touch to Stop / Run) ── */
+.reel-center-feedback-pop {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
-  padding: 40px 24px 20px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  z-index: 6;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
   pointer-events: none;
+  z-index: 8;
+  animation: reelCenterPop 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.reel-caption-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 6px;
-}
-
-.reel-badge-year {
-  background: var(--accent-lavender);
-  color: white;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 0.72rem;
-}
-
-
-.reel-item-title {
-  font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 4px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.reel-item-desc {
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.85);
-  max-width: 600px;
-  line-height: 1.45;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-/* ── Bottom Bar Controls ── */
-.reel-controls-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  background: rgba(12, 16, 26, 0.88);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.controls-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.reel-control-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  color: #ffffff;
-  padding: 7px 18px;
-  border-radius: var(--radius-pill);
-  font-size: 0.82rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
-  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
-}
-
-.reel-control-btn:hover {
-  background: rgba(255, 255, 255, 0.24);
-  transform: translateY(-2px);
-}
-
-.reel-control-btn.play-btn.is-playing {
-  background: var(--gradient-brand);
-  border-color: transparent;
-  box-shadow: 0 4px 14px rgba(91, 76, 219, 0.4);
-}
-
-.reel-control-btn.play-btn.is-paused {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #ffffff;
+@keyframes reelCenterPop {
+  0% { transform: translate(-50%, -50%) scale(0.65); opacity: 0; }
+  35% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.95; }
+  70% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(0.88); opacity: 0; }
 }
 
 .reel-paused-indicator {
@@ -324,11 +254,89 @@
   50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
 }
 
+/* ── UNIFIED TRANSPARENT GLASS FLOATING OVERLAY (Caption + Controls) ── */
+.reel-floating-glass-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 55px 24px 22px 24px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.36) 25%, rgba(0, 0, 0, 0.88) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 10;
+  pointer-events: none;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
 
-.reel-counter-text {
+.reel-caption-content {
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.reel-caption-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.70);
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 6px;
+}
+
+.reel-badge-year {
+  background: rgba(99, 102, 241, 0.38);
+  border: 1px solid rgba(129, 140, 248, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  letter-spacing: 0.3px;
+}
+
+.reel-date, .reel-loc {
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.reel-item-title {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.reel-item-desc {
+  font-size: 0.90rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 680px;
+  line-height: 1.45;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Floating Transparent Glass Controls Bar */
+.reel-transparent-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  pointer-events: auto;
+  padding-top: 4px;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .controls-right {
@@ -337,25 +345,93 @@
   gap: 10px;
 }
 
-.reel-icon-btn {
-  width: 36px;
-  height: 36px;
+/* Transparent Glass Control Button */
+.reel-glass-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reel-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.48);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.reel-glass-btn:active {
+  transform: scale(0.96);
+}
+
+.reel-glass-btn.play-btn.is-playing {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(168, 85, 247, 0.85));
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.45);
+}
+
+.reel-glass-btn.play-btn.is-paused {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.reel-glass-btn.like-btn.is-liked {
+  background: rgba(255, 45, 85, 0.25);
+  border-color: rgba(255, 45, 85, 0.55);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(255, 45, 85, 0.3);
+}
+
+.reel-glass-counter-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.4px;
+}
+
+/* Glass Icon Button (Mute, Fullscreen) */
+.reel-glass-icon-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid rgba(255, 255, 255, 0.20);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.20);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reel-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px) scale(1.06);
+.reel-glass-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.48);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.reel-glass-icon-btn:active {
+  transform: scale(0.94);
 }
 
 @media (max-width: 640px) {
@@ -363,29 +439,31 @@
     padding: 60px 0 40px 0;
   }
   .reel-theater-card {
-    border-radius: var(--radius-xl);
+    border-radius: 26px;
   }
   .reel-media-stage {
-    height: clamp(340px, 68vh, 520px);
+    height: clamp(380px, 72vh, 560px);
   }
-
-  .reel-tap-area {
-    opacity: 1;
+  .reel-floating-glass-overlay {
+    padding: 35px 14px 14px 14px;
+    gap: 10px;
   }
-  .reel-controls-bar {
-    padding: 10px 12px;
+  .reel-transparent-controls-bar {
     gap: 8px;
   }
-  .reel-control-btn {
+  .reel-glass-btn {
     padding: 6px 12px;
     font-size: 0.76rem;
     gap: 5px;
   }
+  .reel-glass-counter-pill {
+    display: none;
+  }
   .reel-item-title {
-    font-size: 1.05rem;
+    font-size: 1.12rem;
   }
   .reel-item-desc {
-    font-size: 0.80rem;
+    font-size: 0.82rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

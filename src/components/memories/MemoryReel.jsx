@@ -8,7 +8,8 @@ import {
   Minimize2, 
   Film, 
   Volume2, 
-  VolumeX 
+  VolumeX,
+  Heart 
 } from 'lucide-react';
 import { subscribeToReelsR2, INITIAL_REELS, isVideoMedia } from '../../services/r2Database';
 import './MemoryReel.css';
@@ -48,6 +49,20 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const videoRef = useRef(null);
   const manuallyPausedRef = useRef(false);
   const manuallyMutedRef = useRef(false);
+
+  // Like state per reel
+  const [likedReels, setLikedReels] = useState(() => {
+    try {
+      const saved = localStorage.getItem('squad_reels_liked');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Touch feedback icon
+  const [showCenterIcon, setShowCenterIcon] = useState(null);
+  const [centerIconKey, setCenterIconKey] = useState(0);
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
@@ -235,9 +250,12 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     if (vid) {
       if (nextState) {
         vid.play().catch(() => {});
+        setShowCenterIcon('play');
       } else {
         vid.pause();
+        setShowCenterIcon('pause');
       }
+      setCenterIconKey(k => k + 1);
     }
 
     window.dispatchEvent(
@@ -245,6 +263,27 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
         detail: { isPlaying: nextState, inView: isInView }
       })
     );
+  };
+
+  const handleToggleLike = (e) => {
+    e?.stopPropagation?.();
+    if (!activeItem) return;
+    const isCurrentlyLiked = !!likedReels[activeItem.id];
+    const updated = { ...likedReels, [activeItem.id]: !isCurrentlyLiked };
+    setLikedReels(updated);
+    try {
+      localStorage.setItem('squad_reels_liked', JSON.stringify(updated));
+    } catch {}
+  };
+
+  const toggleMute = (e) => {
+    e?.stopPropagation?.();
+    const nextMuted = !isMuted;
+    manuallyMutedRef.current = nextMuted;
+    setIsMuted(nextMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = nextMuted;
+    }
   };
 
   const handlePrev = (e) => {
@@ -323,14 +362,13 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
             ))}
           </div>
 
-          {/* Video Reel Viewport — Dynamically Formats to Portrait or Landscape */}
+          {/* Video Reel Viewport — Fully filling the curved screen edge-to-edge */}
           <div 
             className={`reel-media-stage ${isPortrait ? 'stage-portrait' : 'stage-landscape'}`} 
             onClick={togglePlay} 
-            title={isPlaying ? "Click to Pause" : "Click to Play"}
+            title={isPlaying ? "Click anywhere to Pause" : "Click anywhere to Play"}
           >
-            {/* Ambient CSS backdrop glow is handled via CSS stage-portrait */}
-
+            {/* Ambient CSS backdrop glow */}
             <video 
               ref={videoRef}
               src={activeItem.mediaUrl} 
@@ -346,10 +384,20 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
               key={activeItem.id || safeIndex}
             />
 
+            {/* Touch to Stop and Run Centered Feedback Pop */}
+            {showCenterIcon && (
+              <div 
+                key={centerIconKey}
+                className="reel-center-feedback-pop"
+              >
+                {showCenterIcon === 'play' ? <Play size={36} /> : <Pause size={36} />}
+              </div>
+            )}
+
             {/* Paused State Floating Overlay */}
-            {!isPlaying && (
+            {!isPlaying && !showCenterIcon && (
               <div className="reel-paused-indicator" title="Paused - Click to Play">
-                <Play size={34} style={{ marginLeft: 3 }} />
+                <Play size={36} style={{ marginLeft: 3 }} />
               </div>
             )}
 
@@ -365,61 +413,68 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
               </button>
             </div>
 
-            {/* Bottom Caption Overlay */}
-            <div className="reel-caption-overlay">
-              <div className="reel-caption-meta">
-                <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
-                <span className="reel-date">{activeItem.date || ""}</span>
-                {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
+            {/* Unified Transparent Glass Floating Overlay (Caption + Controls inside curved screen) */}
+            <div className="reel-floating-glass-overlay">
+              {/* Caption Meta, Title, Description */}
+              <div className="reel-caption-content">
+                <div className="reel-caption-meta">
+                  <span className="reel-badge-year">{activeItem.category || "Moment"}</span>
+                  <span className="reel-date">{activeItem.date || ""}</span>
+                  {activeItem.location && <span className="reel-loc">• {activeItem.location}</span>}
+                </div>
+                <h3 className="reel-item-title">{activeItem.title || "Squad Memory"}</h3>
+                {activeItem.description && (
+                  <p className="reel-item-desc">{activeItem.description}</p>
+                )}
               </div>
-              <h3 className="reel-item-title">{activeItem.title || "Squad Memory"}</h3>
-              {activeItem.description && (
-                <p className="reel-item-desc">{activeItem.description}</p>
-              )}
-            </div>
-          </div>
 
-          {/* Bottom Bar Controls */}
-          <div className="reel-controls-bar">
-            <div className="controls-left">
-              <button 
-                className={`reel-control-btn play-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
-                onClick={togglePlay}
-                title={isPlaying ? "Pause Reel" : "Play Reel"}
-              >
-                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-                <span>{isPlaying ? "Pause Reel" : "Play Reel"}</span>
-              </button>
+              {/* Transparent Glass Control Buttons Floating Over Video */}
+              <div className="reel-transparent-controls-bar">
+                <div className="controls-left">
+                  <button 
+                    className={`reel-glass-btn play-btn ${isPlaying ? 'is-playing' : 'is-paused'}`}
+                    onClick={togglePlay}
+                    title={isPlaying ? "Pause Reel" : "Play Reel"}
+                  >
+                    {isPlaying ? <Pause size={17} /> : <Play size={17} />}
+                    <span>{isPlaying ? "Pause Reel" : "Play Reel"}</span>
+                  </button>
 
+                  {/* Transparent Glass Like Button */}
+                  <button 
+                    className={`reel-glass-btn like-btn ${likedReels[activeItem.id] ? 'is-liked' : ''}`}
+                    onClick={handleToggleLike}
+                    title="Like this moment"
+                  >
+                    <Heart size={16} fill={likedReels[activeItem.id] ? "#ff2d55" : "none"} color={likedReels[activeItem.id] ? "#ff2d55" : "#ffffff"} />
+                    <span>{likedReels[activeItem.id] ? 'Liked' : 'Like'}</span>
+                  </button>
 
+                  <span className="reel-glass-counter-pill">
+                    {safeIndex + 1} of {reelItems.length}
+                  </span>
+                </div>
 
-              <span className="reel-counter-text">
-                {safeIndex + 1} of {reelItems.length}
-              </span>
-            </div>
+                <div className="controls-right">
+                  {activeItem.mediaType === 'video' && (
+                    <button 
+                      className="reel-glass-icon-btn"
+                      onClick={toggleMute}
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                    </button>
+                  )}
 
-            <div className="controls-right">
-              {activeItem.mediaType === 'video' && (
-                <button 
-                  className="reel-icon-btn"
-                  onClick={() => {
-                    const nextMuted = !isMuted;
-                    manuallyMutedRef.current = nextMuted;
-                    setIsMuted(nextMuted);
-                  }}
-                  title={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                </button>
-              )}
-
-              <button 
-                className="reel-icon-btn"
-                onClick={toggleFullscreen}
-                title="Fullscreen"
-              >
-                {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-              </button>
+                  <button 
+                    className="reel-glass-icon-btn"
+                    onClick={toggleFullscreen}
+                    title="Fullscreen"
+                  >
+                    {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
