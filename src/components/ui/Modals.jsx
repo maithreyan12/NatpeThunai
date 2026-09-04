@@ -316,6 +316,23 @@ export function AddEventModal({ isOpen, onClose, onSave }) {
 
 // ── LIGHTBOX VIEWER MODAL ──
 export function LightboxModal({ isOpen, onClose, memory }) {
+  useEffect(() => {
+    if (isOpen && memory?.mediaType === 'video') {
+      window.dispatchEvent(
+        new CustomEvent('reel-state-change', {
+          detail: { isPlaying: true, inView: true }
+        })
+      );
+      return () => {
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: false, inView: false }
+          })
+        );
+      };
+    }
+  }, [isOpen, memory?.mediaType]);
+
   if (!isOpen || !memory) return null;
 
   return (

@@ -18,6 +18,8 @@ export default function BackgroundMusicPlayer() {
 
   const audioRef = useRef(null);
   const containerRef = useRef(null);
+  const wasPlayingBeforeReelRef = useRef(false);
+  const manuallyPausedByUserRef = useRef(false);
 
   // Initialize native HTML5 audio with autoplay
   useEffect(() => {
@@ -93,16 +95,122 @@ export default function BackgroundMusicPlayer() {
     };
   }, [hasStarted, volume]);
 
+  // Stop audio immediately when user switches tabs, minimizes window, or navigates away
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      if (document.hidden) {
+        // User switched tab or minimized browser — stop the song!
+        if (!audio.paused) {
+          audio.pause();
+          setIsPlaying(false);
+        }
+      }
+    };
+
+    const handlePageExit = () => {
+      const audio = audioRef.current;
+      if (audio && !audio.paused) {
+        audio.pause();
+        setIsPlaying(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageExit);
+    window.addEventListener('beforeunload', handlePageExit);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageExit);
+      window.removeEventListener('beforeunload', handlePageExit);
+    };
+  }, []);
+
+  // Coordinate with Reels section: stop background music when reel is in view / playing original audio
+  useEffect(() => {
+    // 1. Listen for custom events from MemoryReel or LightboxModal
+    const handleReelState = (e) => {
+      const { isPlaying: reelIsPlaying, inView } = e.detail || {};
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      if (inView && reelIsPlaying) {
+        // Reel is active with original sound — stop the background song!
+        if (!audio.paused) {
+          wasPlayingBeforeReelRef.current = true;
+          audio.pause();
+          setIsPlaying(false);
+        }
+      } else if (!inView) {
+        // User left reels section — resume if it was playing before
+        if (wasPlayingBeforeReelRef.current && !manuallyPausedByUserRef.current && !document.hidden) {
+          wasPlayingBeforeReelRef.current = false;
+          audio.play().then(() => setIsPlaying(true)).catch(() => {});
+        }
+      }
+    };
+
+    window.addEventListener('reel-state-change', handleReelState);
+
+    // 2. Direct IntersectionObserver on #reel element as a reliable failsafe
+    let observer = null;
+    const setupReelObserver = () => {
+      const reelEl = document.getElementById('reel');
+      if (!reelEl) return;
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          const audio = audioRef.current;
+          if (!audio) return;
+
+          if (entry.isIntersecting && entry.intersectionRatio > 0.15) {
+            // Reels section came into view — pause background song
+            if (!audio.paused) {
+              wasPlayingBeforeReelRef.current = true;
+              audio.pause();
+              setIsPlaying(false);
+            }
+          } else if (!entry.isIntersecting) {
+            // Left the reels section — resume if it was auto-paused for reel
+            if (wasPlayingBeforeReelRef.current && !manuallyPausedByUserRef.current && !document.hidden) {
+              wasPlayingBeforeReelRef.current = false;
+              audio.play().then(() => setIsPlaying(true)).catch(() => {});
+            }
+          }
+        },
+        { threshold: [0, 0.15, 0.5] }
+      );
+
+      observer.observe(reelEl);
+    };
+
+    setupReelObserver();
+    const timer = setTimeout(setupReelObserver, 600);
+
+    return () => {
+      window.removeEventListener('reel-state-change', handleReelState);
+      if (observer) observer.disconnect();
+      clearTimeout(timer);
+    };
+  }, []);
+
   // Toggle Play / Pause
   const togglePlay = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
+      manuallyPausedByUserRef.current = true;
+      wasPlayingBeforeReelRef.current = false;
       audio.pause();
       setIsPlaying(false);
     } else {
       try {
+        manuallyPausedByUserRef.current = false;
         await audio.play();
         setIsPlaying(true);
         setHasStarted(true);

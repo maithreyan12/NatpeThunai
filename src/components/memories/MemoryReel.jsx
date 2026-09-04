@@ -37,6 +37,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isInView, setIsInView] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isPortrait, setIsPortrait] = useState(false);
@@ -46,6 +47,56 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
 
   const safeIndex = reelItems.length > 0 ? Math.min(currentIndex, reelItems.length - 1) : 0;
   const activeItem = reelItems[safeIndex] || null;
+
+  // IntersectionObserver: Track when the Reels section comes into or leaves the viewport
+  useEffect(() => {
+    const el = document.getElementById('reel') || reelContainerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const inView = entry.isIntersecting && entry.intersectionRatio > 0.15;
+        setIsInView(inView);
+
+        // Notify background music player to stop or resume
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: inView && isPlaying, inView }
+          })
+        );
+      },
+      { threshold: [0, 0.15, 0.5] }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isPlaying]);
+
+  // Tab switch & visibility listener: pause video immediately when user switches tabs or window minimizes
+  useEffect(() => {
+    const handleVisibility = () => {
+      const vid = videoRef.current;
+      if (document.hidden) {
+        if (vid) vid.pause();
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: false, inView: false }
+          })
+        );
+      } else if (isInView && isPlaying) {
+        if (vid) vid.play().catch(() => {});
+        window.dispatchEvent(
+          new CustomEvent('reel-state-change', {
+            detail: { isPlaying: true, inView: true }
+          })
+        );
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isInView, isPlaying]);
 
   // Detect video dimensions and orientation
   const handleLoadedMetadata = (e) => {
@@ -64,11 +115,14 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     }
   }, [safeIndex, activeItem?.mediaUrl]);
 
-  // Ensure HTML5 video plays or pauses without resetting position
+  // Ensure HTML5 video only plays when in view, active, and tab is visible
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
-    if (isPlaying) {
+
+    const shouldPlay = isPlaying && isInView && !document.hidden;
+
+    if (shouldPlay) {
       const p = vid.play();
       if (p !== undefined) {
         p.catch(() => {
@@ -80,7 +134,7 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
     } else {
       vid.pause();
     }
-  }, [isPlaying, safeIndex, activeItem?.mediaUrl]);
+  }, [isPlaying, isInView, safeIndex, activeItem?.mediaUrl]);
 
   // Sync mute changes directly with the video DOM element
   useEffect(() => {
@@ -136,6 +190,11 @@ export default function MemoryReel({ reels: propReels, memories = [] }) {
           vid.pause();
         }
       }
+      window.dispatchEvent(
+        new CustomEvent('reel-state-change', {
+          detail: { isPlaying: nextState, inView: isInView }
+        })
+      );
       return nextState;
     });
   };
