@@ -13,7 +13,7 @@ import {
   subscribeToPostsR2, savePostR2, deletePostR2,
   subscribeToEventsR2, saveEventR2, deleteEventR2,
   subscribeToJourneyR2, saveJourneyMilestoneR2,
-  subscribeToSpiralR2, saveSpiralItemR2, deleteSpiralItemR2,
+  subscribeToSpiralR2, saveSpiralItemR2, saveAllSpiralItemsR2, deleteSpiralItemR2, INITIAL_SPIRAL_ITEMS,
   subscribeToReelsR2, saveReelR2, deleteReelR2, INITIAL_REELS, isVideoMedia,
   bootR2Database,
 } from '../../services/r2Database';
@@ -795,10 +795,10 @@ export default function AdminPortal({ onExit, currentUser }) {
     setSpiralForm({
       id: '',
       src: '',
-      alt: 'Squad Memory',
+      alt: 'Squad Member',
       title: '',
-      positionY: 50,
-      objectPosition: 'center 50%',
+      positionY: 20,
+      objectPosition: 'center 20%',
       objectFit: 'cover',
       scale: 1
     });
@@ -807,7 +807,7 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const openEditSpiralItem = (item) => {
     setEditingSpiralItem(item);
-    let posY = 50;
+    let posY = 20;
     if (item.positionY !== undefined) {
       posY = Number(item.positionY);
     } else if (item.objectPosition) {
@@ -893,6 +893,60 @@ export default function AdminPortal({ onExit, currentUser }) {
       setSpiralItems(prev => prev.filter(s => s.id !== id));
       triggerToast('Spiral photo removed 🗑️');
       deleteSpiralItemR2(id).catch(err => triggerToast(`Delete error: ${err.message}`));
+    }
+  };
+
+  const handleSyncAllSquadMembersToSpiral = async () => {
+    if (!window.confirm('Sync all 14 squad members into the Infinite Spiral with calibrated face-framing? This will ensure all member photos appear in the rotating spiral with proper face framing.')) {
+      return;
+    }
+
+    const faceCalibrations = {
+      kafil:      { positionY: 18, objectPosition: 'center 18%', scale: 1.0,  role: 'Creative Soul' },
+      haniya:     { positionY: 20, objectPosition: 'center 20%', scale: 1.0,  role: 'The Chill Sloth' },
+      grace:      { positionY: 16, objectPosition: 'center 16%', scale: 1.0,  role: 'The Spark & Creative' },
+      jaffreen:   { positionY: 16, objectPosition: 'center 16%', scale: 1.0,  role: 'The Sweet Heart' },
+      farish:     { positionY: 15, objectPosition: 'center 15%', scale: 1.0,  role: 'The Mastermind' },
+      divyaaa:    { positionY: 22, objectPosition: 'center 22%', scale: 1.05, role: 'The Sunshine' },
+      heenuuu:    { positionY: 20, objectPosition: 'center 20%', scale: 1.05, role: 'The Spark & Heart' },
+      puppy:      { positionY: 28, objectPosition: 'center 28%', scale: 1.0,  role: 'The Chill Vibe' },
+      afnaan:     { positionY: 22, objectPosition: 'center 22%', scale: 1.0,  role: 'The Energy Dynamo' },
+      meshak:     { positionY: 30, objectPosition: '62% 30%',    scale: 1.0,  role: 'The Silent Strength' },
+      samuel:     { positionY: 24, objectPosition: 'center 24%', scale: 1.0,  role: 'The Joyful Soul' },
+      harshitha:  { positionY: 24, objectPosition: 'center 24%', scale: 1.0,  role: 'Radiant Sunshine' },
+      maithreyan: { positionY: 35, objectPosition: 'center 35%', scale: 1.0,  role: 'Tech & Vibe Pilot' },
+      gopika:     { positionY: 28, objectPosition: 'center 28%', scale: 1.0,  role: 'The Graceful Heart' },
+    };
+
+    let syncedList = [];
+    if (Array.isArray(members) && members.length > 0) {
+      syncedList = INITIAL_SPIRAL_ITEMS.map(item => {
+        const memberKey = item.id.replace('spiral-', '');
+        const member = members.find(m => m.id === memberKey);
+        const calib = faceCalibrations[memberKey] || { positionY: 20, objectPosition: 'center 20%', scale: 1 };
+        return {
+          ...item,
+          src: member?.photo || item.src,
+          alt: member?.name || item.alt,
+          title: member ? `${member.name} · ${calib.role || member.role}` : item.title,
+          objectPosition: calib.objectPosition,
+          positionY: calib.positionY,
+          scale: calib.scale,
+          objectFit: 'cover',
+          updatedAt: new Date().toISOString()
+        };
+      });
+    } else {
+      syncedList = [...INITIAL_SPIRAL_ITEMS];
+    }
+
+    setSpiralItems(syncedList);
+    triggerToast(`✨ All ${syncedList.length} squad members synced with calibrated face framing!`);
+    try {
+      await saveAllSpiralItemsR2(syncedList);
+      triggerToast('Cloudflare R2 Infinite Spiral vault updated! ☁️🌀');
+    } catch (err) {
+      triggerToast(`Sync error: ${err.message}`);
     }
   };
 
@@ -1441,6 +1495,28 @@ export default function AdminPortal({ onExit, currentUser }) {
                   </p>
                 </div>
                 <div className="admin-action-bar">
+                  <button
+                    onClick={handleSyncAllSquadMembersToSpiral}
+                    className="admin-secondary-btn"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '7px',
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(168, 85, 247, 0.28))',
+                      border: '1px solid rgba(139, 92, 246, 0.45)',
+                      color: '#e0e7ff',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.86rem',
+                      fontWeight: 500,
+                      transition: 'all 0.2s ease'
+                    }}
+                    title="Sync all 14 squad members with calibrated face framing"
+                  >
+                    <Sparkles size={16} style={{ color: '#a5b4fc' }} />
+                    <span>Sync All 14 Members (Face Focus)</span>
+                  </button>
                   <button onClick={openAddSpiralItem} className="admin-primary-btn">
                     <Plus size={16} /> Add Spiral Photo
                   </button>
@@ -1451,31 +1527,42 @@ export default function AdminPortal({ onExit, currentUser }) {
                 <div className="admin-empty-pane" style={{ textAlign: 'center', padding: '60px 20px' }}>
                   <Sparkles size={44} style={{ opacity: 0.4, margin: '0 auto 12px' }} />
                   <h3>No spiral photos found</h3>
-                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Spiral Photo" to add photos to the 3D rotating spiral.</p>
+                  <p style={{ color: 'var(--text-muted)' }}>Click "Add Spiral Photo" or "Sync All 14 Members" to populate the 3D rotating spiral.</p>
                 </div>
               ) : (
                 <div className="admin-cards-grid">
-                  {spiralItems.map((item, idx) => (
-                    <div key={item.id || idx} className="admin-card-item">
-                      <div style={{ position: 'relative', overflow: 'hidden', height: '170px', background: 'rgba(0,0,0,0.3)' }}>
-                        <img 
-                          src={item.src} 
-                          alt={item.alt || item.title} 
-                          className="admin-card-img" 
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: item.objectFit || 'cover',
-                            objectPosition: item.objectPosition || 'center center',
-                            transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined
-                          }}
-                        />
-                        {item.positionY !== undefined && item.positionY !== 50 && (
-                          <span style={{ position: 'absolute', bottom: '8px', right: '8px', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', background: 'rgba(0,0,0,0.7)', color: '#a5b4fc', backdropFilter: 'blur(4px)' }}>
-                            Focus: {item.positionY}%
+                  {spiralItems.map((item, idx) => {
+                    const focusPercent = item.positionY ?? (item.objectPosition?.match(/(\d+)%/)?.[1] ? parseInt(item.objectPosition.match(/(\d+)%/)[1], 10) : 20);
+                    return (
+                      <div key={item.id || idx} className="admin-card-item">
+                        <div style={{ position: 'relative', overflow: 'hidden', height: '170px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px 12px 0 0' }}>
+                          <img 
+                            src={item.src} 
+                            alt={item.alt || item.title} 
+                            className="admin-card-img" 
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: item.objectFit || 'cover',
+                              objectPosition: item.objectPosition || `center ${focusPercent}%`,
+                              transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            bottom: '8px',
+                            right: '8px',
+                            fontSize: '0.7rem',
+                            padding: '2px 7px',
+                            borderRadius: '5px',
+                            background: 'rgba(0,0,0,0.75)',
+                            color: '#a5b4fc',
+                            backdropFilter: 'blur(4px)',
+                            border: '1px solid rgba(255,255,255,0.1)'
+                          }}>
+                            Face Focus: {focusPercent}%
                           </span>
-                        )}
-                      </div>
+                        </div>
                       <div className="admin-card-body">
                         <div className="admin-card-header-row">
                           <span className="admin-card-badge">Position #{idx + 1}</span>
@@ -1492,8 +1579,9 @@ export default function AdminPortal({ onExit, currentUser }) {
                         <p className="admin-card-desc">{item.alt ? `Alt: ${item.alt}` : 'Featured in Infinite Spiral'}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
               )}
             </div>

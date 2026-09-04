@@ -6,18 +6,8 @@ import { subscribeToSpiralR2, INITIAL_SPIRAL_ITEMS } from '../../services/r2Data
 import { isAuthorizedAdmin, onAuthChange } from '../../firebase';
 import './MemoriesSpiral.css';
 
-// Fallback initial squad photos
-const FALLBACK_SPIRAL_IMAGES = [
-  { id: 'grace',      src: r2Photo('friend1.jpg'),    alt: 'Grace' },
-  { id: 'heenuuu',    src: r2Photo('friend2.jpg'),    alt: 'Heenuuu' },
-  { id: 'divyaaa',    src: r2Photo('friend3.jpg'),    alt: 'Divyaaa' },
-  { id: 'puppy',      src: r2Photo('friend4.jpg'),    alt: 'Puppy' },
-  { id: 'farish',     src: r2Photo('farish.jpg'),     alt: 'Farish' },
-  { id: 'kafil',      src: r2Photo('kafil.jpg'),      alt: 'Kafil' },
-  { id: 'hanuu',      src: r2Photo('hanuu.jpg'),      alt: 'Hanu' },
-  { id: 'gopika',     src: r2Photo('gopika.jpg'),     alt: 'Gopika' },
-  { id: 'maithreyan', src: r2Photo('maithreyan.jpg'),  alt: 'Maithreyan' },
-];
+// Fallback initial squad photos for all 14 members
+const FALLBACK_SPIRAL_IMAGES = INITIAL_SPIRAL_ITEMS;
 
 export default function MemoriesSpiral({ currentUser }) {
   const [isAdmin, setIsAdmin] = useState(() => isAuthorizedAdmin(currentUser));
@@ -83,7 +73,7 @@ export default function MemoriesSpiral({ currentUser }) {
 
       <div
         style={{
-          height: isMobile ? '620px' : '680px',
+          height: isMobile ? '640px' : '720px',
           position: 'relative',
           overflow: 'hidden',
           width: '100%',
@@ -91,16 +81,15 @@ export default function MemoriesSpiral({ currentUser }) {
       >
         <InfiniteSpiral
           items={spiralItems}
-
           animationMode="auto"
-          speed={0.5}
-          radius={isMobile ? 140 : 240}
-          cardWidth={isMobile ? 140 : 195}
-          cardHeight={isMobile ? 110 : 145}
-          verticalSpacing={isMobile ? 76 : 82}
-          perspective={isMobile ? 800 : 950}
+          speed={0.48}
+          radius={isMobile ? 145 : 245}
+          cardWidth={isMobile ? 135 : 170}
+          cardHeight={isMobile ? 165 : 205}
+          verticalSpacing={isMobile ? 78 : 86}
+          perspective={isMobile ? 820 : 980}
           cardRadius={isMobile ? 14 : 18}
-          centerScale={1.32}
+          centerScale={1.28}
           edgeBlur={5.5}
           cardsPerTurn={8}
           pauseOnHover={false}

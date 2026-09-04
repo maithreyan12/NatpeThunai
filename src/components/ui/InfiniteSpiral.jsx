@@ -317,9 +317,9 @@ const InfiniteSpiral = ({
                   maxWidth: 'none',
                   maxHeight: 'none',
                   objectFit: item.objectFit || imageFit,
-                  objectPosition: item.objectPosition || 'center center',
+                  objectPosition: item.objectPosition || (item.positionY !== undefined ? `center ${item.positionY}%` : 'center 20%'),
                   transform: item.scale && item.scale !== 1 ? `scale(${item.scale})` : undefined,
-                  transformOrigin: item.objectPosition || 'center center',
+                  transformOrigin: item.objectPosition || (item.positionY !== undefined ? `center ${item.positionY}%` : 'center 20%'),
                   filter: `grayscale(${Math.min(1, Math.max(0, grayscale))})`
                 }}
 

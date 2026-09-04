@@ -67,6 +67,23 @@ const EVENTS = [
   { id: 'evt-2', title: 'Squad Memory Reel Screening Night', date: 'October 02, 2026', time: '8:30 PM', location: 'Private Screen & Hangout', description: 'Streaming our compiled digital memory reel.', category: 'Celebration', rsvpCount: 12 },
 ];
 
+const SPIRAL = [
+  { id: 'spiral-kafil',      src: r2Photo('kafil.jpg'),      alt: 'Kafil',          title: 'Kafil · Creative Soul',          objectPosition: 'center 18%', positionY: 18, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-haniya',     src: r2Photo('hanuu.jpg'),      alt: 'Haniya',         title: 'Haniya · The Chill Sloth',       objectPosition: 'center 20%', positionY: 20, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-grace',      src: r2Photo('Gracee.jpg'),     alt: 'Grace',          title: 'Grace · The Spark & Creative',   objectPosition: 'center 16%', positionY: 16, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-jaffreen',   src: r2Photo('jaffreen.jpg'),   alt: 'Jaffreen',       title: 'Jaffreen · The Sweet Heart',     objectPosition: 'center 16%', positionY: 16, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-farish',     src: r2Photo('farish.jpg'),     alt: 'Farish Sharif',  title: 'Farish · The Mastermind',        objectPosition: 'center 15%', positionY: 15, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-divyaaa',    src: r2Photo('Divyaa.jpg'),     alt: 'Divyaaa',        title: 'Divyaaa · The Sunshine',         objectPosition: 'center 22%', positionY: 22, scale: 1.05, objectFit: 'cover' },
+  { id: 'spiral-heenuuu',    src: r2Photo('Heenuuu.jpg'),    alt: 'Heenuuu',        title: 'Heenuuu · The Spark & Heart',    objectPosition: 'center 20%', positionY: 20, scale: 1.05, objectFit: 'cover' },
+  { id: 'spiral-puppy',      src: r2Photo('Puppy.jpg'),      alt: 'Puppy',          title: 'Puppy · The Chill Vibe',         objectPosition: 'center 28%', positionY: 28, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-afnaan',     src: r2Photo('affu.jpg'),       alt: 'Afnaaan',        title: 'Afnaan · The Energy Dynamo',     objectPosition: 'center 22%', positionY: 22, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-meshak',     src: r2Photo('meshak.jpg'),     alt: 'Meshak',         title: 'Meshak · The Silent Strength',   objectPosition: '62% 30%',    positionY: 30, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-samuel',     src: r2Photo('samuel.jpg'),     alt: 'Samuel',         title: 'Samuel · The Joyful Soul',       objectPosition: 'center 24%', positionY: 24, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-harshitha',  src: r2Photo('harshuuu.jpg'),   alt: 'Harshitha',      title: 'Harshitha · Radiant Sunshine',   objectPosition: 'center 24%', positionY: 24, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-maithreyan', src: r2Photo('maithreyan.jpg'), alt: 'Maithreyan',     title: 'Maithreyan · Tech & Vibe Pilot', objectPosition: 'center 35%', positionY: 35, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-gopika',     src: r2Photo('gopika.jpg'),     alt: 'Gopika',         title: 'Gopika · The Graceful Heart',    objectPosition: 'center 28%', positionY: 28, scale: 1, objectFit: 'cover' },
+];
+
 async function writeJSON(collection, data) {
   const key = `data/${collection}.json`;
   // Check if exists first
@@ -92,11 +109,13 @@ async function main() {
   await writeJSON('memories', MEMORIES);
   await writeJSON('posts',    POSTS);
   await writeJSON('events',   EVENTS);
+  await writeJSON('spiral',   SPIRAL);
   console.log(`\n✨ Done! Data is live at ${PUBLIC_URL}/data/\n`);
   console.log('  members  →', `${PUBLIC_URL}/data/members.json`);
   console.log('  memories →', `${PUBLIC_URL}/data/memories.json`);
   console.log('  posts    →', `${PUBLIC_URL}/data/posts.json`);
   console.log('  events   →', `${PUBLIC_URL}/data/events.json`);
+  console.log('  spiral   →', `${PUBLIC_URL}/data/spiral.json`);
 }
 
 main().catch(err => { console.error('❌ Seed failed:', err); process.exit(1); });

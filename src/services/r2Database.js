@@ -209,13 +209,20 @@ export const INITIAL_JOURNEY_MILESTONES = [
 ];
 
 export const INITIAL_SPIRAL_ITEMS = [
-  { id: 'spiral-1', src: r2Photo('friend1.jpg'), alt: 'Squad Memory 1', title: 'Mountain Lake Vibes' },
-  { id: 'spiral-2', src: r2Photo('friend2.jpg'), alt: 'Squad Memory 2', title: 'Forest Trail Hangout' },
-  { id: 'spiral-3', src: r2Photo('friend3.jpg'), alt: 'Squad Memory 3', title: 'Summit Sunset View' },
-  { id: 'spiral-4', src: r2Photo('friend4.jpg'), alt: 'Squad Memory 4', title: 'Beachside Laughs' },
-  { id: 'spiral-5', src: r2Photo('farish.jpg'),  alt: 'Farish Sharif', title: 'Farish in White Hoodie' },
-  { id: 'spiral-6', src: r2Photo('kafil.jpg'),   alt: 'Kafil K',       title: 'Kafil by the Water' },
-  { id: 'spiral-7', src: r2Photo('hanuu.jpg'),   alt: 'Haniya Hanu',   title: 'Hanu Chill Smiles' },
+  { id: 'spiral-kafil',      src: r2Photo('kafil.jpg'),      alt: 'Kafil',          title: 'Kafil · Creative Soul',          objectPosition: 'center 18%', positionY: 18, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-haniya',     src: r2Photo('hanuu.jpg'),      alt: 'Haniya',         title: 'Haniya · The Chill Sloth',       objectPosition: 'center 20%', positionY: 20, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-grace',      src: r2Photo('Gracee.jpg'),     alt: 'Grace',          title: 'Grace · The Spark & Creative',   objectPosition: 'center 16%', positionY: 16, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-jaffreen',   src: r2Photo('jaffreen.jpg'),   alt: 'Jaffreen',       title: 'Jaffreen · The Sweet Heart',     objectPosition: 'center 16%', positionY: 16, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-farish',     src: r2Photo('farish.jpg'),     alt: 'Farish Sharif',  title: 'Farish · The Mastermind',        objectPosition: 'center 15%', positionY: 15, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-divyaaa',    src: r2Photo('Divyaa.jpg'),     alt: 'Divyaaa',        title: 'Divyaaa · The Sunshine',         objectPosition: 'center 22%', positionY: 22, scale: 1.05, objectFit: 'cover' },
+  { id: 'spiral-heenuuu',    src: r2Photo('Heenuuu.jpg'),    alt: 'Heenuuu',        title: 'Heenuuu · The Spark & Heart',    objectPosition: 'center 20%', positionY: 20, scale: 1.05, objectFit: 'cover' },
+  { id: 'spiral-puppy',      src: r2Photo('Puppy.jpg'),      alt: 'Puppy',          title: 'Puppy · The Chill Vibe',         objectPosition: 'center 28%', positionY: 28, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-afnaan',     src: r2Photo('affu.jpg'),       alt: 'Afnaaan',        title: 'Afnaan · The Energy Dynamo',     objectPosition: 'center 22%', positionY: 22, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-meshak',     src: r2Photo('meshak.jpg'),     alt: 'Meshak',         title: 'Meshak · The Silent Strength',   objectPosition: '62% 30%',    positionY: 30, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-samuel',     src: r2Photo('samuel.jpg'),     alt: 'Samuel',         title: 'Samuel · The Joyful Soul',       objectPosition: 'center 24%', positionY: 24, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-harshitha',  src: r2Photo('harshuuu.jpg'),   alt: 'Harshitha',      title: 'Harshitha · Radiant Sunshine',   objectPosition: 'center 24%', positionY: 24, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-maithreyan', src: r2Photo('maithreyan.jpg'), alt: 'Maithreyan',     title: 'Maithreyan · Tech & Vibe Pilot', objectPosition: 'center 35%', positionY: 35, scale: 1, objectFit: 'cover' },
+  { id: 'spiral-gopika',     src: r2Photo('gopika.jpg'),     alt: 'Gopika',         title: 'Gopika · The Graceful Heart',    objectPosition: 'center 28%', positionY: 28, scale: 1, objectFit: 'cover' },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -613,12 +620,21 @@ export function subscribeToSpiralR2(callback) {
 
 export async function saveSpiralItemR2(spiralData) {
   const id = spiralData.id || `spiral-${Date.now()}`;
+  let posY = 20;
+  if (spiralData.positionY !== undefined) {
+    posY = Number(spiralData.positionY);
+  } else if (spiralData.objectPosition) {
+    const match = spiralData.objectPosition.match(/(\d+)%/);
+    if (match) posY = parseInt(match[1], 10);
+  }
+
   const item = {
     id,
     src: spiralData.src,
     alt: spiralData.alt || 'Squad Memory',
     title: spiralData.title || spiralData.alt || 'Squad Moment',
-    objectPosition: spiralData.objectPosition || 'center center',
+    objectPosition: spiralData.objectPosition || `center ${posY}%`,
+    positionY: posY,
     objectFit: spiralData.objectFit || 'cover',
     scale: Number(spiralData.scale) || 1,
     updatedAt: new Date().toISOString()
@@ -634,6 +650,33 @@ export async function saveSpiralItemR2(spiralData) {
   cache.set(COLLECTIONS.SPIRAL, updated);
   await callAPI({ collection: COLLECTIONS.SPIRAL, action: 'upsert', item });
   return item;
+}
+
+export async function saveAllSpiralItemsR2(items) {
+  if (!Array.isArray(items) || items.length === 0) return;
+  const normalized = items.map((item, idx) => {
+    let posY = 20;
+    if (item.positionY !== undefined) {
+      posY = Number(item.positionY);
+    } else if (item.objectPosition) {
+      const match = item.objectPosition.match(/(\d+)%/);
+      if (match) posY = parseInt(match[1], 10);
+    }
+    return {
+      ...item,
+      id: item.id || `spiral-${idx + 1}`,
+      objectPosition: item.objectPosition || `center ${posY}%`,
+      positionY: posY,
+      objectFit: item.objectFit || 'cover',
+      scale: Number(item.scale) || 1,
+      updatedAt: new Date().toISOString()
+    };
+  });
+
+  // ⚡ Instant optimistic cache update
+  cache.set(COLLECTIONS.SPIRAL, normalized);
+  await callAPI({ collection: COLLECTIONS.SPIRAL, action: 'set', data: normalized });
+  return normalized;
 }
 
 export async function deleteSpiralItemR2(itemId) {
