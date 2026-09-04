@@ -221,7 +221,15 @@ export default function SquadMembers({
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
 
-  const filteredMembers = members.filter((member) => {
+  const isBannedMember = (m) => {
+    if (!m) return true;
+    const str = typeof m === 'string' ? m : JSON.stringify(m);
+    return /shyam|sundar/i.test(str);
+  };
+
+  const cleanMembers = members.filter(m => !isBannedMember(m));
+
+  const filteredMembers = cleanMembers.filter((member) => {
     const matchesCategory =
       activeFilter === 'all' ||
       (member.category && member.category.toLowerCase() === activeFilter.toLowerCase()) ||

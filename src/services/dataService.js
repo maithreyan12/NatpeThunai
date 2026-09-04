@@ -263,43 +263,58 @@ const setLocal = (key, data) => {
 //  SQUAD MEMBERS API (15+ GANG MEMBERS)
 // ═══════════════════════════════════════════════════════════════════
 
-const OLD_PLACEHOLDER_IDS = new Set(["siddharth", "pooja", "rohan", "meera", "arjun", "sneha", "vikram", "harini", "karthik"]);
+const OLD_PLACEHOLDER_IDS = new Set([
+  "siddharth", "pooja", "rohan", "meera", "arjun", "sneha", "vikram", "harini", "karthik",
+  "shyam", "shyamsundar", "shyam-sundar", "sundar"
+]);
 const DUO_IDS = ["maithreyan", "gopika"];
+
+export const isShyamSundar = (obj) => {
+  if (!obj) return false;
+  const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
+  return /shyam|sundar/i.test(str);
+};
 
 // Helper to keep Duo at the very end
 const arrangeWithDuoAtEnd = (membersList) => {
   const isDuo = (m) => DUO_IDS.includes(m.id?.toLowerCase?.() || '') || DUO_IDS.includes(m.name?.toLowerCase?.() || '');
-  const mainList = membersList.filter(m => !isDuo(m));
-  const duoMembers = DUO_IDS.map(did => membersList.find(m => m.id?.toLowerCase?.() === did || m.name?.toLowerCase?.() === did)).filter(Boolean);
+  const mainList = membersList.filter(m => !isDuo(m) && !isShyamSundar(m));
+  const duoMembers = DUO_IDS.map(did => membersList.find(m => (m.id?.toLowerCase?.() === did || m.name?.toLowerCase?.() === did) && !isShyamSundar(m))).filter(Boolean);
   return [...mainList, ...duoMembers];
 };
 
 export const getStoredMembers = () => {
   const local = getLocal(STORAGE_KEYS.MEMBERS, null);
   if (!local || !Array.isArray(local) || local.length === 0) {
-    const organized = arrangeWithDuoAtEnd(INITIAL_SQUAD_MEMBERS);
+    const organized = arrangeWithDuoAtEnd(INITIAL_SQUAD_MEMBERS).filter(m => !isShyamSundar(m));
     setLocal(STORAGE_KEYS.MEMBERS, organized);
     return organized;
   }
 
-  // Merge code-defined squad roster with user edits (user edits ALWAYS win)
-  const synced = INITIAL_SQUAD_MEMBERS.map(initialMember => {
-    const existing = local.find(m => m.id === initialMember.id || m.name?.toLowerCase().trim() === initialMember.name?.toLowerCase().trim());
-    if (!existing) return initialMember;
-    return {
-      ...initialMember,
-      ...existing,
-      photo: existing.photo !== undefined ? existing.photo : initialMember.photo
-    };
-  });
+  // Purge any stale Shyam Sundar or old placeholder records from local cache
+  const sanitizedLocal = local.filter(m => !isShyamSundar(m) && !OLD_PLACEHOLDER_IDS.has(m.id));
 
-  // Keep any user-added custom members from UI (excluding old placeholder names)
-  const customMembers = local.filter(m =>
+  // Merge code-defined squad roster with user edits (user edits ALWAYS win)
+  const synced = INITIAL_SQUAD_MEMBERS
+    .filter(m => !isShyamSundar(m))
+    .map(initialMember => {
+      const existing = sanitizedLocal.find(m => m.id === initialMember.id || m.name?.toLowerCase().trim() === initialMember.name?.toLowerCase().trim());
+      if (!existing) return initialMember;
+      return {
+        ...initialMember,
+        ...existing,
+        photo: existing.photo !== undefined ? existing.photo : initialMember.photo
+      };
+    });
+
+  // Keep any user-added custom members from UI (excluding old placeholder names and Shyam Sundar)
+  const customMembers = sanitizedLocal.filter(m =>
+    !isShyamSundar(m) &&
     !OLD_PLACEHOLDER_IDS.has(m.id) &&
     !INITIAL_SQUAD_MEMBERS.some(im => im.id === m.id || im.name?.toLowerCase().trim() === m.name?.toLowerCase().trim())
   );
   
-  const fullList = arrangeWithDuoAtEnd([...synced, ...customMembers]);
+  const fullList = arrangeWithDuoAtEnd([...synced, ...customMembers]).filter(m => !isShyamSundar(m));
   setLocal(STORAGE_KEYS.MEMBERS, fullList);
   return fullList;
 };

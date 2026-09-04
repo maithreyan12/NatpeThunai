@@ -27,16 +27,34 @@ export const COLLECTIONS = {
 
 
 
-// ── Fast in-memory + localStorage cache ────────────────────────────
+export const isBannedEntity = (obj) => {
+  if (!obj) return false;
+  const str = typeof obj === 'string' ? obj : JSON.stringify(obj);
+  return /shyam|sundar/i.test(str);
+};
+
+// ── Fast in-memory + localStorage cache (with auto-purge) ───────────
 const mem = {};
 const cache = {
   get: (key) => {
-    if (mem[key]) return mem[key];
-    try { const d = localStorage.getItem(`r2_${key}`); return d ? JSON.parse(d) : null; } catch { return null; }
+    if (mem[key]) {
+      if (Array.isArray(mem[key])) return mem[key].filter(x => !isBannedEntity(x));
+      return isBannedEntity(mem[key]) ? null : mem[key];
+    }
+    try {
+      const d = localStorage.getItem(`r2_${key}`);
+      if (!d) return null;
+      const parsed = JSON.parse(d);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(x => !isBannedEntity(x));
+      }
+      return isBannedEntity(parsed) ? null : parsed;
+    } catch { return null; }
   },
   set: (key, data) => {
-    mem[key] = data;
-    try { localStorage.setItem(`r2_${key}`, JSON.stringify(data)); } catch {}
+    const clean = Array.isArray(data) ? data.filter(x => !isBannedEntity(x)) : (isBannedEntity(data) ? null : data);
+    mem[key] = clean;
+    try { localStorage.setItem(`r2_${key}`, JSON.stringify(clean)); } catch {}
   },
 };
 
@@ -233,20 +251,42 @@ export async function bootR2Database(initialMemories = [], initialPosts = [], in
   if (booted) return;
   booted = true;
 
+  // Auto-purge any stale Shyam Sundar from browser localStorage on start
+  if (typeof window !== 'undefined') {
+    try {
+      const keys = ['squad_members', 'r2_members', 'r2_memories', 'r2_posts', 'r2_events', 'r2_journey', 'r2_spiral', 'r2_reels'];
+      keys.forEach(k => {
+        const d = localStorage.getItem(k);
+        if (d && /shyam|sundar/i.test(d)) {
+          try {
+            const parsed = JSON.parse(d);
+            if (Array.isArray(parsed)) {
+              localStorage.setItem(k, JSON.stringify(parsed.filter(x => !isBannedEntity(x))));
+            } else {
+              localStorage.removeItem(k);
+            }
+          } catch {
+            localStorage.removeItem(k);
+          }
+        }
+      });
+    } catch {}
+  }
+
   const duo = ['maithreyan', 'gopika'];
   const arrangedMembers = [
-    ...INITIAL_SQUAD_MEMBERS.filter(m => !duo.includes(m.id)),
-    ...INITIAL_SQUAD_MEMBERS.filter(m => duo.includes(m.id)),
+    ...INITIAL_SQUAD_MEMBERS.filter(m => !duo.includes(m.id) && !isBannedEntity(m)),
+    ...INITIAL_SQUAD_MEMBERS.filter(m => duo.includes(m.id) && !isBannedEntity(m)),
   ];
 
   await Promise.allSettled([
     seedCollection(COLLECTIONS.MEMBERS, arrangedMembers),
-    seedCollection(COLLECTIONS.MEMORIES, initialMemories),
-    seedCollection(COLLECTIONS.REELS, INITIAL_REELS),
-    seedCollection(COLLECTIONS.POSTS, initialPosts),
-    seedCollection(COLLECTIONS.EVENTS, initialEvents),
-    seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES),
-    seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS),
+    seedCollection(COLLECTIONS.MEMORIES, initialMemories.filter(m => !isBannedEntity(m))),
+    seedCollection(COLLECTIONS.REELS, INITIAL_REELS.filter(r => !isBannedEntity(r))),
+    seedCollection(COLLECTIONS.POSTS, initialPosts.filter(p => !isBannedEntity(p))),
+    seedCollection(COLLECTIONS.EVENTS, initialEvents.filter(e => !isBannedEntity(e))),
+    seedCollection(COLLECTIONS.JOURNEY, INITIAL_JOURNEY_MILESTONES.filter(j => !isBannedEntity(j))),
+    seedCollection(COLLECTIONS.SPIRAL, INITIAL_SPIRAL_ITEMS.filter(s => !isBannedEntity(s))),
   ]);
 }
 
@@ -260,9 +300,10 @@ const DUO_IDS = ['maithreyan', 'gopika'];
 
 const arrangeWithDuoAtEnd = (list) => {
   if (!Array.isArray(list)) return [];
+  const cleanList = list.filter(m => !isBannedEntity(m));
   return [
-    ...list.filter(m => !DUO_IDS.includes(m.id?.toLowerCase?.() || '')),
-    ...DUO_IDS.map(id => list.find(m => m.id === id)).filter(Boolean),
+    ...cleanList.filter(m => !DUO_IDS.includes(m.id?.toLowerCase?.() || '')),
+    ...DUO_IDS.map(id => cleanList.find(m => m.id === id)).filter(Boolean),
   ];
 };
 
@@ -308,9 +349,9 @@ export function subscribeToMembersR2(callback) {
 export function subscribeToMemoriesR2(callback) {
   const cacheKey = COLLECTIONS.MEMORIES;
 
-  // Memories must strictly be PHOTOS ONLY (exclude any videos and reel items)
-  const isPhotoOnly = (m) => {
-    if (!m) return false;
+  // Memories must strictly be PHOTOS ONLY and never contain Shyam Sundar
+  const isCleanPhotoMemory = (m) => {
+    if (!m || isBannedEntity(m)) return false;
     if (m.isReel) return false;
     if (m.mediaType === 'video') return false;
     if (typeof m.mediaUrl === 'string') {
@@ -320,16 +361,27 @@ export function subscribeToMemoriesR2(callback) {
     return true;
   };
 
+  const sanitizePeople = (m) => {
+    if (!m) return m;
+    let people = m.people;
+    if (Array.isArray(people)) {
+      people = people.filter(p => !isBannedEntity(p));
+    } else if (typeof people === 'string' && isBannedEntity(people)) {
+      people = people.split(',').map(s => s.trim()).filter(p => !isBannedEntity(p)).join(', ');
+    }
+    return { ...m, people };
+  };
+
   const cached = cache.get(cacheKey);
   if (cached && Array.isArray(cached)) {
-    callback(cached.filter(isPhotoOnly));
+    callback(cached.filter(isCleanPhotoMemory).map(sanitizePeople));
   }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data)) {
-        const cleanMemories = data.filter(isPhotoOnly);
+        const cleanMemories = data.filter(isCleanPhotoMemory).map(sanitizePeople);
         cache.set(cacheKey, cleanMemories);
         callback(cleanMemories);
       }
@@ -357,8 +409,9 @@ export function subscribeToPostsR2(callback) {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data)) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const cleanData = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, cleanData);
+        callback(cleanData);
       }
     } catch (err) {
       console.warn('[R2 DB] Posts fetch failed:', err.message);
@@ -382,8 +435,9 @@ export function subscribeToEventsR2(callback) {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data)) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const cleanData = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, cleanData);
+        callback(cleanData);
       }
     } catch (err) {
       console.warn('[R2 DB] Events fetch failed:', err.message);
@@ -558,17 +612,18 @@ export function subscribeToJourneyR2(callback) {
   const cacheKey = COLLECTIONS.JOURNEY;
   const cached = cache.get(cacheKey);
   if (cached && cached.length > 0) {
-    callback(cached);
+    callback(cached.filter(x => !isBannedEntity(x)));
   } else {
-    callback(INITIAL_JOURNEY_MILESTONES);
+    callback(INITIAL_JOURNEY_MILESTONES.filter(x => !isBannedEntity(x)));
   }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data) && data.length > 0) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const clean = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, clean);
+        callback(clean);
       }
     } catch (err) {
       console.warn('[R2 DB] Journey fetch warning:', err.message);
@@ -596,17 +651,18 @@ export function subscribeToSpiralR2(callback) {
   const cacheKey = COLLECTIONS.SPIRAL;
   const cached = cache.get(cacheKey);
   if (cached && cached.length > 0) {
-    callback(cached);
+    callback(cached.filter(x => !isBannedEntity(x)));
   } else {
-    callback(INITIAL_SPIRAL_ITEMS);
+    callback(INITIAL_SPIRAL_ITEMS.filter(x => !isBannedEntity(x)));
   }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data) && data.length > 0) {
-        cache.set(cacheKey, data);
-        callback(data);
+        const clean = data.filter(x => !isBannedEntity(x));
+        cache.set(cacheKey, clean);
+        callback(clean);
       }
     } catch (err) {
       console.warn('[R2 DB] Spiral fetch warning:', err.message);
@@ -740,21 +796,22 @@ export const isVideoMedia = (item) => {
 
 export function subscribeToReelsR2(callback) {
   const cacheKey = COLLECTIONS.REELS;
+  const cleanInitial = INITIAL_REELS.filter(r => !isBannedEntity(r));
 
   const cached = cache.get(cacheKey);
   if (cached && Array.isArray(cached) && cached.length > 0) {
-    const videoReels = cached.filter(isVideoMedia);
-    callback(videoReels.length > 0 ? videoReels : INITIAL_REELS);
+    const videoReels = cached.filter(isVideoMedia).filter(r => !isBannedEntity(r));
+    callback(videoReels.length > 0 ? videoReels : cleanInitial);
   } else {
-    callback(INITIAL_REELS);
+    callback(cleanInitial);
   }
 
   const refresh = async () => {
     try {
       const data = await fetchFromCDN(cacheKey);
       if (Array.isArray(data) && data.length > 0) {
-        const videoReels = data.filter(isVideoMedia);
-        const finalReels = videoReels.length > 0 ? videoReels : INITIAL_REELS;
+        const videoReels = data.filter(isVideoMedia).filter(r => !isBannedEntity(r));
+        const finalReels = videoReels.length > 0 ? videoReels : cleanInitial;
         cache.set(cacheKey, finalReels);
         callback(finalReels);
       }
