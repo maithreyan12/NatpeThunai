@@ -2372,6 +2372,19 @@
     width: 100%;
     justify-content: center;
   }
+  .admin-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .admin-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .admin-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
 }
 
 /* ── Infinite Spiral Drag-and-Drop & Live Align Controls ── */

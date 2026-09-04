@@ -33,6 +33,7 @@ export default function SpotifyMusicModal({
 }) {
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(true);
+  const [mobileTab, setMobileTab] = useState('player'); // 'player' | 'queue'
   const [likedTracks, setLikedTracks] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('liked_music_tracks') || '{}');
@@ -42,6 +43,8 @@ export default function SpotifyMusicModal({
   });
 
   const activeTrack = tracks[currentTrackIndex] || tracks[0] || null;
+  const nextTrackIndex = (currentTrackIndex + 1) % (tracks.length || 1);
+  const nextTrack = tracks.length > 1 ? tracks[nextTrackIndex] : null;
 
   // Toggle track like/favorite
   const toggleLike = (trackId) => {
@@ -72,12 +75,22 @@ export default function SpotifyMusicModal({
 
   const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
+  const handleScrub = (clientX, target) => {
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    onSeek(ratio * (duration || 1));
+  };
+
   return (
     <div className="spotify-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div 
         className="spotify-modal-container"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* iOS Drag Handle indicator for mobile */}
+        <div className="spotify-drag-handle" aria-hidden="true" />
+
         {/* Background ambient color splash from cover art */}
         <div 
           className="spotify-ambient-glow" 
@@ -104,8 +117,32 @@ export default function SpotifyMusicModal({
           </div>
         </div>
 
-        {/* ── TWO-COLUMN MAIN CONTENT ── */}
-        <div className="spotify-modal-body">
+        {/* ── MOBILE SEGMENTED TABS (Now Playing / Playlist) ── */}
+        <div className="spotify-mobile-tabs" role="tablist">
+          <button 
+            type="button" 
+            role="tab"
+            aria-selected={mobileTab === 'player'}
+            className={`spotify-mobile-tab-btn ${mobileTab === 'player' ? 'active' : ''}`}
+            onClick={() => setMobileTab('player')}
+          >
+            <Disc size={15} />
+            <span>Now Playing</span>
+          </button>
+          <button 
+            type="button" 
+            role="tab"
+            aria-selected={mobileTab === 'queue'}
+            className={`spotify-mobile-tab-btn ${mobileTab === 'queue' ? 'active' : ''}`}
+            onClick={() => setMobileTab('queue')}
+          >
+            <ListMusic size={15} />
+            <span>Playlist ({tracks.length})</span>
+          </button>
+        </div>
+
+        {/* ── TWO-COLUMN / MOBILE-TABBED MAIN CONTENT ── */}
+        <div className={`spotify-modal-body mobile-view-${mobileTab}`}>
           {/* LEFT: NOW PLAYING SPOTLIGHT */}
           <div className="spotify-now-playing-stage">
             <div className={`spotify-art-frame ${isPlaying ? 'is-playing' : ''}`}>
@@ -158,16 +195,20 @@ export default function SpotifyMusicModal({
                 <span className="eq-bar bar-8" />
               </div>
 
-              {/* Seek Timeline Scrubber */}
+              {/* Seek Timeline Scrubber (Touch + Mouse Seeking) */}
               <div className="spotify-timeline-wrap">
                 <span className="spotify-time-label">{formatTime(currentTime)}</span>
                 <div 
                   className="spotify-scrubber-track"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                    onSeek(ratio * (duration || 1));
-                  }}
+                  onClick={(e) => handleScrub(e.clientX, e.currentTarget)}
+                  onTouchStart={(e) => handleScrub(e.touches[0].clientX, e.currentTarget)}
+                  onTouchMove={(e) => handleScrub(e.touches[0].clientX, e.currentTarget)}
+                  role="slider"
+                  aria-valuenow={currentTime}
+                  aria-valuemin={0}
+                  aria-valuemax={duration || 1}
+                  aria-label="Song progress"
+                  tabIndex={0}
                 >
                   <div 
                     className="spotify-scrubber-progress"
@@ -257,6 +298,22 @@ export default function SpotifyMusicModal({
                 />
                 <span className="spotify-vol-val">{isMuted ? '0%' : `${volume}%`}</span>
               </div>
+
+              {/* Mobile "Up Next" preview banner */}
+              {nextTrack && (
+                <div 
+                  className="spotify-mobile-upnext-banner" 
+                  onClick={() => setMobileTab('queue')}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="spotify-upnext-left">
+                    <span className="spotify-upnext-tag">UP NEXT</span>
+                    <span className="spotify-upnext-title">{nextTrack.title}</span>
+                  </div>
+                  <span className="spotify-upnext-link">View Playlist →</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -277,7 +334,10 @@ export default function SpotifyMusicModal({
                   <div 
                     key={track.id || idx}
                     className={`spotify-track-row ${isActive ? 'is-active-track' : ''}`}
-                    onClick={() => onSelectTrack(idx)}
+                    onClick={() => {
+                      onSelectTrack(idx);
+                      // On mobile, keep in queue or toggle to player if user wants
+                    }}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
@@ -319,7 +379,7 @@ export default function SpotifyMusicModal({
                         {track.titleTamil && <span className="spotify-track-tamil"> • {track.titleTamil}</span>}
                       </div>
                       <div className="spotify-track-artist">
-                        {track.artist || 'Natpe Thunai'}
+                        {track.artist || 'Natpe Thunai Squad'}
                       </div>
                     </div>
 
@@ -332,6 +392,37 @@ export default function SpotifyMusicModal({
                 );
               })}
             </div>
+
+            {/* Mobile Sticky Mini-Player Bar (When browsing playlist on phone) */}
+            {activeTrack && (
+              <div 
+                className="spotify-mobile-sticky-mini" 
+                onClick={() => setMobileTab('player')}
+                role="button"
+                tabIndex={0}
+              >
+                <img 
+                  src={activeTrack.coverPhoto || '/audio/cover-default.jpg'} 
+                  alt="" 
+                  className="mini-sticky-img" 
+                />
+                <div className="mini-sticky-info">
+                  <span className="mini-sticky-title">{activeTrack.title}</span>
+                  <span className="mini-sticky-artist">{activeTrack.artist || 'Natpe Thunai'}</span>
+                </div>
+                <button 
+                  type="button" 
+                  className="mini-sticky-play-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTogglePlay();
+                  }}
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                >
+                  {isPlaying ? <Pause size={18} /> : <Play size={18} className="mini-sticky-play-icon" />}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
