@@ -101,14 +101,16 @@ export default function Navbar({
 
   // Determine active states for the core tabs
   const isSquadActive = activeSection === 'members' || activeSection === 'journey';
-  const isMemoriesActive = activeSection === 'album-teaser' || activeSection === 'reel';
+  const isMemoriesActive = activeSection === 'album-teaser' || activeSection === 'timeline';
+  const isReelsActive = activeSection === 'reel';
   const isMusicCurrent = isMusicActive || activeSection === 'music';
 
   const navLinks = [
     { id: 'hero', label: 'Home', icon: Sparkles, isActive: activeSection === 'hero' },
     { id: 'story', label: 'Story', icon: Heart, isActive: activeSection === 'story' },
     { id: 'members', label: 'Members', icon: Users, isActive: isSquadActive },
-    { id: 'album-teaser', label: 'Memories', icon: Film, isActive: isMemoriesActive },
+    { id: 'album-teaser', label: 'Memories', icon: Images, isActive: isMemoriesActive },
+    { id: 'reel', label: 'Reels', icon: Film, isActive: isReelsActive },
     { id: 'music', label: 'Music', icon: Music, isActive: isMusicCurrent },
   ];
 
