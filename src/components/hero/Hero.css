@@ -146,6 +146,39 @@
   background: radial-gradient(ellipse at center, rgba(88, 70, 186, 0.22) 0%, rgba(186, 70, 124, 0.14) 45%, transparent 72%);
 }
 
+@media (max-width: 768px) {
+  .smoke-orb {
+    filter: none !important;
+    animation: none !important;
+    will-change: auto !important;
+    opacity: 0.7 !important;
+  }
+  .smoke-orb-1 {
+    width: 280px;
+    height: 280px;
+    top: 5%;
+    left: -20px;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.28) 0%, rgba(196, 181, 253, 0.12) 40%, transparent 70%);
+  }
+  .smoke-orb-2 {
+    width: 280px;
+    height: 280px;
+    top: 30%;
+    right: -20px;
+    background: radial-gradient(circle, rgba(244, 114, 182, 0.22) 0%, rgba(251, 191, 220, 0.10) 40%, transparent 70%);
+  }
+  .smoke-orb-3,
+  .smoke-orb-4 {
+    display: none !important;
+  }
+  .hero-ambient-soft-spot {
+    filter: none !important;
+    width: 100vw;
+    height: 380px;
+    background: radial-gradient(ellipse at center, rgba(220, 212, 248, 0.25) 0%, rgba(253, 226, 236, 0.10) 50%, transparent 70%);
+  }
+}
+
 .hero-community-content {
   position: relative;
   z-index: 1;

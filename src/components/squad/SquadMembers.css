@@ -999,6 +999,12 @@
 
 /* ── Responsive adjustments ── */
 @media (max-width: 900px) {
+  .flip-particles-layer {
+    display: none !important;
+  }
+  .flip-card-scene {
+    contain: layout style;
+  }
   .flip-cards-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;

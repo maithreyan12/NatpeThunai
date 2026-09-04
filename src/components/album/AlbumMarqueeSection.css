@@ -12,6 +12,7 @@
   gap: 0.5rem;
   width: 100%;
   background: transparent;
+  contain: content;
 }
 
 .album-marquee-section .section-header {
@@ -67,6 +68,9 @@
   display: flex;
   align-items: center;
   padding: 0.6rem 0;
+  contain: content;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
 }
 
 .marquee-edge-fade {
@@ -101,6 +105,10 @@
   will-change: transform;
   align-items: center;
   padding: 0.2rem 0;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .marquee-track.scroll-left {
@@ -116,18 +124,21 @@
 }
 
 @keyframes marqueeScrollLeft {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 @keyframes marqueeScrollRight {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 .marquee-photo-bubble {
   position: relative;
   flex: none;
+  contain: layout paint;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
   width: 5rem;
   height: 5rem;
   border-radius: 9999px;

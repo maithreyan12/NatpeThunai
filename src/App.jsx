@@ -187,35 +187,34 @@ export default function App() {
     }
   };
 
-  // High-performance rAF throttled scroll spy observer
+  // High-performance asynchronous IntersectionObserver for scroll spy (zero main-thread scroll listener)
   useEffect(() => {
     const sections = ['hero', 'story', 'journey', 'members', 'album-teaser', 'timeline', 'reel'];
-    let ticking = false;
+    
+    if (typeof IntersectionObserver === 'undefined') return;
 
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollPosition = window.scrollY + 200;
-          for (const sectionId of sections) {
-            const el = document.getElementById(sectionId);
-            if (el) {
-              const top = el.offsetTop;
-              const height = el.offsetHeight;
-              if (scrollPosition >= top && scrollPosition < top + height) {
-                setActiveSection(prev => (prev !== sectionId ? sectionId : prev));
-                break;
-              }
-            }
-          }
-          ticking = false;
-        });
-        ticking = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries.filter(e => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          const activeId = visibleEntries[0].target.id;
+          setActiveSection(prev => (prev !== activeId ? activeId : prev));
+        }
+      },
+      {
+        rootMargin: '-15% 0px -55% 0px',
+        threshold: [0, 0.2, 0.5, 0.8]
       }
-    };
+    );
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [members, memories]);
 
   const handleFilterMemories = (memberName) => {
     setActiveMemberFilter(memberName);

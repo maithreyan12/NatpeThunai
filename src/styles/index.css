@@ -166,6 +166,39 @@ p, h1, h2, h3, h4, h5, h6, span, a, button {
   100% { transform: translate3d(-45px, 30px, 0) scale(1.06); }
 }
 
+@media (max-width: 768px) {
+  .orb {
+    filter: none !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
+  .orb-1 {
+    top: -5%;
+    left: -10%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, var(--mesh-orb-1) 0%, rgba(206, 196, 248, 0.16) 40%, transparent 70%);
+  }
+  .orb-2 {
+    top: 40%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--mesh-orb-2) 0%, rgba(254, 219, 232, 0.14) 40%, transparent 70%);
+  }
+  .orb-3 {
+    bottom: -5%;
+    left: -5%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, var(--mesh-orb-3) 0%, rgba(209, 239, 227, 0.12) 40%, transparent 70%);
+  }
+  .orb-4,
+  .orb-5 {
+    display: none !important;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════ */
 /*  LIQUID GLASS SPATIAL CARDS & SURFACES                             */
 /* ═══════════════════════════════════════════════════════════════════ */

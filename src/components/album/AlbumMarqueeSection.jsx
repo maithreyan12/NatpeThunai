@@ -59,16 +59,23 @@ export default function AlbumMarqueeSection({ onOpenAlbum, members = [], memorie
     return list.length > 0 ? list : DEFAULT_MARQUEE_PHOTOS;
   }, [members, memories]);
 
-  // Split into Row 1 (even index) and Row 2 (odd index) with quadruple repetition for seamless loop
+  // Split into Row 1 (even index) and Row 2 (odd index) with seamless 2x duplication for 50% translate loop
   const row1 = useMemo(() => {
     const evens = photoList.filter((_, i) => i % 2 === 0);
-    return [...evens, ...evens, ...evens, ...evens];
+    let base = evens.length > 0 ? evens : photoList;
+    while (base.length < 8 && base.length > 0) {
+      base = [...base, ...base];
+    }
+    return [...base, ...base];
   }, [photoList]);
 
   const row2 = useMemo(() => {
     const odds = photoList.filter((_, i) => i % 2 === 1);
-    const source = odds.length > 0 ? odds : photoList;
-    return [...source, ...source, ...source, ...source];
+    let base = odds.length > 0 ? odds : photoList;
+    while (base.length < 8 && base.length > 0) {
+      base = [...base, ...base];
+    }
+    return [...base, ...base];
   }, [photoList]);
 
   return (

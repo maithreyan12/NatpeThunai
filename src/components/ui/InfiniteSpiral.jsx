@@ -82,17 +82,40 @@ const InfiniteSpiral = ({
       window.addEventListener('resize', handleWinResize);
     }
 
+    let isRunning = false;
+
+    const startLoop = () => {
+      if (isRunning) return;
+      isRunning = true;
+      previousTime = performance.now();
+      frameId = requestAnimationFrame(render);
+    };
+
+    const stopLoop = () => {
+      isRunning = false;
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+    };
+
     let intersectionObserver = null;
     if (typeof IntersectionObserver !== 'undefined') {
       intersectionObserver = new IntersectionObserver(
         ([entry]) => {
           visibleRef.current = entry.isIntersecting;
+          if (entry.isIntersecting) {
+            startLoop();
+          } else if (!draggingRef.current) {
+            stopLoop();
+          }
         },
-        { threshold: 0.02 }
+        { threshold: 0.01 }
       );
       intersectionObserver.observe(root);
     } else {
       visibleRef.current = true;
+      startLoop();
     }
 
     const handleScroll = () => {
@@ -109,14 +132,14 @@ const InfiniteSpiral = ({
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     const render = time => {
-      const delta = Math.min((time - previousTime) / 1000, 0.05);
-      previousTime = time;
-
-      // When the spiral is off-screen and not being dragged, sleep the loop to preserve 120fps scrolling!
+      // Completely halt frame requests when out of view and not dragging
       if (!visibleRef.current && !draggingRef.current) {
-        frameId = requestAnimationFrame(render);
+        stopLoop();
         return;
       }
+
+      const delta = Math.min((time - previousTime) / 1000, 0.05);
+      previousTime = time;
 
       const autoEnabled = animationMode === 'auto' || animationMode === 'all';
       const isPhotoPaused = Date.now() < photoPausedUntilRef.current;
@@ -168,10 +191,10 @@ const InfiniteSpiral = ({
       frameId = requestAnimationFrame(render);
     };
 
-    frameId = requestAnimationFrame(render);
+    startLoop();
 
     return () => {
-      cancelAnimationFrame(frameId);
+      stopLoop();
       if (resizeObserver) resizeObserver.disconnect();
       if (intersectionObserver) intersectionObserver.disconnect();
       window.removeEventListener('scroll', handleScroll);

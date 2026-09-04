@@ -465,6 +465,9 @@
     left: 16px;
     padding: 6px 14px 6px 6px;
     gap: 10px;
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
+    contain: layout style;
   }
 
   .bg-music-tap-prompt {
@@ -472,6 +475,8 @@
     left: 16px;
     font-size: 0.78rem;
     padding: 6px 14px;
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
   }
 
   .bg-music-artist,
