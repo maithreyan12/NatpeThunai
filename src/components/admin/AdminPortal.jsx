@@ -840,6 +840,9 @@ export default function AdminPortal({ onExit, currentUser }) {
 
   const openEditSpiralItem = (item) => {
     setEditingSpiralItem(item);
+    const curIdx = spiralItems.findIndex(s => s.id === item.id);
+    const positionNum = curIdx >= 0 ? curIdx + 1 : 1;
+
     let posY = 20;
     if (item.positionY !== undefined) {
       posY = Number(item.positionY);
@@ -857,6 +860,8 @@ export default function AdminPortal({ onExit, currentUser }) {
       src: item.src || '',
       alt: item.alt || '',
       title: item.title || item.alt || '',
+      position: positionNum,
+      originalPosition: positionNum,
       positionY: posY,
       objectPosition: item.objectPosition || `center ${posY}%`,
       objectFit: item.objectFit || 'cover',
@@ -901,24 +906,48 @@ export default function AdminPortal({ onExit, currentUser }) {
       ? { ...editingSpiralItem, ...spiralForm }
       : { id: `spiral-${Date.now()}`, ...spiralForm };
 
-    // ⚡ Instant optimistic update
-    setSpiralItems(prev => {
-      const idx = prev.findIndex(s => s.id === payload.id);
+    let updatedList;
+    if (editingSpiralItem && spiralForm.position && spiralForm.originalPosition && spiralForm.position !== spiralForm.originalPosition) {
+      const filtered = spiralItems.filter(s => s.id !== payload.id);
+      const targetIdx = Math.max(0, Math.min(filtered.length, spiralForm.position - 1));
+      filtered.splice(targetIdx, 0, payload);
+      updatedList = filtered;
+    } else {
+      const idx = spiralItems.findIndex(s => s.id === payload.id);
       if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = payload;
-        return copy;
+        updatedList = [...spiralItems];
+        updatedList[idx] = payload;
+      } else {
+        updatedList = [...spiralItems, payload];
       }
-      return [...prev, payload];
-    });
-    triggerToast(editingSpiralItem ? 'Updated spiral photo & framing! 🌀' : 'Added new photo to Infinite Spiral! 🌀');
+    }
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(updatedList);
+    triggerToast(editingSpiralItem ? `Updated "${spiralForm.title || spiralForm.alt}" (Position #${spiralForm.position || 1})! 🌀` : 'Added new photo to Infinite Spiral! 🌀');
     try {
-      await saveSpiralItemR2(payload);
+      await saveAllSpiralItemsR2(updatedList);
     } catch (err) {
       triggerToast(`Spiral save error: ${err.message}`);
     }
   };
 
+  const handleJumpToPosition = async (sourceIdx, targetIdx) => {
+    if (sourceIdx === targetIdx || targetIdx < 0 || targetIdx >= spiralItems.length) return;
+    const updated = [...spiralItems];
+    const [moved] = updated.splice(sourceIdx, 1);
+    updated.splice(targetIdx, 0, moved);
+
+    // ⚡ Instant optimistic update
+    setSpiralItems(updated);
+    triggerToast(`Moved "${moved.title || moved.alt || 'Photo'}" to Position #${targetIdx + 1} 🚀`);
+
+    try {
+      await saveAllSpiralItemsR2(updated);
+    } catch (err) {
+      triggerToast(`Position change error: ${err.message}`);
+    }
+  };
 
   const handleDeleteSpiralItem = async (id, title) => {
     if (window.confirm(`Remove photo "${title || 'this photo'}" from Infinite Spiral only? (This will ONLY remove it from the spiral and will NOT delete files from other modules or the database)`)) {
@@ -1721,9 +1750,19 @@ export default function AdminPortal({ onExit, currentUser }) {
                               >
                                 <GripVertical size={16} />
                               </div>
-                              <span className="admin-card-badge" style={{ margin: 0 }}>
-                                Position #{idx + 1}
-                              </span>
+                              <div className="admin-position-select-wrapper" title="Click to jump directly to any position">
+                                <span className="admin-position-select-label">POS</span>
+                                <select
+                                  value={idx + 1}
+                                  onChange={(e) => handleJumpToPosition(idx, parseInt(e.target.value, 10) - 1)}
+                                  className="admin-position-select-dropdown"
+                                  title="Change position in spiral sequence"
+                                >
+                                  {spiralItems.map((_, pIdx) => (
+                                    <option key={pIdx} value={pIdx + 1}>#{pIdx + 1}</option>
+                                  ))}
+                                </select>
+                              </div>
                               {/* Step Reorder ‹ › Arrows */}
                               <div style={{ display: 'inline-flex', gap: '3px', marginLeft: '4px' }}>
                                 <button
@@ -2796,7 +2835,36 @@ export default function AdminPortal({ onExit, currentUser }) {
               </div>
 
               <div className="admin-form-row">
-                <div className="admin-input-group">
+                <div className="admin-input-group" style={{ maxWidth: '170px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>Position Order</span>
+                    {spiralForm.originalPosition && (
+                      <span style={{ fontSize: '0.72rem', color: '#a5b4fc' }}>
+                        (was #{spiralForm.originalPosition})
+                      </span>
+                    )}
+                  </label>
+                  <select
+                    value={spiralForm.position || 1}
+                    onChange={(e) => setSpiralForm(prev => ({ ...prev, position: parseInt(e.target.value, 10) }))}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      background: 'rgba(99, 102, 241, 0.18)',
+                      border: '1px solid rgba(99, 102, 241, 0.5)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '0.88rem'
+                    }}
+                  >
+                    {spiralItems.map((_, pIdx) => (
+                      <option key={pIdx} value={pIdx + 1}>
+                        Position #{pIdx + 1} {editingSpiralItem && pIdx === (spiralForm.originalPosition - 1) ? '• Current' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="admin-input-group" style={{ flex: 1 }}>
                   <label>Title / Label</label>
                   <input
                     type="text"
@@ -2805,7 +2873,7 @@ export default function AdminPortal({ onExit, currentUser }) {
                     placeholder="e.g. Farish in White Hoodie"
                   />
                 </div>
-                <div className="admin-input-group">
+                <div className="admin-input-group" style={{ flex: 1 }}>
                   <label>Alt Text / Description</label>
                   <input
                     type="text"

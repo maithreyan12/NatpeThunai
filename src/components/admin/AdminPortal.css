@@ -2384,6 +2384,49 @@
   cursor: not-allowed;
 }
 
+.admin-position-select-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 6px;
+  padding: 1px 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-position-select-wrapper:hover {
+  border-color: #818cf8;
+  background: rgba(99, 102, 241, 0.25);
+}
+
+.admin-position-select-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #a5b4fc;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+.admin-position-select-dropdown {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 1px 0;
+  outline: none;
+}
+
+.admin-position-select-dropdown option {
+  background: #1e1b4b;
+  color: #ffffff;
+  padding: 4px;
+}
+
 .admin-quick-align-bar {
   margin-top: 12px;
   padding: 10px 12px;
